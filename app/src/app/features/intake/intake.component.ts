@@ -33,14 +33,16 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
  * Cycled second line of the hero headline — maps to the plan's founder-needs
- * framing, not generic adjectives, so keep these concrete like the examples
- * below rather than reaching for buzzwords.
+ * framing, not generic adjectives, so keep these concrete. Deliberately
+ * drawn from different verticals than the example chips/descriptions below
+ * (health-it, aerospace, water, cybersecurity, consumer marketplace) so the
+ * hero reads as its own claim about breadth, not a replay of the test cases.
  */
 const HERO_TYPED_PHRASES = [
-  'a nurse-AI platform.',
-  'composite parts for launch vehicles.',
-  'a water-leak sensor network.',
-  '— or an honest "no."'
+  'lithium recovery from mine tailings.',
+  'adaptive learning for rural schools.',
+  'drone-based wildfire detection.',
+  'chip testing for defense primes.'
 ];
 
 /** Describe-mode fallback pastes — kept verbatim, this preserves the tested pipeline. */

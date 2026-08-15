@@ -22,6 +22,12 @@
 .hero-eyebrow {
   color: var(--fp-sand);
   margin: 0;
+  animation: eyebrowFloat 4.5s ease-in-out infinite;
+}
+
+@keyframes eyebrowFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
 }
 
 .hero-headline {
@@ -35,6 +41,17 @@
 
 .hero-headline-line--typed {
   color: var(--fp-signal);
+  /*
+   * Fixed to 2 lines' worth of height regardless of how many lines the
+   * current phrase actually wraps to (they vary a lot in length) — without
+   * this, every phrase change reflows the hero's height and shoves the
+   * intake form below it up/down. Centered within that reserved space so a
+   * 1-line phrase doesn't just sit at the top of an empty box.
+   */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(var(--fp-display-xl-size) * var(--fp-display-xl-line) * 2);
 }
 
 .intake-wrapper {
@@ -59,18 +76,12 @@
   margin-bottom: 8px;
 }
 
-.wordmark {
-  color: var(--fp-basin);
-  font-family: var(--fp-font-display);
-  font-size: 44px;
-  font-weight: 800;
-  margin: 0 0 8px;
-  letter-spacing: -1px;
-}
-
 .tagline {
-  color: #555;
-  font-size: 16px;
+  color: var(--fp-ink);
+  font-family: var(--fp-font-display);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   margin: 0;
 }
 

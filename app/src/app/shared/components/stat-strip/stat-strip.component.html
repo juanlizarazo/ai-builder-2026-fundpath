@@ -6,6 +6,9 @@
     <span class="stat-strip-dot" aria-hidden="true">·</span>
     <span class="stat-strip-item"><span class="stat-strip-number">{{ sourceCount }}</span> sources</span>
     <span class="stat-strip-dot" aria-hidden="true">·</span>
-    <span class="stat-strip-item">synced {{ syncedLabel() }}</span>
+    <span class="stat-strip-item">
+      <span class="stat-strip-live fp-motion" aria-hidden="true"></span>
+      synced {{ syncedLabel() }}
+    </span>
   </div>
 }
