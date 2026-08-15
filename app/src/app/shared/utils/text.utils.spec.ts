@@ -2,10 +2,26 @@ import { toSentences } from './text.utils';
 
 describe('text.utils', () => {
   describe('toSentences', () => {
-    it('returns an empty array for empty or nullish input', () => {
-      expect(toSentences('')).toEqual([]);
-      expect(toSentences(undefined)).toEqual([]);
-      expect(toSentences(null)).toEqual([]);
+    it('returns [\'\'] for empty or nullish input, matching the old firstSentence', () => {
+      expect(toSentences('')).toEqual(['']);
+      expect(toSentences(undefined)).toEqual(['']);
+      expect(toSentences(null)).toEqual(['']);
+    });
+
+    it('truncates to 120 characters when there is no sentence-ending punctuation at all', () => {
+      const noTerminator = 'a'.repeat(200);
+
+      const result = toSentences(noTerminator);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toBe(noTerminator.substring(0, 120));
+      expect(result[0]).toHaveLength(120);
+    });
+
+    it('does not truncate short unterminated text', () => {
+      const short = 'no punctuation here just words';
+
+      expect(toSentences(short)).toEqual([short]);
     });
 
     it('returns a single-element array for a one-sentence paragraph', () => {
