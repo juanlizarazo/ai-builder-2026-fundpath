@@ -7,13 +7,26 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { differenceInBusinessDays } from 'date-fns';
 import { Observable, catchError, filter, of, switchMap } from 'rxjs';
 import { FundpathService } from '@app/core/services/fundpath.service';
 import { AuthService } from '@app/core/services/auth.service';
 import { AlertBannerComponent } from '@app/shared/components/alert-banner/alert-banner.component';
+import { RunwayComponent } from '@app/shared/components/runway/runway.component';
 import { ApplicationService, IApplicantDetailsWire } from './services/application.service';
 import { FundPath } from '../../../types/firestore';
-import { formatDate } from '../../shared/utils/format.utils';
+import { formatDate, toDate } from '../../shared/utils/format.utils';
+
+/** Which leg of the Sherpa wizard is showing. Leg 0 is the feasibility pre-check; Legs 1-4 are the numbered legs. */
+type Leg = 0 | 1 | 2 | 3 | 4;
+
+const LEG_TITLES: Record<Leg, string> = {
+  0: 'Can you make it?',
+  1: 'Get registered',
+  2: 'Tell your story',
+  3: 'Fill the form',
+  4: 'Your form'
+};
 
 interface IApplicantFormState {
   legalName: string;
@@ -82,13 +95,26 @@ function toDateInputValue(value: unknown): string {
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    AlertBannerComponent
+    AlertBannerComponent,
+    RunwayComponent
   ],
   templateUrl: './application.component.html',
   styleUrl: './application.component.scss'
 })
 export class ApplicationComponent {
   @ViewChild('pageHeading') private readonly _headingRef?: ElementRef<HTMLElement>;
+
+  protected readonly legTitles = LEG_TITLES;
+  protected readonly legs: Leg[] = [0, 1, 2, 3, 4];
+  protected readonly numberedLegs: Leg[] = [1, 2, 3, 4];
+  protected readonly currentLeg = signal<Leg>(0);
+
+  /**
+   * Keys of registration steps marked done, for the runway's "lit" node.
+   * Local UI state for now — Task 9 wires this to real per-step persistence
+   * as part of Leg 1's "Get registered" content.
+   */
+  protected readonly checkedStepKeys = signal<string[]>([]);
 
   private readonly _activatedRoute = inject(ActivatedRoute);
   private readonly _fundpathService = inject(FundpathService);
@@ -125,6 +151,28 @@ export class ApplicationComponent {
   protected readonly narratives = computed(() => this.kit()?.narratives ?? []);
   protected readonly portals = computed(() => this.kit()?.portals ?? []);
   protected readonly submissionMechanics = computed(() => this.kit()?.submissionMechanics ?? []);
+
+  // --- Leg 0: "Can you make it?" ------------------------------------------
+
+  /** Business days from today to the deadline (`closeDate` or `submitBy`) — "days you have". */
+  protected readonly daysAvailable = computed<number | null>(() => {
+    const t = this.timeline();
+    if (!t) { return null; }
+
+    const deadline = toDate(t.closeDate) ?? toDate(t.submitBy);
+    return deadline ? differenceInBusinessDays(deadline, new Date()) : null;
+  });
+
+  /** Sum of every step's `durationBusinessDays` — "days you need". */
+  protected readonly daysNeeded = computed<number | null>(() => {
+    const t = this.timeline();
+    if (!t) { return null; }
+
+    return t.steps.reduce((total, step) => total + step.durationBusinessDays, 0);
+  });
+
+  /** The backend's own `slackBusinessDays`, rendered as-is — never recomputed client-side. */
+  protected readonly slackDays = computed<number | null>(() => this.timeline()?.slackBusinessDays ?? null);
 
   private readonly _profile = toSignal(this._buildProfile$(), { initialValue: undefined });
   private readonly _hasPrefilled = signal(false);
@@ -184,6 +232,24 @@ export class ApplicationComponent {
 
   public ngAfterViewInit(): void {
     setTimeout(() => this._headingRef?.nativeElement.focus(), 0);
+  }
+
+  protected goToLeg(leg: Leg): void {
+    this.currentLeg.set(leg);
+  }
+
+  protected nextLeg(): void {
+    this.currentLeg.update(leg => (leg < 4 ? (leg + 1) as Leg : leg));
+  }
+
+  protected previousLeg(): void {
+    this.currentLeg.update(leg => (leg > 0 ? (leg - 1) as Leg : leg));
+  }
+
+  protected toggleRunwayStep(stepKey: string): void {
+    this.checkedStepKeys.update(keys =>
+      keys.includes(stepKey) ? keys.filter(k => k !== stepKey) : [...keys, stepKey]
+    );
   }
 
   protected updateField<K extends keyof IApplicantFormState>(field: K, event: Event): void {

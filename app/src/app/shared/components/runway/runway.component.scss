@@ -1,0 +1,230 @@
+// Desktop-first: horizontal runway, position via `left`. Mobile media query
+// below rotates to vertical, position via `top` (both are bound from the
+// component in lockstep — see runway.component.html).
+.runway {
+  padding: 32px 12px 12px;
+}
+
+.runway-ruler {
+  position: relative;
+  height: 16px;
+  margin-bottom: 8px;
+  color: #888;
+}
+
+.runway-tick {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.runway-track {
+  position: relative;
+  height: 4px;
+  margin: 24px 0;
+}
+
+.runway-rail {
+  position: absolute;
+  inset: 0;
+  background: var(--fp-sand);
+  border-radius: var(--fp-radius-full);
+}
+
+.runway-segment {
+  position: absolute;
+  top: 0;
+  height: 4px;
+  background: var(--fp-basin);
+  border-radius: var(--fp-radius-full);
+
+  &--done {
+    background: var(--fp-sage);
+  }
+}
+
+.runway-slack {
+  position: absolute;
+  top: 0;
+  height: 4px;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--fp-sand),
+    var(--fp-sand) 3px,
+    transparent 3px,
+    transparent 6px
+  );
+}
+
+.runway-node {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--fp-ink);
+  border: none;
+  padding: 0;
+}
+
+.runway-node--today,
+.runway-node--deadline {
+  background: var(--fp-ink);
+  width: 8px;
+  height: 8px;
+}
+
+.runway-node--step {
+  cursor: pointer;
+  background: var(--fp-sand);
+  opacity: 0.5;
+
+  &:focus-visible {
+    outline: 2px solid var(--fp-basin);
+    outline-offset: 2px;
+  }
+}
+
+.runway-node--done {
+  background: var(--fp-sage);
+  opacity: 1;
+}
+
+.runway-node--lit {
+  background: var(--fp-basin);
+  opacity: 1;
+  width: 14px;
+  height: 14px;
+}
+
+.runway-station {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+}
+
+.runway-start-here {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  color: var(--fp-basin);
+  font-weight: 600;
+}
+
+.runway-popover {
+  position: absolute;
+  top: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  min-width: 200px;
+  background: #fff;
+  border: 1px solid var(--fp-sand);
+  border-radius: var(--fp-radius-sm);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  padding: 12px;
+}
+
+.runway-popover-label {
+  font-weight: 600;
+  margin: 0 0 4px;
+  color: var(--fp-ink);
+}
+
+.runway-popover-system {
+  color: #888;
+  margin: 0 0 6px;
+}
+
+.runway-popover-note {
+  font-size: 13px;
+  color: #555;
+  margin: 0 0 8px;
+  line-height: 1.4;
+}
+
+.runway-popover-link {
+  display: block;
+  color: var(--fp-basin);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  margin-bottom: 8px;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.runway-popover-done {
+  width: 100%;
+  padding: 6px 10px;
+  background: var(--fp-basin);
+  color: #fff;
+  border: none;
+  border-radius: var(--fp-radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.runway-slack-label {
+  text-align: right;
+  color: #888;
+}
+
+.runway--infeasible {
+  .runway-rail,
+  .runway-segment,
+  .runway-slack {
+    background: var(--fp-signal) !important;
+  }
+
+  .runway-slack-label {
+    color: var(--fp-signal);
+    font-weight: 600;
+  }
+}
+
+@media (max-width: 599px) {
+  .runway-track {
+    height: 240px;
+    width: 4px;
+    margin: 24px auto;
+  }
+
+  .runway-ruler {
+    height: 240px;
+    width: 60px;
+  }
+
+  .runway-tick {
+    left: 0 !important;
+    transform: translateY(-50%);
+  }
+
+  .runway-rail,
+  .runway-segment,
+  .runway-slack {
+    left: 0 !important;
+    top: 0 !important;
+    width: 4px !important;
+  }
+
+  .runway-node,
+  .runway-station {
+    left: 50% !important;
+    transform: translate(-50%, -50%);
+  }
+
+  .runway-start-here,
+  .runway-popover {
+    left: 24px;
+    top: 0;
+    transform: none;
+  }
+}

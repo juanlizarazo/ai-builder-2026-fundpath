@@ -305,3 +305,131 @@
     gap: 0;
   }
 }
+
+// --- Sherpa: leg shell ------------------------------------------------------
+
+.sherpa {
+  display: flex;
+  gap: 32px;
+}
+
+.sherpa-rail {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 160px;
+}
+
+.sherpa-rail-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 4px;
+  background: none;
+  border: none;
+  border-left: 2px solid var(--fp-sand);
+  text-align: left;
+  cursor: pointer;
+  color: #999;
+
+  &--current {
+    border-left-color: var(--fp-basin);
+    color: var(--fp-ink);
+    font-weight: 600;
+  }
+}
+
+.sherpa-rail-numeral {
+  width: 18px;
+  flex-shrink: 0;
+}
+
+.sherpa-rail-label {
+  font-size: 13px;
+  font-family: var(--fp-font-body);
+}
+
+.sherpa-progress {
+  display: none;
+  gap: 4px;
+}
+
+.sherpa-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.leg {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.leg-headline {
+  font-family: var(--fp-font-display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--fp-ink);
+  margin: 0;
+
+  &--signal {
+    color: var(--fp-signal);
+  }
+}
+
+.leg-subline {
+  color: #555;
+  margin: 0;
+
+  &--signal {
+    color: var(--fp-signal);
+  }
+}
+
+.leg-primary-action {
+  align-self: flex-start;
+  padding: 12px 20px;
+  background: var(--fp-basin);
+  color: #fff;
+  border: none;
+  border-radius: var(--fp-radius-sm);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.92;
+  }
+}
+
+.leg-stub {
+  color: #888;
+  font-style: italic;
+}
+
+@media (max-width: 767px) {
+  .sherpa {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .sherpa-rail {
+    display: none;
+  }
+
+  .sherpa-progress {
+    display: flex;
+  }
+
+  .sherpa-progress-segment {
+    flex: 1;
+    height: 4px;
+    background: var(--fp-sand);
+    border-radius: var(--fp-radius-full);
+
+    &--done {
+      background: var(--fp-basin);
+    }
+  }
+}
