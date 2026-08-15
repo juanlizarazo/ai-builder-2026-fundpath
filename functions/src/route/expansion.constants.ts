@@ -12,6 +12,9 @@ export const AGENCY_ALN_PREFIXES: Record<string, string> = {
   NASA: '43',
   DOE: '81',
   DHS: '97',
+  Commerce: '11',
+  USDA: '10',
+  SBA: '59',
 };
 
 export const VERTICAL_NAICS_MAP: Record<string, string[]> = {

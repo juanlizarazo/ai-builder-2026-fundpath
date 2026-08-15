@@ -25,44 +25,106 @@ export class Normalizer {
   }
 
   private static _toNumber(value: unknown): number | undefined {
-    const n = Number(value);
-
-    if (isNaN(n)) {
+    if (value === null || value === undefined) {
       return undefined;
     }
 
-    return n;
+    if (typeof value === 'string' && (value.trim() === '' || value.trim().toLowerCase() === 'none')) {
+      return undefined;
+    }
+
+    const parsed = Number(value);
+
+    if (isNaN(parsed)) {
+      return undefined;
+    }
+
+    return parsed;
   }
 
-  public static fromGrantsGov(raw: Record<string, unknown>): IOpportunity {
-    const eligibilities = Array.isArray(raw['eligibilities'])
-      ? (raw['eligibilities'] as Record<string, unknown>[]).map(
-          e => String(e['eligibilityCode'] ?? e['code'] ?? '')
-        ).filter(Boolean)
+  private static _isSbirTitle(title: string): boolean {
+    const haystack = title.toLowerCase();
+
+    return (
+      haystack.includes('small business innovation research') ||
+      haystack.includes('small business technology transfer') ||
+      /\bsbir\b/.test(haystack) ||
+      /\bsttr\b/.test(haystack)
+    );
+  }
+
+  private static _isSttrTitle(title: string): boolean {
+    const haystack = title.toLowerCase();
+
+    return haystack.includes('small business technology transfer') || /\bsttr\b/.test(haystack);
+  }
+
+  public static fromGrantsGov(
+    hit: Record<string, unknown>,
+    detail?: Record<string, unknown>
+  ): IOpportunity {
+    const synopsis = (detail?.['synopsis'] ?? {}) as Record<string, unknown>;
+    const forecast = (detail?.['forecast'] ?? {}) as Record<string, unknown>;
+    const detailBody = Object.keys(synopsis).length > 0 ? synopsis : forecast;
+
+    const cfdas = Array.isArray(detail?.['cfdas'])
+      ? (detail?.['cfdas'] as Record<string, unknown>[])
+          .map(entry => (entry?.['cfdaNumber'] ? String(entry['cfdaNumber']) : ''))
+          .filter(Boolean)
+      : [];
+    const cfdaListFallback = Normalizer._toStringArray(hit['cfdaList']) ?? [];
+    const alnAll = cfdas.length > 0 ? cfdas : cfdaListFallback;
+
+    const applicantTypeCodes = Array.isArray(detailBody['applicantTypes'])
+      ? (detailBody['applicantTypes'] as Record<string, unknown>[])
+          .map(entry => (entry?.['id'] ? String(entry['id']) : ''))
+          .filter(Boolean)
       : undefined;
 
-    const aln = raw['aln'] ?? raw['cfdaList'];
-    const alnStr = aln ? String(aln) : undefined;
+    const fundingInstruments = Array.isArray(detailBody['fundingInstruments'])
+      ? (detailBody['fundingInstruments'] as Record<string, unknown>[])
+      : [];
+
+    const title = String(detail?.['opportunityTitle'] ?? hit['title'] ?? '');
+    const description = String(detailBody['synopsisDesc'] ?? detailBody['forecastDesc'] ?? '');
 
     return {
       source: 'grants-gov',
-      sourceId: String(raw['opportunityId'] ?? raw['id'] ?? ''),
-      aln: alnStr,
-      alnResolved: Boolean(alnStr),
-      title: String(raw['opportunityTitle'] ?? raw['title'] ?? ''),
-      description: String(raw['synopsis'] ?? raw['description'] ?? ''),
-      agency: String(raw['agencyName'] ?? raw['agency'] ?? ''),
-      agencyCode: raw['agencyCode'] ? String(raw['agencyCode']) : undefined,
-      fundingInstrument: raw['fundingInstrumentTypes']
-        ? String((raw['fundingInstrumentTypes'] as string[])[0] ?? '')
+      sourceId: String(hit['id'] ?? detail?.['id'] ?? ''),
+      aln: alnAll[0],
+      alnAll: alnAll.length > 0 ? alnAll : undefined,
+      alnResolved: alnAll.length > 0,
+      title,
+      description,
+      agency: String(
+        (detail?.['agencyDetails'] as Record<string, unknown> | undefined)?.['agencyName'] ??
+          hit['agency'] ??
+          detailBody['agencyName'] ??
+          ''
+      ),
+      agencyCode: String(detailBody['agencyCode'] ?? hit['agencyCode'] ?? '') || undefined,
+      fundingInstrument: fundingInstruments[0]?.['id']
+        ? String(fundingInstruments[0]['id'])
         : undefined,
-      applicantTypeCodes: eligibilities,
-      keywords: Normalizer._toStringArray(raw['keywords']),
-      minAward: Normalizer._toNumber(raw['estimatedFundingMin'] ?? raw['awardCeiling']),
-      maxAward: Normalizer._toNumber(raw['estimatedFundingMax'] ?? raw['estimatedFunding']),
-      openDate: Normalizer._parseDate(raw['openDate'] ?? raw['postDate']),
-      closeDate: Normalizer._parseDate(raw['closeDate'] ?? raw['applicationDeadline']),
-      status: (raw['oppStatus'] as IOpportunity['status']) ?? 'posted',
+      applicantTypeCodes,
+      applicantEligibilityDesc: detailBody['applicantEligibilityDesc']
+        ? String(detailBody['applicantEligibilityDesc'])
+        : undefined,
+      keywords: Normalizer._toStringArray(hit['keywords']),
+      minAward: Normalizer._toNumber(detailBody['awardFloor']),
+      maxAward: Normalizer._toNumber(detailBody['awardCeiling']),
+      openDate: Normalizer._parseDate(
+        detailBody['postingDate'] ?? detailBody['estSynopsisPostingDate'] ?? hit['openDate']
+      ),
+      closeDate: Normalizer._parseDate(
+        detailBody['responseDate'] ?? detailBody['estApplicationResponseDate'] ?? hit['closeDate']
+      ),
+      isSbir: Normalizer._isSbirTitle(title) || undefined,
+      isSttr: Normalizer._isSttrTitle(title) || undefined,
+      status: (hit['oppStatus'] as IOpportunity['status']) ?? 'posted',
+      programUrl: hit['id']
+        ? `https://www.grants.gov/search-results-detail/${String(hit['id'])}`
+        : undefined,
       lastSyncedAt: Timestamp.now(),
     };
   }
@@ -148,24 +210,70 @@ export class Normalizer {
       minAward: Normalizer._toNumber(raw['minAward']),
       maxAward: Normalizer._toNumber(raw['maxAward']),
       status: (raw['status'] as IOpportunity['status']) ?? 'posted',
+      placement: (raw['placement'] as IOpportunity['placement']) ?? undefined,
+      programUrl: raw['programUrl'] ? String(raw['programUrl']) : undefined,
+      curated: true,
+      lastSyncedAt: Timestamp.now(),
+    };
+  }
+
+  public static fromSeedProgram(raw: Record<string, unknown>): IOpportunity {
+    const alnAll = Normalizer._toStringArray(raw['alnAll']);
+    const aln = raw['aln'] ? String(raw['aln']) : alnAll?.[0];
+
+    return {
+      source: 'seed',
+      sourceId: String(raw['sourceId'] ?? ''),
+      aln,
+      alnAll,
+      alnResolved: Boolean(aln),
+      title: String(raw['title'] ?? ''),
+      description: String(raw['description'] ?? ''),
+      agency: String(raw['agency'] ?? ''),
+      agencyCode: raw['agencyCode'] ? String(raw['agencyCode']) : undefined,
+      fundingInstrument: raw['fundingInstrument'] ? String(raw['fundingInstrument']) : undefined,
+      applicantTypeCodes: Normalizer._toStringArray(raw['applicantTypeCodes']),
+      applicantEligibilityDesc: raw['applicantEligibilityDesc']
+        ? String(raw['applicantEligibilityDesc'])
+        : undefined,
+      naicsCodes: Normalizer._toStringArray(raw['naicsCodes']),
+      keywords: Normalizer._toStringArray(raw['keywords']),
+      minAward: Normalizer._toNumber(raw['minAward']),
+      maxAward: Normalizer._toNumber(raw['maxAward']),
+      openDate: Normalizer._parseDate(raw['openDate']),
+      closeDate: Normalizer._parseDate(raw['closeDate']),
+      programPhase: (raw['programPhase'] as IOpportunity['programPhase']) ?? undefined,
+      isSbir: raw['isSbir'] === true ? true : undefined,
+      isSttr: raw['isSttr'] === true ? true : undefined,
+      status: (raw['status'] as IOpportunity['status']) ?? 'posted',
+      placement: (raw['placement'] as IOpportunity['placement']) ?? undefined,
+      programUrl: raw['programUrl'] ? String(raw['programUrl']) : undefined,
+      curated: true,
+      provenance: (raw['provenance'] as IOpportunity['provenance']) ?? undefined,
       lastSyncedAt: Timestamp.now(),
     };
   }
 
   public static fromUsaSpending(raw: Record<string, unknown>): IOpportunity {
     const awardId = String(raw['Award ID'] ?? raw['award_id'] ?? '');
+    const recipientName = raw['Recipient Name'] ? String(raw['Recipient Name']) : undefined;
+    const awardAmount = Normalizer._toNumber(raw['Award Amount']);
+    const startDate = Normalizer._parseDate(raw['Start Date']);
 
     return {
       source: 'usaspending',
       sourceId: `usaspending-${awardId}`,
       alnResolved: false,
-      title: String(raw['Award ID'] ?? ''),
-      description: String(raw['NAICS Description'] ?? ''),
+      title: recipientName ? `${recipientName} — ${awardId}` : awardId,
+      description: String(raw['NAICS Description'] ?? raw['Description'] ?? ''),
       agency: String(raw['Awarding Agency'] ?? ''),
       naicsCodes: raw['NAICS Code'] ? [String(raw['NAICS Code'])] : undefined,
-      minAward: Normalizer._toNumber(raw['Award Amount']),
-      maxAward: Normalizer._toNumber(raw['Award Amount']),
-      openDate: Normalizer._parseDate(raw['Start Date']),
+      minAward: awardAmount,
+      maxAward: awardAmount,
+      openDate: startDate,
+      recipientName,
+      awardAmount,
+      awardYear: startDate ? startDate.toDate().getUTCFullYear() : undefined,
       status: 'closed',
       lastSyncedAt: Timestamp.now(),
     };

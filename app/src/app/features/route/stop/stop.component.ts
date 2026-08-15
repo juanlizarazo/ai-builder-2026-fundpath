@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, input, signal } from '@angular/core';
+import { Component, ElementRef, ViewChild, computed, input, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { FundPath, FIT_TIER_LABELS, FIT_TIER_ICONS } from '../../../../types/firestore';
@@ -22,6 +22,22 @@ export class StopComponent {
   protected readonly isExpanded = signal(false);
   protected readonly tierLabels = FIT_TIER_LABELS;
   protected readonly tierIcons = FIT_TIER_ICONS;
+
+  protected readonly eligibilityFlags = computed<FundPath.Firestore.Routes.IEligibilityFlag[]>(() =>
+    this.stop().eligibilityFlags ?? []
+  );
+
+  protected readonly tasks = computed<FundPath.Firestore.Routes.ITask[]>(() =>
+    this.stop().tasks ?? []
+  );
+
+  protected readonly namedWinners = computed<string[]>(() =>
+    this.stop().historicalProof?.namedWinners ?? []
+  );
+
+  protected readonly provenanceNote = computed<string>(() =>
+    this.stop().provenanceNote || 'Program details curated from agency source, Aug 2026'
+  );
 
   private readonly _taskOverrides = signal<Record<string, boolean>>({});
 

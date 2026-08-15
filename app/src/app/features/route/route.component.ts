@@ -1,10 +1,13 @@
 import { Component, computed, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { Observable, catchError, filter, of, switchMap } from 'rxjs';
 import { FundpathService } from '@app/core/services/fundpath.service';
+import { AuthService } from '@app/core/services/auth.service';
 import { StopComponent } from './stop/stop.component';
 import { FundPath } from '../../../types/firestore';
 
@@ -25,17 +28,32 @@ import { FundPath } from '../../../types/firestore';
 export class RouteComponent {
   private readonly _activatedRoute = inject(ActivatedRoute);
   private readonly _fundpathService = inject(FundpathService);
+  private readonly _authService = inject(AuthService);
 
   protected readonly routeId = this._activatedRoute.snapshot.paramMap.get('routeId');
 
-  protected readonly route = computed(() => this._fundpathService.currentRoute());
+  private readonly _liveRoute = toSignal(this._buildLiveRoute(), { initialValue: undefined });
+
+  protected readonly route = computed<FundPath.Firestore.Routes.IRoute | null>(() => {
+    const live = this._liveRoute();
+
+    if (live === undefined) {
+      return this._fundpathService.currentRoute();
+    }
+
+    return live ?? this._fundpathService.currentRoute();
+  });
+
+  protected readonly isLoading = computed<boolean>(() =>
+    !!this.routeId && this._liveRoute() === undefined && !this._fundpathService.currentRoute()
+  );
 
   protected readonly primaryStops = computed<FundPath.Firestore.Routes.IStop[]>(() =>
-    this.route()?.stops.filter(s => s.placement === 'primary') ?? []
+    (this.route()?.stops ?? []).filter(stop => stop.placement === 'primary')
   );
 
   protected readonly alongsideStops = computed<FundPath.Firestore.Routes.IStop[]>(() =>
-    this.route()?.stops.filter(s => s.placement === 'alongside') ?? []
+    (this.route()?.stops ?? []).filter(stop => stop.placement === 'alongside')
   );
 
   protected readonly offRouteStops = computed<FundPath.Firestore.Routes.IStop[]>(() =>
@@ -47,8 +65,9 @@ export class RouteComponent {
   );
 
   protected readonly isAbstention = computed<boolean>(() => {
-    const r = this.route();
-    return !!r && r.stops.length === 0 && (r.nonGrantAlternatives?.length ?? 0) > 0;
+    const currentRoute = this.route();
+
+    return !!currentRoute && (currentRoute.stops?.length ?? 0) === 0 && (currentRoute.nonGrantAlternatives?.length ?? 0) > 0;
   });
 
   protected readonly isDeepRunning = computed<boolean>(() =>
@@ -60,10 +79,22 @@ export class RouteComponent {
   );
 
   protected alongsideForPrimary(primaryStop: FundPath.Firestore.Routes.IStop): FundPath.Firestore.Routes.IStop[] {
-    const seq = primaryStop.sequenceMonth;
+    const sequenceMonth = primaryStop.sequenceMonth;
 
-    if (seq === undefined) { return []; }
+    if (sequenceMonth === undefined) { return []; }
 
-    return this.alongsideStops().filter(s => s.sequenceMonth === seq);
+    return this.alongsideStops().filter(stop => stop.sequenceMonth === sequenceMonth);
+  }
+
+  private _buildLiveRoute(): Observable<FundPath.Firestore.Routes.IRoute | null> {
+    const routeId = this.routeId;
+
+    if (!routeId) { return of(null); }
+
+    return this._authService.user$.pipe(
+      filter((user) => !!user),
+      switchMap(() => this._fundpathService.watchRoute(routeId)),
+      catchError(() => of(null))
+    );
   }
 }

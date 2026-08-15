@@ -3,11 +3,18 @@
   "description": "Cloud Functions for FundPath",
   "scripts": {
     "build": "tsc",
+    "test": "vitest run",
+    "typecheck:dev": "tsc -p tsconfig.dev.json",
     "serve": "yarn build && firebase emulators:start --only functions",
     "shell": "yarn build && firebase functions:shell",
     "start": "yarn shell",
     "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
+    "logs": "firebase functions:log",
+    "dev:sync": "tsx src/dev/run-sync.ts",
+    "dev:coverage": "tsx src/dev/check-coverage.ts",
+    "dev:cases": "tsx src/dev/run-cases.ts",
+    "seed:export": "tsx src/dev/export-corpus.ts",
+    "seed:restore": "tsx src/dev/restore-corpus.ts"
   },
   "engines": {
     "node": "22"
@@ -21,7 +28,9 @@
   "devDependencies": {
     "firebase-functions-test": "^3.1.0",
     "typescript": "^5.3.3",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "tsx": "4.19.2",
+    "vitest": "2.1.8"
   },
   "private": true
 }

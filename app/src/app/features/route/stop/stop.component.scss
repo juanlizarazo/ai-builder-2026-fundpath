@@ -274,6 +274,28 @@
   color: #aaa;
 }
 
+.provenance-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--app-theme--border);
+  border-radius: 8px;
+  background: var(--app-theme--surface);
+  font-size: 12px;
+  line-height: 1.4;
+  color: #777;
+}
+
+.provenance-icon {
+  font-size: 14px;
+  height: 14px;
+  width: 14px;
+  flex-shrink: 0;
+  color: #999;
+}
+
 .learn-more-link {
   color: var(--app-theme--primary);
   font-size: 14px;

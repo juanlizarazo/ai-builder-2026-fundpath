@@ -1,37 +1,38 @@
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { onCall } from 'firebase-functions/v2/https';
 import * as logger from 'firebase-functions/logger';
-import { initializeApp, getApps } from 'firebase-admin/app';
-import { getFirestore, Timestamp } from 'firebase-admin/firestore';
+import { Timestamp } from 'firebase-admin/firestore';
 import { CallableGuardHelper } from '../shared/callable-guard.helper';
+import { FirebaseHelper } from '../shared/firebase.helper';
 import { GrantsGovHelper } from './grants-gov';
 import { SbirHelper } from './sbir';
 import { AssistanceListingsHelper } from './assistance-listings';
 import { USASpendingHelper } from './usaspending';
 import { UtahProgramsHelper } from './utah-programs';
+import { FederalProgramsHelper } from './federal-programs';
 import { UtahResourcesHelper } from './utah-resources';
 import { Normalizer } from './normalizer';
 import { IOpportunity } from '../firestore';
 import { AGENCY_ALN_PREFIXES, VERTICAL_NAICS_MAP } from '../route/expansion.constants';
 
-if (!getApps().length) {
-  initializeApp();
-}
-
 const ALLOWED_ALN_PREFIXES = new Set(Object.values(AGENCY_ALN_PREFIXES));
+const WRITE_BATCH_SIZE = 400;
 
-function isAllowedAln(aln: string | undefined): boolean {
-  if (!aln) {
+function isAllowedAln(opportunity: IOpportunity): boolean {
+  const alns = opportunity.alnAll ?? (opportunity.aln ? [opportunity.aln] : []);
+
+  if (alns.length === 0) {
     return true;
   }
 
-  const prefix = aln.split('.')[0];
-  return ALLOWED_ALN_PREFIXES.has(prefix);
+  return alns.some(aln => ALLOWED_ALN_PREFIXES.has(aln.split('.')[0]));
 }
 
-async function runSync(): Promise<void> {
-  const db = getFirestore();
+export async function runSync(): Promise<void> {
+  const db = FirebaseHelper.getDb();
   let countGrantsGov = 0;
+  let countSeed = 0;
+  let countHydrated = 0;
   let countSbir = 0;
   let countUtah = 0;
   let countAssistanceListings = 0;
@@ -39,32 +40,78 @@ async function runSync(): Promise<void> {
 
   try {
     const grantsGovRaw = await GrantsGovHelper.fetchPostedOpportunities(
-      ['HL', 'ST', 'ED', 'ENV'],
-      2000
+      ['HL', 'ST', 'ED', 'ENV', 'NR', 'BC', 'EN', 'ISS', 'CD', 'O'],
+      3000
     );
     logger.info('Grants.gov raw fetched', { count: grantsGovRaw.length });
 
+    const details = await GrantsGovHelper.hydrateOpportunities(grantsGovRaw);
+    countHydrated = details.size;
+
+    let writeBatch = db.batch();
+    let pendingWrites = 0;
+
     for (const raw of grantsGovRaw) {
       try {
-        const normalized = Normalizer.fromGrantsGov(raw);
+        const detail = details.get(String(raw['id'] ?? ''));
+        const normalized = Normalizer.fromGrantsGov(raw, detail);
 
         if (!normalized.sourceId) {
           continue;
         }
 
-        if (!isAllowedAln(normalized.aln)) {
+        if (!isAllowedAln(normalized)) {
+          continue;
+        }
+
+        writeBatch.set(db.collection('corpus').doc(normalized.sourceId), normalized, {
+          merge: true,
+        });
+        pendingWrites++;
+        countGrantsGov++;
+      } catch (err) {
+        logger.warn('Failed to normalize Grants.gov record', { error: (err as Error).message });
+
+        continue;
+      }
+
+      if (pendingWrites >= WRITE_BATCH_SIZE) {
+        const committing = writeBatch;
+        writeBatch = db.batch();
+        pendingWrites = 0;
+        await committing.commit();
+      }
+    }
+
+    if (pendingWrites > 0) {
+      await writeBatch.commit();
+    }
+
+    logger.info('Grants.gov upserted', { count: countGrantsGov, hydrated: countHydrated });
+  } catch (err) {
+    logger.error('Grants.gov sync failed', { error: (err as Error).message });
+  }
+
+  try {
+    const federalPrograms = FederalProgramsHelper.getSeedPrograms();
+
+    for (const raw of federalPrograms) {
+      try {
+        const normalized = Normalizer.fromSeedProgram(raw);
+
+        if (!normalized.sourceId) {
           continue;
         }
 
         await db.collection('corpus').doc(normalized.sourceId).set(normalized, { merge: true });
-        countGrantsGov++;
+        countSeed++;
       } catch (err) {
-        logger.warn('Failed to normalize Grants.gov record', { error: (err as Error).message });
+        logger.warn('Failed to upsert seed federal program', { error: (err as Error).message });
       }
     }
-    logger.info('Grants.gov upserted', { count: countGrantsGov });
+    logger.info('Seed federal programs upserted', { count: countSeed });
   } catch (err) {
-    logger.error('Grants.gov sync failed', { error: (err as Error).message });
+    logger.error('Seed federal programs sync failed', { error: (err as Error).message });
   }
 
   try {
@@ -107,13 +154,7 @@ async function runSync(): Promise<void> {
           continue;
         }
 
-        const docData: IOpportunity & Record<string, unknown> = {
-          ...normalized,
-          placement: raw['placement'] ?? undefined,
-          programUrl: raw['programUrl'] ?? undefined,
-        };
-
-        await db.collection('corpus').doc(normalized.sourceId).set(docData, { merge: true });
+        await db.collection('corpus').doc(normalized.sourceId).set(normalized, { merge: true });
         countUtah++;
       } catch (err) {
         logger.warn('Failed to upsert Utah program', { error: (err as Error).message });
@@ -156,7 +197,7 @@ async function runSync(): Promise<void> {
           continue;
         }
 
-        if (!isAllowedAln(normalized.aln)) {
+        if (!isAllowedAln(normalized)) {
           continue;
         }
 
@@ -179,11 +220,7 @@ async function runSync(): Promise<void> {
       ...VERTICAL_NAICS_MAP['software'],
     ];
     const uniqueNaics = [...new Set(techNaics)];
-    const usaRaw = await USASpendingHelper.fetchAwardsByStateAndNaics(
-      'UT',
-      uniqueNaics,
-      ['02', '03', '04', '05', 'A', 'B', 'C', 'D']
-    );
+    const usaRaw = await USASpendingHelper.fetchUtahAwards('UT', uniqueNaics);
     logger.info('USAspending raw fetched', { count: usaRaw.length });
 
     for (const raw of usaRaw) {
@@ -205,14 +242,22 @@ async function runSync(): Promise<void> {
     logger.error('USAspending sync failed', { error: (err as Error).message });
   }
 
-  const totalCount = countGrantsGov + countSbir + countUtah + countAssistanceListings + countUSASpending;
+  const totalCount =
+    countGrantsGov +
+    countSeed +
+    countSbir +
+    countUtah +
+    countAssistanceListings +
+    countUSASpending;
 
   await db
-    .collection('corpus')
-    .doc('_stats')
+    .collection('corpusMeta')
+    .doc('stats')
     .set({
       lastSyncedAt: Timestamp.now(),
       countGrantsGov,
+      countGrantsGovHydrated: countHydrated,
+      countSeed,
       countSbir,
       countUtah,
       countAssistanceListings,
@@ -220,7 +265,16 @@ async function runSync(): Promise<void> {
       totalCount,
     });
 
-  logger.info('Sync complete', { totalCount, countGrantsGov, countSbir, countUtah, countAssistanceListings, countUSASpending });
+  logger.info('Sync complete', {
+    totalCount,
+    countGrantsGov,
+    countHydrated,
+    countSeed,
+    countSbir,
+    countUtah,
+    countAssistanceListings,
+    countUSASpending,
+  });
 }
 
 export const syncCorpus = onSchedule(

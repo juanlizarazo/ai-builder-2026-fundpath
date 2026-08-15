@@ -3,6 +3,7 @@ import * as logger from 'firebase-functions/logger';
 const SEARCH_URL = 'https://api.grants.gov/v1/api/search2';
 const DETAIL_URL = 'https://api.grants.gov/v1/api/fetchOpportunity';
 const PAGE_SIZE = 1000;
+const HYDRATION_CONCURRENCY = 8;
 
 export class GrantsGovHelper {
   public static async fetchPostedOpportunities(
@@ -79,5 +80,45 @@ export class GrantsGovHelper {
     const json = (await response.json()) as Record<string, unknown>;
 
     return (json['data'] as Record<string, unknown>) ?? json;
+  }
+
+  public static async hydrateOpportunities(
+    hits: Record<string, unknown>[]
+  ): Promise<Map<string, Record<string, unknown>>> {
+    const details = new Map<string, Record<string, unknown>>();
+    let cursor = 0;
+    let failures = 0;
+
+    const worker = async (): Promise<void> => {
+      while (cursor < hits.length) {
+        const index = cursor;
+        cursor++;
+
+        const opportunityId = String(hits[index]?.['id'] ?? '');
+
+        if (!opportunityId) {
+          continue;
+        }
+
+        try {
+          const detail = await GrantsGovHelper.fetchOpportunityDetail(opportunityId);
+          details.set(opportunityId, detail);
+        } catch {
+          failures++;
+        }
+      }
+    };
+
+    await Promise.all(
+      Array.from({ length: Math.min(HYDRATION_CONCURRENCY, hits.length) }, () => worker())
+    );
+
+    logger.info('Grants.gov hydration complete', {
+      requested: hits.length,
+      hydrated: details.size,
+      failures,
+    });
+
+    return details;
   }
 }
