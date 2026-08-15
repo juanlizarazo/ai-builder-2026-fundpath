@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { Clipboard } from '@angular/cdk/clipboard';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,7 +12,7 @@ import { NotificationsService } from '@app/core/services/notifications.service';
 import { LoadingService } from '@app/core/services/loading.service';
 import { AlertBannerComponent } from '@app/shared/components/alert-banner/alert-banner.component';
 import { SidePanelComponent } from '@app/shared/components/side-panel/side-panel.component';
-import { formatDollars, toDate } from '@app/shared/utils/format.utils';
+import { formatDate, formatDollars, toDate } from '@app/shared/utils/format.utils';
 import { datePosition } from '@app/shared/utils/scale.utils';
 import { toSentences } from '@app/shared/utils/text.utils';
 import { StopComponent } from './stop/stop.component';
@@ -33,6 +34,11 @@ const DIAGRAM_HORIZON_MONTHS = 24;
 
 /** A deadline inside this many days renders in `--fp-signal` on the summary rail. */
 const URGENT_DEADLINE_DAYS = 45;
+
+/** How long the share button shows its "Copied!" confirmation before reverting to idle. */
+const SHARE_COPIED_RESET_MS = 2000;
+
+type ShareState = 'idle' | 'sharing' | 'copied';
 
 @Component({
   selector: 'app-route',
@@ -57,10 +63,14 @@ export class RouteComponent {
   private readonly _authService = inject(AuthService);
   private readonly _notificationsService = inject(NotificationsService);
   private readonly _loadingService = inject(LoadingService);
+  private readonly _clipboard = inject(Clipboard);
 
   protected readonly checkForNewMessage = signal('');
   protected readonly checkForNewError = signal('');
+  protected readonly shareState = signal<ShareState>('idle');
   protected readonly formatDollars = formatDollars;
+
+  private _shareResetTimer: ReturnType<typeof setTimeout> | undefined;
 
   /** Fixed at construction so the diagram's time scale doesn't jitter re-render to re-render. */
   private readonly _today = new Date();
@@ -75,6 +85,11 @@ export class RouteComponent {
 
   private readonly _liveRoute = toSignal(this._buildLiveRoute(), { initialValue: undefined });
 
+  private readonly _uid = toSignal(
+    this._authService.user$.pipe(map(user => user?.uid ?? null)),
+    { initialValue: null }
+  );
+
   protected readonly route = computed<FundPath.Firestore.Routes.IRoute | null>(() => {
     const live = this._liveRoute();
 
@@ -83,6 +98,13 @@ export class RouteComponent {
     }
 
     return live ?? this._fundpathService.currentRoute();
+  });
+
+  /** Whether the signed-in visitor owns this route — false for anyone viewing a shared link. Owner-only actions (share, check for new, apply) hinge on this. */
+  protected readonly isOwner = computed<boolean>(() => {
+    const route = this.route();
+    const uid = this._uid();
+    return !!route && !!uid && route.uid === uid;
   });
 
   protected readonly isLoading = computed<boolean>(() =>
@@ -154,6 +176,11 @@ export class RouteComponent {
   protected readonly utahResources = computed<FundPath.Firestore.Routes.IUtahResourceMatch[]>(() =>
     this.route()?.utahResources ?? []
   );
+
+  protected readonly isPublic = computed<boolean>(() => this.route()?.isPublic ?? false);
+
+  /** PDF-only masthead date — the print stylesheet hides everything else that would otherwise mark "now". */
+  protected readonly printGeneratedOn = formatDate(this._today);
 
   // --- Header summary rail --------------------------------------------------
 
@@ -318,5 +345,28 @@ export class RouteComponent {
 
   protected clearCheckForNewError(): void {
     this.checkForNewError.set('');
+  }
+
+  protected async shareRoute(): Promise<void> {
+    const routeId = this.routeId;
+
+    if (!routeId || this.shareState() === 'sharing') { return; }
+
+    clearTimeout(this._shareResetTimer);
+    this.shareState.set('sharing');
+
+    if (!this.isPublic()) {
+      await this._fundpathService.setRoutePublic(routeId, true);
+    }
+
+    const shareUrl = `${window.location.origin}/route/${routeId}`;
+    this._clipboard.copy(shareUrl);
+    this.shareState.set('copied');
+
+    this._shareResetTimer = setTimeout(() => this.shareState.set('idle'), SHARE_COPIED_RESET_MS);
+  }
+
+  protected downloadPdf(): void {
+    window.print();
   }
 }

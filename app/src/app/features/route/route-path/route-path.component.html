@@ -1,73 +1,117 @@
 <div class="route-path">
-  <div class="route-path-lane" [style.height.px]="containerHeight()">
-    <svg
-      class="route-path-connector"
-      aria-hidden="true"
-      [attr.viewBox]="'0 0 100 ' + containerHeight()"
-      preserveAspectRatio="none"
-    >
-      <path class="route-path-connector-line" [attr.d]="connectorD()"></path>
-    </svg>
+  <p class="route-path-legend fp-data">Time runs left to right. The higher and bigger a stop sits, the more it's worth.</p>
 
-    <div class="route-node route-node--today" [style.left.%]="50" [style.top.px]="12">
-      <span class="route-today-marker fp-data">Today</span>
-    </div>
-
-    @for (station of orderedStations(); track station.stop.id; let i = $index) {
-      <div
-        class="route-node route-node--{{ status(station.stop) }}"
-        [class.route-node--active]="isOpen(station.stop)"
-        [style.left.%]="leftPct(i)"
-        [style.top.px]="topPx(i)"
-        [style.--tier-color]="tierColor(station.stop)"
+  <div class="route-path-scroll-wrap">
+    <div class="route-path-scroll" #scrollEl>
+    <div class="route-path-lane" [style.width.px]="containerWidth()" [style.height.px]="containerHeight">
+      <svg
+        class="route-path-connector"
+        aria-hidden="true"
+        [attr.viewBox]="'0 0 ' + containerWidth() + ' ' + containerHeight"
       >
-        @if (status(station.stop) === 'next') {
-          <span class="route-node-badge fp-data">Next up</span>
+        <defs>
+          <linearGradient id="routeTerrainFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="var(--fp-basin)" stop-opacity="0.38" />
+            <stop offset="55%" stop-color="var(--fp-basin)" stop-opacity="0.14" />
+            <stop offset="100%" stop-color="var(--fp-basin)" stop-opacity="0" />
+          </linearGradient>
+          <clipPath id="routeSweep">
+            <rect x="0" y="0" [attr.width]="sweptIn() ? containerWidth() : 0" class="route-sweep-rect" [attr.height]="containerHeight"></rect>
+          </clipPath>
+        </defs>
+
+        @for (tick of elevationTicks(); track tick.label) {
+          <line class="route-path-tick-line" x1="0" [attr.x2]="containerWidth()" [attr.y1]="tick.y" [attr.y2]="tick.y"></line>
+          <text class="route-path-tick-label fp-data" x="0" [attr.y]="tick.y - 6">{{ tick.label }}</text>
         }
 
-        <button
-          type="button"
-          class="route-node-button"
-          [attr.aria-label]="station.stop.title + ' — ' + tierLabels[station.stop.fitTier]"
-          [attr.aria-expanded]="isOpen(station.stop)"
-          (click)="toggle(station.stop)"
+        <g clip-path="url(#routeSweep)">
+          <path class="route-path-mountain" [attr.d]="mountainD()" fill="url(#routeTerrainFill)"></path>
+          <path class="route-path-connector-line" [attr.d]="connectorD()"></path>
+        </g>
+      </svg>
+
+      <div class="route-node route-node--today" [style.left.px]="todayX()" [style.top.px]="chartBaseline">
+        <span class="route-today-marker fp-data">Today</span>
+      </div>
+
+      @for (station of orderedStations(); track station.stop.id; let i = $index) {
+        <div
+          class="route-node route-node--{{ status(station.stop) }}"
+          [class.route-node--active]="isOpen(station.stop)"
+          [class.route-node--peak]="station.stop.id === peakStopId()"
+          [style.left.px]="leftPx(i)"
+          [style.top.px]="elevationY(i)"
+          [style.--tier-color]="tierColor(station.stop)"
+          [style.--node-scale]="nodeScale(station.stop)"
         >
-          <mat-icon class="route-node-icon">{{ icon(station) }}</mat-icon>
-        </button>
+          @if (status(station.stop) === 'next') {
+            <span class="route-node-badge fp-data">Next up</span>
+          }
 
-        <span class="route-node-date fp-data">{{ deadlineLabel(station.stop) }}</span>
+          <button
+            type="button"
+            class="route-node-button"
+            [attr.aria-label]="station.stop.title + ' — ' + tierLabels[station.stop.fitTier]"
+            [attr.aria-expanded]="isOpen(station.stop)"
+            (click)="toggle(station.stop, $event)"
+          >
+            <mat-icon class="route-node-icon">{{ icon(station) }}</mat-icon>
+          </button>
 
-        @if (isOpen(station.stop)) {
-          <div class="route-preview" role="dialog" [attr.aria-label]="station.stop.title">
-            <span class="route-preview-tier" [style.color]="tierColor(station.stop)">
-              <mat-icon class="route-preview-tier-icon">{{ tierIcon(station.stop) }}</mat-icon>
-              {{ tierLabels[station.stop.fitTier] }}
-            </span>
-            <span class="route-preview-title">{{ station.stop.title }}</span>
-            <span class="route-preview-agency">{{ station.stop.agency }}</span>
-            <div class="route-preview-meta fp-data">
-              @if (amountLabel(station.stop); as amount) {
-                <span>{{ amount }}</span>
-              }
-              @if (deadlineLabel(station.stop); as deadline) {
-                <span>{{ deadline }}</span>
-              }
-            </div>
-            <button type="button" class="route-preview-cta" (click)="viewDetails(station.stop)">
-              View details
-            </button>
-          </div>
+          <span class="route-node-date fp-data">
+            <span class="route-node-date-line">{{ closeDateLabel(station.stop) }}</span>
+            @if (daysLeftLabel(station.stop); as daysLeft) {
+              <span class="route-node-date-line">{{ daysLeft }}</span>
+            }
+          </span>
+        </div>
+      }
+
+      <div class="route-node route-node--finish" [style.left.px]="finishX()" [style.top.px]="chartBaseline">
+        <span class="route-finish-flag" aria-hidden="true">
+          <mat-icon>flag</mat-icon>
+        </span>
+        @if (totalPotentialLabel(); as total) {
+          <span class="route-finish-summit fp-data">Summit: up to {{ total }} across the trail</span>
+        }
+        <span class="route-finish-caption fp-data">That's your route — for now</span>
+      </div>
+    </div>
+    </div>
+
+    @if (hasOverflow()) {
+      <div class="route-path-scroll-fade" aria-hidden="true"></div>
+    }
+  </div>
+
+  @if (selectedStation(); as selected) {
+    <div
+      class="route-preview"
+      role="dialog"
+      [attr.aria-label]="selected.stop.title"
+      [style.left.px]="previewLeft()"
+      [style.top.px]="previewTop()"
+    >
+      <span class="route-preview-tier" [style.color]="tierColor(selected.stop)">
+        <mat-icon class="route-preview-tier-icon">{{ tierIcon(selected.stop) }}</mat-icon>
+        {{ tierLabels[selected.stop.fitTier] }}
+      </span>
+      <span class="route-preview-title">{{ selected.stop.title }}</span>
+      <span class="route-preview-agency">{{ selected.stop.agency }}</span>
+      <div class="route-preview-meta fp-data">
+        @if (amountLabel(selected.stop); as amount) {
+          <span>{{ amount }}</span>
+        }
+        @if (deadlineLabel(selected.stop); as deadline) {
+          <span>{{ deadline }}</span>
         }
       </div>
-    }
-
-    <div class="route-node route-node--finish" [style.left.%]="leftPct(orderedStations().length)" [style.top.px]="topPx(orderedStations().length)">
-      <span class="route-finish-flag" aria-hidden="true">
-        <mat-icon>flag</mat-icon>
-      </span>
-      <span class="route-finish-caption fp-data">That's your route — for now</span>
+      <button type="button" class="route-preview-cta" (click)="viewDetails(selected.stop)">
+        View details
+      </button>
     </div>
-  </div>
+  }
 
   <div class="route-path-fallback" role="list">
     @for (station of orderedStations(); track station.stop.id) {

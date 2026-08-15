@@ -11,6 +11,7 @@ import {
   docData,
   orderBy,
   query,
+  serverTimestamp,
   setDoc,
   where
 } from '@angular/fire/firestore';
@@ -149,5 +150,11 @@ export class FundpathService {
 
     const profileRef = doc(this._firestore, 'profiles', profileId);
     await setDoc(profileRef, { companyName }, { merge: true });
+  }
+
+  /** Marks a route as publicly readable (or revokes it) so its owner can hand out a share link. */
+  public async setRoutePublic(routeId: string, isPublic: boolean): Promise<void> {
+    const routeRef = doc(this._firestore, 'routes', routeId);
+    await setDoc(routeRef, { isPublic, sharedAt: serverTimestamp() }, { merge: true });
   }
 }

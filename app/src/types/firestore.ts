@@ -128,6 +128,8 @@ export namespace FundPath {
         deepPassStatus: 'pending' | 'running' | 'complete';
         deepPassFoundNew: boolean;
         taskState?: Record<string, boolean>;
+        isPublic?: boolean;
+        sharedAt?: Timestamp;
         createdAt: Timestamp;
         updatedAt: Timestamp;
       }

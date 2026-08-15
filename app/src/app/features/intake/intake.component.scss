@@ -613,6 +613,10 @@
 
 .notify-field {
   width: 100%;
+
+  ::ng-deep .mat-mdc-text-field-wrapper .mat-mdc-form-field-infix input {
+    padding-left: 12px;
+  }
 }
 
 .sms-checkbox {

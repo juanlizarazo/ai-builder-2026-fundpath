@@ -26,7 +26,9 @@ service cloud.firestore {
     }
 
     match /routes/{routeId} {
-      allow read, write: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow read: if resource.data.isPublic == true
+        || (request.auth != null && resource.data.uid == request.auth.uid);
+      allow write: if request.auth != null && resource.data.uid == request.auth.uid;
       allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
     }
 
