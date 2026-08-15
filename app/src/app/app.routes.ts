@@ -34,6 +34,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/legal/terms/terms.component').then(m => m.TermsComponent)
   },
   {
+    path: 'security',
+    data: { layout: Layout.Public },
+    loadComponent: () => import('./features/legal/security/security.component').then(m => m.SecurityComponent)
+  },
+  {
     path: '**',
     redirectTo: ''
   }

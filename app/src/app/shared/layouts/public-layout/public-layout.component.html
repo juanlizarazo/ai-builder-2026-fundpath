@@ -31,6 +31,11 @@
           <mat-icon>route</mat-icon>
           <span>My paths</span>
         </a>
+        <button mat-menu-item [disabled]="isSimulating()" (click)="simulateNotification()">
+          <mat-icon>mark_email_read</mat-icon>
+          <span>Send test notification</span>
+        </button>
+        <mat-divider></mat-divider>
         <button mat-menu-item (click)="signOut()">
           <mat-icon>logout</mat-icon>
           <span>Sign out</span>
@@ -42,13 +47,27 @@
   </div>
 </nav>
 
+@if (simulateMessage()) {
+  <ss-alert-banner type="info" [message]="simulateMessage()" (dismissed)="clearSimulateFeedback()"></ss-alert-banner>
+}
+@if (simulateError()) {
+  <ss-alert-banner type="error" [message]="simulateError()" (dismissed)="clearSimulateFeedback()"></ss-alert-banner>
+}
+
 <div class="page-content">
   <router-outlet></router-outlet>
 </div>
 
 <footer class="public-footer">
-  <a routerLink="/privacy">Privacy</a>
-  <a routerLink="/terms">Terms</a>
+  <div class="footer-links">
+    <a routerLink="/privacy">Privacy</a>
+    <a routerLink="/terms">Terms</a>
+    <a routerLink="/security" class="security-link">
+      <mat-icon>lock</mat-icon>
+      Security
+    </a>
+  </div>
+  <p class="footer-event">Created by Juan Lizarazo for AI Builder Day · Aug 2026</p>
 </footer>
 
 <ss-side-panel title="Notifications" [isOpen]="isInboxOpen()" (closed)="closeInbox()">
