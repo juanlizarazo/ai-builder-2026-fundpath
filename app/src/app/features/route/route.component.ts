@@ -16,6 +16,7 @@ import { formatDollars, formatRelativeTime, toDate } from '@app/shared/utils/for
 import { datePosition, monthTicks } from '@app/shared/utils/scale.utils';
 import { toSentences } from '@app/shared/utils/text.utils';
 import { StopComponent } from './stop/stop.component';
+import { StopDetailPanelComponent } from './stop-detail-panel/stop-detail-panel.component';
 import { FundPath } from '../../../types/firestore';
 
 type IStop = FundPath.Firestore.Routes.IStop;
@@ -53,6 +54,7 @@ const URGENT_DEADLINE_DAYS = 45;
     AlertBannerComponent,
     SidePanelComponent,
     StopComponent,
+    StopDetailPanelComponent,
     FundingStackComponent
   ],
   templateUrl: './route.component.html',
@@ -76,8 +78,9 @@ export class RouteComponent {
   /** Fixed at construction so the diagram's time scale doesn't jitter re-render to re-render. */
   private readonly _today = new Date();
 
-  /** Seam for Task 7 (side panel): set by `openStopDetail`, not consumed by any UI yet. */
+  /** The stop currently shown in the stop-detail side panel, or `null` when closed. */
   protected readonly selectedStopForDetail = signal<IStop | null>(null);
+  protected readonly isStopDetailOpen = computed<boolean>(() => this.selectedStopForDetail() !== null);
 
   protected readonly isRuledOutOpen = signal(false);
 
@@ -139,6 +142,8 @@ export class RouteComponent {
 
   /** The founder's funding need — the funding-stack's scale domain. `null` until the profile loads (or if unset). */
   protected readonly askMax = computed<number | null>(() => this._liveProfile()?.askMax ?? null);
+  /** The founder's ask floor — used by the stop-detail panel's proof bar marker. */
+  protected readonly askMin = computed<number | null>(() => this._liveProfile()?.askMin ?? null);
 
   /** Primary + alongside stops passed to the funding-stack bar (same set the survey-line diagram renders). */
   protected readonly fundingStackStops = computed<IStop[]>(() => this.route()?.stops ?? []);
@@ -274,12 +279,12 @@ export class RouteComponent {
     return this.primaryStops()[0]?.sequenceMonth ?? 0;
   }
 
-  /**
-   * Seam for Task 7: this will wire the click into a side-panel instance.
-   * For now it only records the selection; no UI consumes it yet.
-   */
   protected openStopDetail(stop: IStop): void {
     this.selectedStopForDetail.set(stop);
+  }
+
+  protected closeStopDetail(): void {
+    this.selectedStopForDetail.set(null);
   }
 
   protected toggleRuledOut(): void {

@@ -1,8 +1,5 @@
-import { Component, ElementRef, ViewChild, computed, inject, input, output, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
+import { Component, computed, input, output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { ApplicationService } from '../../application/services/application.service';
 import { FundPath, FIT_TIER_LABELS, FIT_TIER_ICONS } from '../../../../types/firestore';
 import { formatDollars, formatDate, toDate } from '../../../shared/utils/format.utils';
 
@@ -37,49 +34,26 @@ const MAX_FIT_CHIPS = 3;
   selector: 'app-stop',
   standalone: true,
   imports: [
-    RouterLink,
-    MatButtonModule,
     MatIconModule
   ],
   templateUrl: './stop.component.html',
   styleUrl: './stop.component.scss'
 })
 export class StopComponent {
-  @ViewChild('detailsRef') private readonly _detailsRef?: ElementRef<HTMLElement>;
-
-  private readonly _applicationService = inject(ApplicationService);
-
   public readonly stop = input.required<FundPath.Firestore.Routes.IStop>();
-  public readonly routeId = input.required<string>();
-  public readonly taskState = input<Record<string, boolean>>({});
 
   /**
-   * Seam for Task 7 (side panel): emitted whenever the collapsed station
-   * card is activated. `RouteComponent` wires this to `openStopDetail`.
+   * Emitted whenever the collapsed station card is activated.
+   * `RouteComponent` wires this to `openStopDetail`, which opens the
+   * stop-detail side panel (Task 7) — this card no longer expands inline.
    */
   public readonly opened = output<FundPath.Firestore.Routes.IStop>();
 
-  protected readonly isExpanded = signal(false);
-  protected readonly canStartApplication = computed<boolean>(() =>
-    this.stop().placement === 'primary' || this.stop().placement === 'alongside'
-  );
   protected readonly tierLabels = FIT_TIER_LABELS;
   protected readonly tierIcons = FIT_TIER_ICONS;
 
   protected readonly eligibilityFlags = computed<FundPath.Firestore.Routes.IEligibilityFlag[]>(() =>
     this.stop().eligibilityFlags ?? []
-  );
-
-  protected readonly tasks = computed<FundPath.Firestore.Routes.ITask[]>(() =>
-    this.stop().tasks ?? []
-  );
-
-  protected readonly namedWinners = computed<string[]>(() =>
-    this.stop().historicalProof?.namedWinners ?? []
-  );
-
-  protected readonly provenanceNote = computed<string>(() =>
-    this.stop().provenanceNote || 'Program details curated from agency source, Aug 2026'
   );
 
   /** Up to three `✓`/`⚠` fit chips derived from `eligibilityFlags`, for the collapsed card. */
@@ -143,44 +117,7 @@ export class StopComponent {
     return '';
   }
 
-  protected formatCloseDate(stop: FundPath.Firestore.Routes.IStop): string {
-    const formatted = formatDate(stop.closeDate);
-    return formatted ? `Closes ${formatted}` : 'Open';
-  }
-
-  protected formatRegistrationDate(stop: FundPath.Firestore.Routes.IStop): string {
-    const formatted = formatDate(stop.registrationDeadline);
-    return formatted ? `Start SAM.gov registration by ${formatted}` : '';
-  }
-
-  protected formatOpenDate(stop: FundPath.Firestore.Routes.IStop): string {
-    return formatDate(stop.openDate);
-  }
-
-  protected formatHistoricalDollars(amount: number): string {
-    return formatDollars(amount);
-  }
-
-  protected isTaskChecked(task: FundPath.Firestore.Routes.ITask): boolean {
-    return this._applicationService.isTaskChecked(this.taskState(), task);
-  }
-
-  protected toggleTask(taskId: string, currentState: boolean): void {
-    this._applicationService.toggleTask(this.routeId(), taskId, currentState);
-  }
-
-  protected toggle(): void {
-    const next = !this.isExpanded();
-    this.isExpanded.set(next);
+  protected open(): void {
     this.opened.emit(this.stop());
-
-    if (next && this._detailsRef) {
-      setTimeout(() => {
-        const firstFocusable = this._detailsRef?.nativeElement.querySelector<HTMLElement>(
-          'button, a, input, [tabindex="0"]'
-        );
-        firstFocusable?.focus();
-      }, 0);
-    }
   }
 }

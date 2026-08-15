@@ -1,10 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { provideRouter } from '@angular/router';
 import { Timestamp } from '@angular/fire/firestore';
 import { describe, expect, it, vi } from 'vitest';
-
-import { ApplicationService } from '@app/features/application/services/application.service';
 
 import { StopComponent } from './stop.component';
 import { FundPath } from '../../../../types/firestore';
@@ -28,19 +25,11 @@ function makeStop(overrides: Partial<IStop> = {}): IStop {
 function createFixture(stop: IStop) {
   TestBed.configureTestingModule({
     imports: [StopComponent],
-    providers: [
-      provideRouter([]),
-      provideNoopAnimations(),
-      {
-        provide: ApplicationService,
-        useValue: { isTaskChecked: vi.fn(() => false), toggleTask: vi.fn() }
-      }
-    ]
+    providers: [provideNoopAnimations()]
   });
 
   const fixture = TestBed.createComponent(StopComponent);
   fixture.componentRef.setInput('stop', stop);
-  fixture.componentRef.setInput('routeId', 'route-1');
   fixture.detectChanges();
 
   return fixture;

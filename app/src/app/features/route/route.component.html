@@ -103,7 +103,7 @@
           <div class="stops-list">
             @for (stop of nonGrantStops(); track stop.id) {
               <div [id]="'stop-' + stop.id">
-                <app-stop [stop]="stop" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" (opened)="openStopDetail($event)" />
+                <app-stop [stop]="stop" (opened)="openStopDetail($event)" />
               </div>
             }
           </div>
@@ -148,8 +148,6 @@
                     <span class="survey-stub" aria-hidden="true"></span>
                     <app-stop
                       [stop]="station.stop"
-                      [routeId]="routeId!"
-                      [taskState]="route()?.taskState ?? {}"
                       (opened)="openStopDetail($event)"
                     />
                   </div>
@@ -192,7 +190,7 @@
             <div class="stops-list">
               @for (stop of nonGrantStops(); track stop.id) {
                 <div [id]="'stop-' + stop.id">
-                  <app-stop [stop]="stop" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" (opened)="openStopDetail($event)" />
+                  <app-stop [stop]="stop" (opened)="openStopDetail($event)" />
                 </div>
               }
             </div>
@@ -242,6 +240,23 @@
           </button>
         }
       </div>
+    }
+  </ss-side-panel>
+
+  <ss-side-panel
+    [title]="selectedStopForDetail()?.title ?? 'Program details'"
+    [isOpen]="isStopDetailOpen()"
+    [width]="480"
+    (closed)="closeStopDetail()"
+  >
+    @if (selectedStopForDetail(); as detailStop) {
+      <app-stop-detail-panel
+        [stop]="detailStop"
+        [routeId]="routeId!"
+        [taskState]="route()?.taskState ?? {}"
+        [askMin]="askMin()"
+        [askMax]="askMax()"
+      />
     }
   </ss-side-panel>
 }

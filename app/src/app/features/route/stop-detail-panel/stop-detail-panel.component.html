@@ -1,0 +1,177 @@
+<div class="detail-panel">
+  <div class="detail-scroll">
+    <header class="detail-header">
+      <span class="detail-agency fp-eyebrow">{{ stop().agency }}</span>
+      <h3 class="detail-title">{{ stop().title }}</h3>
+    </header>
+
+    <!-- 1. Fit ledger -->
+    <section class="ledger">
+      <div class="ledger-column">
+        <h4 class="ledger-eyebrow fp-eyebrow">Why you fit</h4>
+        @if (fitRows().length > 0) {
+          <ul class="ledger-list" role="list">
+            @for (row of fitRows(); track row.text) {
+              <li class="ledger-row">
+                <span aria-hidden="true">✓</span>
+                <span>{{ row.text }}</span>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="ledger-empty">No specific fit signals recorded.</p>
+        }
+      </div>
+
+      <div class="ledger-column ledger-column--warn">
+        <h4 class="ledger-eyebrow fp-eyebrow">What could make you ineligible</h4>
+        @if (ineligibleRows().length > 0) {
+          <ul class="ledger-list" role="list">
+            @for (row of ineligibleRows(); track row.text) {
+              <li class="ledger-row">
+                <span aria-hidden="true">⚠</span>
+                <span>{{ row.text }}</span>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="ledger-empty">Nothing flagged.</p>
+        }
+      </div>
+    </section>
+
+    @if (stop().whyFit || stop().whyIneligible) {
+      <details class="full-assessment">
+        <summary>Read the full assessment</summary>
+        @if (stop().whyFit) {
+          <p class="full-assessment-block">{{ stop().whyFit }}</p>
+        }
+        @if (stop().whyIneligible) {
+          <p class="full-assessment-block">{{ stop().whyIneligible }}</p>
+        }
+      </details>
+    }
+
+    <p class="disclaimer fp-data">
+      An assessment, not an eligibility determination. Verify with the agency.
+    </p>
+
+    <!-- 2. Proof -->
+    @if (stop().historicalProof; as proof) {
+      <section class="proof">
+        <h4 class="section-eyebrow fp-eyebrow">Proof</h4>
+
+        @if (hasAwardRange()) {
+          <div class="award-bar">
+            <div class="award-bar-track">
+              <div class="award-bar-span" [style.left.%]="minPct()" [style.width.%]="maxPct() - minPct()"></div>
+              @if (proof.medianAward) {
+                <div class="award-bar-tick award-bar-tick--median" [style.left.%]="medianPct()" title="Median award"></div>
+              }
+              @if (askPct() !== null) {
+                <div class="award-bar-tick award-bar-tick--ask" [style.left.%]="askPct()" title="Your ask"></div>
+              }
+            </div>
+            <p class="award-bar-label fp-data">{{ formatAmount() }}</p>
+          </div>
+        }
+
+        <p class="proof-summary fp-data">
+          {{ proof.countUtah }} Utah winners · {{ proof.countVertical }} in your vertical · {{ proof.countTotal }} total
+        </p>
+
+        @if (namedWinners().length > 0) {
+          <div class="winner-chips">
+            @for (winner of namedWinners(); track winner) {
+              <span class="winner-chip">{{ winner }}</span>
+            }
+          </div>
+        }
+      </section>
+    }
+
+    <!-- 3. Verify before you apply -->
+    @if (verifyRows().length > 0) {
+      <section class="verify">
+        <h4 class="section-eyebrow fp-eyebrow">Verify before you apply</h4>
+        <ul class="verify-list" role="list">
+          @for (row of verifyRows(); track row) {
+            <li><span aria-hidden="true">○</span> {{ row }}</li>
+          }
+        </ul>
+      </section>
+    }
+
+    <!-- 4. Do next -->
+    @if (doNextRows().length > 0) {
+      <section class="do-next">
+        <h4 class="section-eyebrow fp-eyebrow">Do next</h4>
+        <ol class="do-next-list">
+          @for (row of doNextRows(); track row) {
+            <li>{{ row }}</li>
+          }
+        </ol>
+      </section>
+    }
+
+    <!-- 5. Checklist -->
+    @if (tasks().length > 0) {
+      <section class="checklist">
+        <button
+          type="button"
+          class="checklist-toggle fp-data"
+          (click)="toggleChecklist()"
+          [attr.aria-expanded]="isChecklistExpanded()"
+        >
+          Checklist {{ checkedTaskCount() }}/{{ tasks().length }}
+        </button>
+        <div class="checklist-progress" aria-hidden="true">
+          <div class="checklist-progress-fill" [style.width.%]="(checkedTaskCount() / tasks().length) * 100"></div>
+        </div>
+
+        @if (isChecklistExpanded()) {
+          <ul class="task-list" role="list">
+            @for (task of tasks(); track task.id) {
+              <li class="task-item">
+                <label class="task-label">
+                  <input
+                    type="checkbox"
+                    class="task-checkbox"
+                    [checked]="isTaskChecked(task)"
+                    (change)="toggleTask(task)"
+                  />
+                  <span [class.task-label--done]="isTaskChecked(task)">{{ task.label }}</span>
+                </label>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+
+    <!-- 6. Provenance -->
+    <p class="provenance fp-data">{{ provenanceNote() }}</p>
+  </div>
+
+  <footer class="detail-footer">
+    @if (canStartApplication()) {
+      <a
+        class="detail-footer-primary"
+        [routerLink]="['/route', routeId(), 'apply', stop().id]"
+      >
+        Start application →
+      </a>
+    }
+
+    @if (stop().programUrl) {
+      <a
+        class="detail-footer-secondary"
+        [href]="stop().programUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Program page ↗
+      </a>
+    }
+  </footer>
+</div>

@@ -1,0 +1,315 @@
+// `ss-side-panel`'s own `.side-panel-content` is the scrolling ancestor
+// (20px padding, overflow-y: auto) — this component doesn't create a
+// second scroll container. The footer below uses `position: sticky` against
+// that same ancestor, extending through its padding via a negative margin.
+.detail-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  margin: -20px;
+}
+
+.detail-scroll {
+  padding: 20px 20px 16px;
+}
+
+.detail-header {
+  margin-bottom: 16px;
+}
+
+.detail-agency {
+  color: var(--fp-basin);
+}
+
+.detail-title {
+  font-family: var(--fp-font-display);
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--fp-ink);
+  margin: 4px 0 0;
+  line-height: 1.3;
+}
+
+.section-eyebrow {
+  color: var(--fp-basin);
+  margin: 0 0 8px;
+}
+
+// --- 1. Fit ledger ---------------------------------------------------------
+
+.ledger {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 14px;
+  border: 1px solid var(--fp-sand);
+  border-radius: var(--fp-radius-sm);
+  margin-bottom: 12px;
+}
+
+.ledger-column {
+  min-width: 0;
+}
+
+.ledger-eyebrow {
+  color: var(--fp-sage);
+  margin: 0 0 8px;
+}
+
+.ledger-column--warn .ledger-eyebrow {
+  color: var(--fp-signal);
+}
+
+.ledger-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ledger-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--fp-ink);
+}
+
+.ledger-empty {
+  font-size: 13px;
+  color: #888;
+  margin: 0;
+}
+
+.full-assessment {
+  margin: 0 0 12px;
+  font-size: 13px;
+
+  summary {
+    cursor: pointer;
+    color: var(--fp-basin);
+    font-weight: 600;
+  }
+}
+
+.full-assessment-block {
+  margin: 8px 0 0;
+  line-height: 1.5;
+  color: #444;
+}
+
+.disclaimer {
+  font-size: 11px;
+  color: #888;
+  margin: 0 0 16px;
+}
+
+// --- 2. Proof ---------------------------------------------------------------
+
+.proof {
+  margin-bottom: 16px;
+}
+
+.award-bar {
+  margin-bottom: 8px;
+}
+
+.award-bar-track {
+  position: relative;
+  height: 6px;
+  background: var(--fp-sand);
+  border-radius: var(--fp-radius-full);
+  margin-bottom: 6px;
+}
+
+.award-bar-span {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: var(--fp-basin);
+  border-radius: var(--fp-radius-full);
+}
+
+.award-bar-tick {
+  position: absolute;
+  top: -3px;
+  width: 2px;
+  height: 12px;
+  background: var(--fp-ink);
+
+  &--median {
+    background: var(--fp-sage);
+  }
+
+  &--ask {
+    background: var(--fp-signal);
+  }
+}
+
+.award-bar-label {
+  font-size: 13px;
+  color: var(--fp-ink);
+}
+
+.proof-summary {
+  font-size: 12px;
+  color: #666;
+  margin: 0 0 8px;
+}
+
+.winner-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.winner-chip {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: var(--fp-radius-full);
+  background: var(--fp-limestone);
+  font-size: 12px;
+  color: #555;
+}
+
+// --- 3/4. Verify / Do next ---------------------------------------------------
+
+.verify,
+.do-next {
+  margin-bottom: 16px;
+}
+
+.verify-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--fp-ink);
+  line-height: 1.4;
+}
+
+.do-next-list {
+  padding-left: 18px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--fp-ink);
+  line-height: 1.4;
+}
+
+// --- 5. Checklist -------------------------------------------------------------
+
+.checklist {
+  margin-bottom: 16px;
+}
+
+.checklist-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--fp-ink);
+  font-weight: 600;
+}
+
+.checklist-progress {
+  height: 4px;
+  background: var(--fp-sand);
+  border-radius: var(--fp-radius-full);
+  margin-top: 6px;
+  overflow: hidden;
+}
+
+.checklist-progress-fill {
+  height: 100%;
+  background: var(--fp-sage);
+}
+
+.task-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.task-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.4;
+}
+
+.task-checkbox {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  accent-color: var(--fp-basin);
+  cursor: pointer;
+}
+
+.task-label--done {
+  text-decoration: line-through;
+  color: #aaa;
+}
+
+// --- 6. Provenance ------------------------------------------------------------
+
+.provenance {
+  font-size: 11px;
+  color: #999;
+  margin: 0;
+}
+
+// --- Sticky footer --------------------------------------------------------
+
+.detail-footer {
+  position: sticky;
+  bottom: -20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px -20px -20px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--fp-sand);
+  background: #fff;
+}
+
+.detail-footer-primary {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 16px;
+  border-radius: var(--fp-radius-sm);
+  background: var(--fp-basin);
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.detail-footer-secondary {
+  font-size: 13px;
+  color: var(--fp-basin);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
