@@ -1,0 +1,946 @@
+{
+ "errorcode": 0,
+ "msg": "Webservice Succeeds",
+ "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.ImFGVGdoVFNOcTFGNmVkU3I5Z2FieFJmSHdVdFZuRDJ2QStrZGxnanFrSFE9Ig.USzHTiutMUnKWTVc9T4X8vURVkY_8yVokNEcn7FgMAw",
+ "data": {
+  "id": 358875,
+  "revision": 5,
+  "opportunityNumber": "PAR-25-415",
+  "opportunityTitle": "Support for Research Excellence  First Independent Research (SuRE-First) Award (R16 - Clinical Trial Not Allowed)",
+  "owningAgencyCode": "HHS-NIH11",
+  "listed": "L",
+  "publisherUid": "85078724978857742224107944047325102090",
+  "modifiedComments": "Updated FON",
+  "flag2006": "N",
+  "opportunityCategory": {
+   "category": "D",
+   "description": "Discretionary"
+  },
+  "synopsis": {
+   "opportunityId": 358875,
+   "version": 1,
+   "agencyCode": "HHS-NIH11",
+   "agencyName": "National Institutes of Health",
+   "agencyPhone": "301-402-2541",
+   "agencyAddressDesc": "See Section VII. Agency Contacts within the full opportunity announcement for all other inquires.",
+   "agencyDetails": {
+    "code": "NIH",
+    "seed": "HHS-NIH11",
+    "agencyName": "National Institutes of Health",
+    "agencyCode": "HHS-NIH11",
+    "topAgencyCode": "HHS"
+   },
+   "topAgencyDetails": {
+    "code": "HHS",
+    "seed": "HHS",
+    "agencyName": "Department of Health and Human Services",
+    "agencyCode": "HHS",
+    "topAgencyCode": "HHS"
+   },
+   "agencyContactPhone": "301-402-2541",
+   "agencyContactName": "National Institutes of Health",
+   "agencyContactDesc": "NIH Grants Information\ngrantsinfo@nih.gov",
+   "agencyContactEmail": "grantsinfo@nih.gov",
+   "agencyContactEmailDesc": "See Section VII. Agency Contacts within the full opportunity announcement for all other inquires.",
+   "synopsisDesc": "The SuRE program supports research capacity building at eligible higher education institutions through funding investigator-initiated biomedical research inbasic, social, clinical, behavioral, or translational science that falls in the mission areas of the NIH. \nThe purpose of SuRE-First awards is to provide support for investigator-initiated research at resource-limited institutions by full-time faculty who have not had any prior independent, peer-reviewed, external research grants, to furnish students with high-quality undergraduate and/or graduate research experiences, and to enhance the institutional scientific research culture.",
+   "responseDate": "Sep 07, 2028 12:00:00 AM EDT",
+   "responseDateDesc": "",
+   "fundingDescLinkUrl": "http://grants.nih.gov/grants/guide/pa-files/PAR-25-415.html",
+   "fundingDescLinkDesc": "https://grants.nih.gov/grants/guide/pa-files/PAR-25-415.html",
+   "postingDate": "Jun 13, 2025 12:00:00 AM EDT",
+   "archiveDate": "Oct 13, 2028 12:00:00 AM EDT",
+   "costSharing": false,
+   "awardCeiling": "125000",
+   "awardCeilingFormatted": "125,000",
+   "awardFloor": "none",
+   "applicantEligibilityDesc": "Other Eligible Applicants include the following:\nNon-domestic (non-U.S.) Entities (Foreign Organizations) are not eligible to apply.\n\nNon-domestic (non-U.S.) components of U.S. Organizations are not eligible to apply.\n\nForeign components, as defined in the NIH Grants Policy Statement, are not allowed.",
+   "createTimeStamp": "Jun 13, 2025 01:07:54 PM EDT",
+   "createdDate": "Jun 13, 2025 12:50:16 PM EDT",
+   "lastUpdatedDate": "Jun 13, 2025 12:50:16 PM EDT",
+   "applicantTypes": [
+    {
+     "id": "20",
+     "description": "Private institutions of higher education"
+    },
+    {
+     "id": "06",
+     "description": "Public and State controlled institutions of higher education"
+    }
+   ],
+   "fundingInstruments": [
+    {
+     "id": "G",
+     "description": "Grant"
+    }
+   ],
+   "fundingActivityCategories": [
+    {
+     "id": "ED",
+     "description": "Education"
+    },
+    {
+     "id": "ENV",
+     "description": "Environment"
+    },
+    {
+     "id": "FN",
+     "description": "Food and Nutrition"
+    },
+    {
+     "id": "HL",
+     "description": "Health"
+    },
+    {
+     "id": "ISS",
+     "description": "Income Security and Social Services"
+    }
+   ],
+   "responseDateStr": "2028-09-07-00-00-00",
+   "postingDateStr": "2025-06-13-00-00-00",
+   "archiveDateStr": "2028-10-13-00-00-00",
+   "createTimeStampStr": "2025-06-13-13-07-54"
+  },
+  "agencyDetails": {
+   "code": "NIH",
+   "seed": "HHS-NIH11",
+   "agencyName": "National Institutes of Health",
+   "agencyCode": "HHS-NIH11",
+   "topAgencyCode": "HHS"
+  },
+  "topAgencyDetails": {
+   "code": "HHS",
+   "seed": "HHS",
+   "agencyName": "Department of Health and Human Services",
+   "agencyCode": "HHS",
+   "topAgencyCode": "HHS"
+  },
+  "forecast": {
+   "opportunityId": 358875,
+   "version": 5,
+   "postingDate": "May 12, 2025 12:00:00 AM EDT",
+   "archiveDate": "Jun 12, 2025 12:00:00 AM EDT",
+   "forecastDesc": "<p>The National Institute of General Medical Sciences (NIGMS), with other NIH Institutes and Centers (ICs), intends to publish a Notice of Funding Opportunity (NOFO) to encourage applications for investigator-initiated research at resource-limited institutions by full-time faculty who have not had any prior independent, peer-reviewed, external research grants, to furnish students with high-quality undergraduate and/or graduate research experiences, and to enhance the institutional scientific research culture.&nbsp;</p><p><br></p><p>Applications are not being solicited at this time. Notice is being provided to allow potential applicants sufficient time to develop meaningful collaborations and responsive projects.&nbsp;Investigators with expertise and insights into this area are encouraged to begin to consider applying for this new NOFO.&nbsp;</p>",
+   "costSharing": false,
+   "agencyContactName": "Pauline Cupit, Ph.D.\r\nNational Institute of General Medical Sciences (NIGMS)",
+   "agencyContactPhone": "301-594-8494",
+   "agencyContactEmail": "pauline.cupit@nih.gov",
+   "agencyContactEmailDesc": "pauline.cupit@nih.gov",
+   "agencyCode": "HHS-NIH11",
+   "applicantEligibilityDesc": "This funding opportunity announcement is open to all institutions of higher education that:award undergraduate (B.S. or B.A.) and/or graduate degrees in biomedical sciences; andhave received no more than $6 million dollars per year (total costs) from NIH Research Project Grants (RPGs) in each of the preceding two fiscal years, calculated using NIH RePORTER, at the time of the application; andenroll at least 25% of undergraduate students supported by Pell grants based on the most recent two years of data available from the Integrated Postsecondary Education Data System (IPEDS) database maintained by the National Center for Education Statistics",
+   "estSynopsisPostingDate": "Jul 25, 2025 12:00:00 AM EDT",
+   "estApplicationResponseDate": "Sep 25, 2025 12:00:00 AM EDT",
+   "estApplicationResponseDateDesc": "",
+   "estAwardDate": "Jul 01, 2026 12:00:00 AM EDT",
+   "estProjectStartDate": "Jul 01, 2026 12:00:00 AM EDT",
+   "fiscalYear": 2026,
+   "modComments": "Updated Archive Date",
+   "createTimeStamp": "Jun 13, 2025 01:07:54 PM EDT",
+   "createdDate": "May 08, 2025 01:38:08 PM EDT",
+   "lastUpdatedDate": "Jun 13, 2025 01:07:54 PM EDT",
+   "agencyDetails": {
+    "code": "NIH",
+    "seed": "HHS-NIH11",
+    "agencyName": "National Institutes of Health",
+    "agencyCode": "HHS-NIH11",
+    "topAgencyCode": "HHS"
+   },
+   "applicantTypes": [
+    {
+     "id": "20",
+     "description": "Private institutions of higher education"
+    },
+    {
+     "id": "06",
+     "description": "Public and State controlled institutions of higher education"
+    },
+    {
+     "id": "25",
+     "description": "Others (see text field entitled \"Additional Information on Eligibility\" for clarification)"
+    }
+   ],
+   "fundingInstruments": [
+    {
+     "id": "G",
+     "description": "Grant"
+    }
+   ],
+   "fundingActivityCategories": [
+    {
+     "id": "HL",
+     "description": "Health"
+    }
+   ],
+   "postingDateStr": "2025-05-12-00-00-00",
+   "archiveDateStr": "2025-06-12-00-00-00",
+   "estSynopsisPostingDateStr": "2025-07-25-00-00-00",
+   "estApplicationResponseDateStr": "2025-09-25-00-00-00",
+   "estAwardDateStr": "2026-07-01-00-00-00",
+   "estProjectStartDateStr": "2026-07-01-00-00-00",
+   "createTimeStampStr": "2025-06-13-13-07-54"
+  },
+  "synopsisAttachmentFolders": [
+   {
+    "id": 77878,
+    "opportunityId": 358875,
+    "folderType": "Full Announcement",
+    "folderName": "PAR-25-415",
+    "zipLobSize": 448,
+    "createdDate": "Jun 13, 2025 12:50:18 PM EDT",
+    "lastUpdatedDate": "Jun 13, 2025 01:07:54 PM EDT",
+    "synopsisAttachments": [
+     {
+      "id": 348202,
+      "opportunityId": 358875,
+      "mimeType": "text/html",
+      "fileName": "PAR-25-415-Full-Announcement.html",
+      "fileDescription": "PAR-25-415 Full Announcement Text",
+      "fileLobSize": 422,
+      "createdDate": "Jun 13, 2025 01:07:54 PM EDT",
+      "synopsisAttFolderId": 77878
+     }
+    ]
+   }
+  ],
+  "synopsisDocumentURLs": [],
+  "synAttChangeComments": [],
+  "cfdas": [
+   {
+    "id": 429745,
+    "opportunityId": 358875,
+    "cfdaNumber": "93.113",
+    "programTitle": "Environmental Health"
+   },
+   {
+    "id": 429738,
+    "opportunityId": 358875,
+    "cfdaNumber": "93.121",
+    "programTitle": "Oral Diseases and Disorders Research"
+   },
+   {
+    "id": 429752,
+    "opportunityId": 358875,
+    "cfdaNumber": "93.172",
+    "programTitle": "Human Genome Research"
+   },
+   {
+    "id": 429748,
+    "opportunityId": 358875,
+    "cfdaNumber": "93.173",
+    "programTitle": "Research Related to Deafness and Communication Disorders"
+   },
+   {
+    "id": 429750,
+    "opportunityId": 358875,
+    "cfdaNumber": "93.242",
+    "programTitle": "Mental Health Research Grants"
+   },
+   {
+    "id": 429739,
+    "opportunityId": 358875,
+    "cfdaNumber": "93.273",
+    "programTitle": "Alcohol Research Programs"
+   },
+   {
+    "id": 429743,
+    "opportunityId": 358875,
+    "cfdaNumber": "93.279",
+    "programTitle": "Drug Use and Addiction Research Programs"
+   },
+   {
+    "id": 429749,
+    "opportunityId": 358875,
+    "cfdaNumber": "93.286",
+    "programTitle": "Discovery and Applied Research for Technological Innovations to Improve Human Health"
+   },
+   {
+    "id": 429753,
+    "opportunityId": 358875,
+    "cfdaNumber": "93.307",
+    "programTitle": "Minority Health and Health Disparities Research"
+   },
+   {
+    "id": 429747,
+    "opportunityId": 358875,
+    "cfdaNumber": "93.361",
+    "programTitle": "Nursing Research"
+   },
+   {
+    "id": 429751,
+    "opportunityId": 358875,
+    "cfdaNumber": "93.398",
+    "programTitle": "Cancer Research Manpower"
+   },
+   {
+    "id": 429737,
+    "opportunityId": 358875,
+    "cfdaNumber": "93.846",
+    "programTitle": "Arthritis, Musculoskeletal and Skin Diseases Research"
+   },
+   {
+    "id": 429754,
+    "opportunityId": 358875,
+    "cfdaNumber": "93.847",
+    "programTitle": "Diabetes, Digestive, and Kidney Diseases Extramural Research"
+   },
+   {
+    "id": 429740,
+    "opportunityId": 358875,
+    "cfdaNumber": "93.853",
+    "programTitle": "Extramural Research Programs in the Neurosciences and Neurological Disorders"
+   },
+   {
+    "id": 429746,
+    "opportunityId": 358875,
+    "cfdaNumber": "93.855",
+    "programTitle": "Allergy and Infectious Diseases Research"
+   },
+   {
+    "id": 428292,
+    "opportunityId": 358875,
+    "cfdaNumber": "93.859",
+    "programTitle": "Biomedical Research and Research Training"
+   },
+   {
+    "id": 429741,
+    "opportunityId": 358875,
+    "cfdaNumber": "93.865",
+    "programTitle": "Child Health and Human Development Extramural Research"
+   },
+   {
+    "id": 429736,
+    "opportunityId": 358875,
+    "cfdaNumber": "93.866",
+    "programTitle": "Aging Research"
+   },
+   {
+    "id": 429742,
+    "opportunityId": 358875,
+    "cfdaNumber": "93.867",
+    "programTitle": "Vision Research"
+   },
+   {
+    "id": 429744,
+    "opportunityId": 358875,
+    "cfdaNumber": "93.879",
+    "programTitle": "Medical Library Assistance"
+   },
+   {
+    "id": 429755,
+    "opportunityId": 358875
+   }
+  ],
+  "opportunityHistoryDetails": [
+   {
+    "oppHistId": {
+     "opportunityId": 358875,
+     "revision": 0
+    },
+    "opportunityId": 358875,
+    "revision": 0,
+    "opportunityNumber": "TEMP-30730",
+    "opportunityTitle": "Support for Research Excellence &ndash; First Independent Research (SuRE-First) Award",
+    "owningAgencyCode": "HHS-NIH11",
+    "publisherUid": "waltemi",
+    "listed": "L",
+    "opportunityCategory": {
+     "category": "D",
+     "description": "Discretionary"
+    },
+    "forecast": {
+     "oppHistId": {
+      "opportunityId": 358875,
+      "revision": 0
+     },
+     "opportunityId": 358875,
+     "revision": 0,
+     "version": 1,
+     "postingDate": "May 12, 2025 12:00:00 AM EDT",
+     "forecastDesc": "<p>The National Institute of General Medical Sciences (NIGMS), with other NIH Institutes and Centers (ICs), intends to publish a Notice of Funding Opportunity (NOFO) to encourage applications for investigator-initiated research at resource-limited institutions by full-time faculty who have not had any prior independent, peer-reviewed, external research grants, to furnish students with high-quality undergraduate and/or graduate research experiences, and to enhance the institutional scientific research culture.&nbsp;</p><p><br></p><p>Applications are not being solicited at this time. Notice is being provided to allow potential applicants sufficient time to develop meaningful collaborations and responsive projects.&nbsp;Investigators with expertise and insights into this area are encouraged to begin to consider applying for this new NOFO.&nbsp;</p>",
+     "costSharing": false,
+     "agencyContactName": "Pauline Cupit, Ph.D.\r\nNational Institute of General Medical Sciences (NIGMS)",
+     "agencyContactPhone": "301-594-8494",
+     "agencyContactEmail": "pauline.cupit@nih.gov",
+     "agencyContactEmailDesc": "pauline.cupit@nih.gov",
+     "agencyCode": "HHS-NIH11",
+     "sendEmail": "Y",
+     "applicantEligibilityDesc": "This funding opportunity announcement is open to all institutions of higher education that:award undergraduate (B.S. or B.A.) and/or graduate degrees in biomedical sciences; andhave received no more than $6 million dollars per year (total costs) from NIH Research Project Grants (RPGs) in each of the preceding two fiscal years, calculated using NIH RePORTER, at the time of the application; andenroll at least 25% of undergraduate students supported by Pell grants based on the most recent two years of data available from the Integrated Postsecondary Education Data System (IPEDS) database maintained by the National Center for Education Statistics",
+     "estSynopsisPostingDate": "Jun 04, 2025 12:00:00 AM EDT",
+     "estApplicationResponseDate": "Jul 04, 2025 12:00:00 AM EDT",
+     "estApplicationResponseDateDesc": "",
+     "estAwardDate": "Apr 01, 2026 12:00:00 AM EDT",
+     "estProjectStartDate": "Apr 01, 2026 12:00:00 AM EDT",
+     "fiscalYear": 2026,
+     "createTimeStamp": "May 12, 2025 12:38:20 PM EDT",
+     "actionType": "U",
+     "actionDate": "May 19, 2025 09:02:23 AM EDT",
+     "createdDate": "May 08, 2025 01:38:08 PM EDT",
+     "lastUpdatedDate": "May 12, 2025 12:38:20 PM EDT",
+     "agencyDetails": {
+      "code": "NIH",
+      "seed": "HHS-NIH11",
+      "agencyName": "National Institutes of Health",
+      "agencyCode": "HHS-NIH11",
+      "topAgencyCode": "HHS"
+     },
+     "applicantTypes": [
+      {
+       "id": "06",
+       "description": "Public and State controlled institutions of higher education"
+      },
+      {
+       "id": "20",
+       "description": "Private institutions of higher education"
+      },
+      {
+       "id": "25",
+       "description": "Others (see text field entitled \"Additional Information on Eligibility\" for clarification)"
+      }
+     ],
+     "fundingInstruments": [
+      {
+       "id": "G",
+       "description": "Grant"
+      }
+     ],
+     "fundingActivityCategories": [
+      {
+       "id": "HL",
+       "description": "Health"
+      }
+     ],
+     "postingDateStr": "2025-05-12-00-00-00",
+     "estSynopsisPostingDateStr": "2025-06-04-00-00-00",
+     "estApplicationResponseDateStr": "2025-07-04-00-00-00",
+     "estAwardDateStr": "2026-04-01-00-00-00",
+     "estProjectStartDateStr": "2026-04-01-00-00-00",
+     "createTimeStampStr": "2025-05-12-12-38-20"
+    },
+    "cfdas": [
+     {
+      "id": 428292,
+      "opportunityId": 358875,
+      "revision": 3,
+      "cfdaNumber": "93.859",
+      "programTitle": "Biomedical Research and Research Training"
+     }
+    ],
+    "synopsisModifiedFields": [],
+    "forecastModifiedFields": []
+   },
+   {
+    "oppHistId": {
+     "opportunityId": 358875,
+     "revision": 1
+    },
+    "opportunityId": 358875,
+    "revision": 1,
+    "opportunityNumber": "TEMP-30730",
+    "opportunityTitle": "Support for Research Excellence &ndash; First Independent Research (SuRE-First) Award",
+    "owningAgencyCode": "HHS-NIH11",
+    "publisherUid": "waltemi",
+    "listed": "L",
+    "opportunityCategory": {
+     "category": "D",
+     "description": "Discretionary"
+    },
+    "forecast": {
+     "oppHistId": {
+      "opportunityId": 358875,
+      "revision": 1
+     },
+     "opportunityId": 358875,
+     "revision": 1,
+     "version": 2,
+     "postingDate": "May 12, 2025 12:00:00 AM EDT",
+     "forecastDesc": "<p>The National Institute of General Medical Sciences (NIGMS), with other NIH Institutes and Centers (ICs), intends to publish a Notice of Funding Opportunity (NOFO) to encourage applications for investigator-initiated research at resource-limited institutions by full-time faculty who have not had any prior independent, peer-reviewed, external research grants, to furnish students with high-quality undergraduate and/or graduate research experiences, and to enhance the institutional scientific research culture.&nbsp;</p><p><br></p><p>Applications are not being solicited at this time. Notice is being provided to allow potential applicants sufficient time to develop meaningful collaborations and responsive projects.&nbsp;Investigators with expertise and insights into this area are encouraged to begin to consider applying for this new NOFO.&nbsp;</p>",
+     "costSharing": false,
+     "agencyContactName": "Pauline Cupit, Ph.D.\r\nNational Institute of General Medical Sciences (NIGMS)",
+     "agencyContactPhone": "301-594-8494",
+     "agencyContactEmail": "pauline.cupit@nih.gov",
+     "agencyContactEmailDesc": "pauline.cupit@nih.gov",
+     "agencyCode": "HHS-NIH11",
+     "sendEmail": "Y",
+     "applicantEligibilityDesc": "This funding opportunity announcement is open to all institutions of higher education that:award undergraduate (B.S. or B.A.) and/or graduate degrees in biomedical sciences; andhave received no more than $6 million dollars per year (total costs) from NIH Research Project Grants (RPGs) in each of the preceding two fiscal years, calculated using NIH RePORTER, at the time of the application; andenroll at least 25% of undergraduate students supported by Pell grants based on the most recent two years of data available from the Integrated Postsecondary Education Data System (IPEDS) database maintained by the National Center for Education Statistics",
+     "estSynopsisPostingDate": "Jul 25, 2025 12:00:00 AM EDT",
+     "estApplicationResponseDate": "Sep 25, 2025 12:00:00 AM EDT",
+     "estApplicationResponseDateDesc": "",
+     "estAwardDate": "Jul 01, 2026 12:00:00 AM EDT",
+     "estProjectStartDate": "Jul 01, 2026 12:00:00 AM EDT",
+     "fiscalYear": 2026,
+     "modComments": "Updated estimated dates.",
+     "createTimeStamp": "May 19, 2025 09:02:23 AM EDT",
+     "actionType": "U",
+     "actionDate": "Jun 13, 2025 12:50:15 PM EDT",
+     "createdDate": "May 08, 2025 01:38:08 PM EDT",
+     "lastUpdatedDate": "May 19, 2025 09:02:23 AM EDT",
+     "agencyDetails": {
+      "code": "NIH",
+      "seed": "HHS-NIH11",
+      "agencyName": "National Institutes of Health",
+      "agencyCode": "HHS-NIH11",
+      "topAgencyCode": "HHS"
+     },
+     "applicantTypes": [
+      {
+       "id": "06",
+       "description": "Public and State controlled institutions of higher education"
+      },
+      {
+       "id": "20",
+       "description": "Private institutions of higher education"
+      },
+      {
+       "id": "25",
+       "description": "Others (see text field entitled \"Additional Information on Eligibility\" for clarification)"
+      }
+     ],
+     "fundingInstruments": [
+      {
+       "id": "G",
+       "description": "Grant"
+      }
+     ],
+     "fundingActivityCategories": [
+      {
+       "id": "HL",
+       "description": "Health"
+      }
+     ],
+     "postingDateStr": "2025-05-12-00-00-00",
+     "estSynopsisPostingDateStr": "2025-07-25-00-00-00",
+     "estApplicationResponseDateStr": "2025-09-25-00-00-00",
+     "estAwardDateStr": "2026-07-01-00-00-00",
+     "estProjectStartDateStr": "2026-07-01-00-00-00",
+     "createTimeStampStr": "2025-05-19-09-02-23"
+    },
+    "cfdas": [
+     {
+      "id": 428292,
+      "opportunityId": 358875,
+      "revision": 3,
+      "cfdaNumber": "93.859",
+      "programTitle": "Biomedical Research and Research Training"
+     }
+    ],
+    "synopsisModifiedFields": [],
+    "forecastModifiedFields": [
+     "revision",
+     "version",
+     "estSynopsisPostingDate",
+     "estApplicationResponseDate",
+     "estAwardDate",
+     "estProjectStartDate",
+     "modComments",
+     "createTimeStamp"
+    ]
+   },
+   {
+    "oppHistId": {
+     "opportunityId": 358875,
+     "revision": 2
+    },
+    "opportunityId": 358875,
+    "revision": 2,
+    "opportunityNumber": "PAR-25-415",
+    "opportunityTitle": "Support for Research Excellence &ndash; First Independent Research (SuRE-First) Award",
+    "owningAgencyCode": "HHS-NIH11",
+    "publisherUid": "85078724978857742224107944047325102090",
+    "listed": "L",
+    "opportunityCategory": {
+     "category": "D",
+     "description": "Discretionary"
+    },
+    "modifiedComments": "Updated FON",
+    "forecast": {
+     "oppHistId": {
+      "opportunityId": 358875,
+      "revision": 2
+     },
+     "opportunityId": 358875,
+     "revision": 2,
+     "version": 3,
+     "postingDate": "May 12, 2025 12:00:00 AM EDT",
+     "forecastDesc": "<p>The National Institute of General Medical Sciences (NIGMS), with other NIH Institutes and Centers (ICs), intends to publish a Notice of Funding Opportunity (NOFO) to encourage applications for investigator-initiated research at resource-limited institutions by full-time faculty who have not had any prior independent, peer-reviewed, external research grants, to furnish students with high-quality undergraduate and/or graduate research experiences, and to enhance the institutional scientific research culture.&nbsp;</p><p><br></p><p>Applications are not being solicited at this time. Notice is being provided to allow potential applicants sufficient time to develop meaningful collaborations and responsive projects.&nbsp;Investigators with expertise and insights into this area are encouraged to begin to consider applying for this new NOFO.&nbsp;</p>",
+     "costSharing": false,
+     "agencyContactName": "Pauline Cupit, Ph.D.\r\nNational Institute of General Medical Sciences (NIGMS)",
+     "agencyContactPhone": "301-594-8494",
+     "agencyContactEmail": "pauline.cupit@nih.gov",
+     "agencyContactEmailDesc": "pauline.cupit@nih.gov",
+     "agencyCode": "HHS-NIH11",
+     "sendEmail": "N",
+     "applicantEligibilityDesc": "This funding opportunity announcement is open to all institutions of higher education that:award undergraduate (B.S. or B.A.) and/or graduate degrees in biomedical sciences; andhave received no more than $6 million dollars per year (total costs) from NIH Research Project Grants (RPGs) in each of the preceding two fiscal years, calculated using NIH RePORTER, at the time of the application; andenroll at least 25% of undergraduate students supported by Pell grants based on the most recent two years of data available from the Integrated Postsecondary Education Data System (IPEDS) database maintained by the National Center for Education Statistics",
+     "estSynopsisPostingDate": "Jul 25, 2025 12:00:00 AM EDT",
+     "estApplicationResponseDate": "Sep 25, 2025 12:00:00 AM EDT",
+     "estApplicationResponseDateDesc": "",
+     "estAwardDate": "Jul 01, 2026 12:00:00 AM EDT",
+     "estProjectStartDate": "Jul 01, 2026 12:00:00 AM EDT",
+     "fiscalYear": 2026,
+     "modComments": "Updated FON",
+     "createTimeStamp": "Jun 13, 2025 12:50:15 PM EDT",
+     "actionType": "U",
+     "actionDate": "Jun 13, 2025 12:50:16 PM EDT",
+     "createdDate": "May 08, 2025 01:38:08 PM EDT",
+     "lastUpdatedDate": "Jun 13, 2025 12:50:15 PM EDT",
+     "agencyDetails": {
+      "code": "NIH",
+      "seed": "HHS-NIH11",
+      "agencyName": "National Institutes of Health",
+      "agencyCode": "HHS-NIH11",
+      "topAgencyCode": "HHS"
+     },
+     "applicantTypes": [
+      {
+       "id": "06",
+       "description": "Public and State controlled institutions of higher education"
+      },
+      {
+       "id": "20",
+       "description": "Private institutions of higher education"
+      },
+      {
+       "id": "25",
+       "description": "Others (see text field entitled \"Additional Information on Eligibility\" for clarification)"
+      }
+     ],
+     "fundingInstruments": [
+      {
+       "id": "G",
+       "description": "Grant"
+      }
+     ],
+     "fundingActivityCategories": [
+      {
+       "id": "HL",
+       "description": "Health"
+      }
+     ],
+     "postingDateStr": "2025-05-12-00-00-00",
+     "estSynopsisPostingDateStr": "2025-07-25-00-00-00",
+     "estApplicationResponseDateStr": "2025-09-25-00-00-00",
+     "estAwardDateStr": "2026-07-01-00-00-00",
+     "estProjectStartDateStr": "2026-07-01-00-00-00",
+     "createTimeStampStr": "2025-06-13-12-50-15"
+    },
+    "cfdas": [
+     {
+      "id": 428292,
+      "opportunityId": 358875,
+      "revision": 3,
+      "cfdaNumber": "93.859",
+      "programTitle": "Biomedical Research and Research Training"
+     }
+    ],
+    "synopsisModifiedFields": [],
+    "forecastModifiedFields": [
+     "revision",
+     "version",
+     "opportunityNumber",
+     "sendEmail",
+     "modComments",
+     "createTimeStamp"
+    ]
+   },
+   {
+    "oppHistId": {
+     "opportunityId": 358875,
+     "revision": 4
+    },
+    "opportunityId": 358875,
+    "revision": 4,
+    "opportunityNumber": "PAR-25-415",
+    "opportunityTitle": "Support for Research Excellence  First Independent Research (SuRE-First) Award (R16 - Clinical Trial Not Allowed)",
+    "owningAgencyCode": "HHS-NIH11",
+    "publisherUid": "85078724978857742224107944047325102090",
+    "listed": "L",
+    "opportunityCategory": {
+     "category": "D",
+     "description": "Discretionary"
+    },
+    "modifiedComments": "Updated FON",
+    "forecast": {
+     "oppHistId": {
+      "opportunityId": 358875,
+      "revision": 4
+     },
+     "opportunityId": 358875,
+     "revision": 4,
+     "version": 4,
+     "postingDate": "May 12, 2025 12:00:00 AM EDT",
+     "forecastDesc": "<p>The National Institute of General Medical Sciences (NIGMS), with other NIH Institutes and Centers (ICs), intends to publish a Notice of Funding Opportunity (NOFO) to encourage applications for investigator-initiated research at resource-limited institutions by full-time faculty who have not had any prior independent, peer-reviewed, external research grants, to furnish students with high-quality undergraduate and/or graduate research experiences, and to enhance the institutional scientific research culture.&nbsp;</p><p><br></p><p>Applications are not being solicited at this time. Notice is being provided to allow potential applicants sufficient time to develop meaningful collaborations and responsive projects.&nbsp;Investigators with expertise and insights into this area are encouraged to begin to consider applying for this new NOFO.&nbsp;</p>",
+     "costSharing": false,
+     "agencyContactName": "Pauline Cupit, Ph.D.\r\nNational Institute of General Medical Sciences (NIGMS)",
+     "agencyContactPhone": "301-594-8494",
+     "agencyContactEmail": "pauline.cupit@nih.gov",
+     "agencyContactEmailDesc": "pauline.cupit@nih.gov",
+     "agencyCode": "HHS-NIH11",
+     "applicantEligibilityDesc": "This funding opportunity announcement is open to all institutions of higher education that:award undergraduate (B.S. or B.A.) and/or graduate degrees in biomedical sciences; andhave received no more than $6 million dollars per year (total costs) from NIH Research Project Grants (RPGs) in each of the preceding two fiscal years, calculated using NIH RePORTER, at the time of the application; andenroll at least 25% of undergraduate students supported by Pell grants based on the most recent two years of data available from the Integrated Postsecondary Education Data System (IPEDS) database maintained by the National Center for Education Statistics",
+     "estSynopsisPostingDate": "Jul 25, 2025 12:00:00 AM EDT",
+     "estApplicationResponseDate": "Sep 25, 2025 12:00:00 AM EDT",
+     "estApplicationResponseDateDesc": "",
+     "estAwardDate": "Jul 01, 2026 12:00:00 AM EDT",
+     "estProjectStartDate": "Jul 01, 2026 12:00:00 AM EDT",
+     "fiscalYear": 2026,
+     "modComments": "Updated FON",
+     "createTimeStamp": "Jun 13, 2025 12:50:16 PM EDT",
+     "actionType": "U",
+     "actionDate": "Jun 13, 2025 12:50:16 PM EDT",
+     "createdDate": "May 08, 2025 01:38:08 PM EDT",
+     "lastUpdatedDate": "Jun 13, 2025 12:50:16 PM EDT",
+     "agencyDetails": {
+      "code": "NIH",
+      "seed": "HHS-NIH11",
+      "agencyName": "National Institutes of Health",
+      "agencyCode": "HHS-NIH11",
+      "topAgencyCode": "HHS"
+     },
+     "applicantTypes": [
+      {
+       "id": "06",
+       "description": "Public and State controlled institutions of higher education"
+      },
+      {
+       "id": "20",
+       "description": "Private institutions of higher education"
+      },
+      {
+       "id": "25",
+       "description": "Others (see text field entitled \"Additional Information on Eligibility\" for clarification)"
+      }
+     ],
+     "fundingInstruments": [
+      {
+       "id": "G",
+       "description": "Grant"
+      }
+     ],
+     "fundingActivityCategories": [
+      {
+       "id": "HL",
+       "description": "Health"
+      }
+     ],
+     "postingDateStr": "2025-05-12-00-00-00",
+     "estSynopsisPostingDateStr": "2025-07-25-00-00-00",
+     "estApplicationResponseDateStr": "2025-09-25-00-00-00",
+     "estAwardDateStr": "2026-07-01-00-00-00",
+     "estProjectStartDateStr": "2026-07-01-00-00-00",
+     "createTimeStampStr": "2025-06-13-12-50-16"
+    },
+    "cfdas": [
+     {
+      "id": 429745,
+      "opportunityId": 358875,
+      "revision": 3,
+      "cfdaNumber": "93.113",
+      "programTitle": "Environmental Health"
+     },
+     {
+      "id": 429738,
+      "opportunityId": 358875,
+      "revision": 3,
+      "cfdaNumber": "93.121",
+      "programTitle": "Oral Diseases and Disorders Research"
+     },
+     {
+      "id": 429752,
+      "opportunityId": 358875,
+      "revision": 3,
+      "cfdaNumber": "93.172",
+      "programTitle": "Human Genome Research"
+     },
+     {
+      "id": 429748,
+      "opportunityId": 358875,
+      "revision": 3,
+      "cfdaNumber": "93.173",
+      "programTitle": "Research Related to Deafness and Communication Disorders"
+     },
+     {
+      "id": 429750,
+      "opportunityId": 358875,
+      "revision": 3,
+      "cfdaNumber": "93.242",
+      "programTitle": "Mental Health Research Grants"
+     },
+     {
+      "id": 429739,
+      "opportunityId": 358875,
+      "revision": 3,
+      "cfdaNumber": "93.273",
+      "programTitle": "Alcohol Research Programs"
+     },
+     {
+      "id": 429743,
+      "opportunityId": 358875,
+      "revision": 3,
+      "cfdaNumber": "93.279",
+      "programTitle": "Drug Use and Addiction Research Programs"
+     },
+     {
+      "id": 429749,
+      "opportunityId": 358875,
+      "revision": 3,
+      "cfdaNumber": "93.286",
+      "programTitle": "Discovery and Applied Research for Technological Innovations to Improve Human Health"
+     },
+     {
+      "id": 429753,
+      "opportunityId": 358875,
+      "revision": 3,
+      "cfdaNumber": "93.307",
+      "programTitle": "Minority Health and Health Disparities Research"
+     },
+     {
+      "id": 429747,
+      "opportunityId": 358875,
+      "revision": 3,
+      "cfdaNumber": "93.361",
+      "programTitle": "Nursing Research"
+     },
+     {
+      "id": 429751,
+      "opportunityId": 358875,
+      "revision": 3,
+      "cfdaNumber": "93.398",
+      "programTitle": "Cancer Research Manpower"
+     },
+     {
+      "id": 429737,
+      "opportunityId": 358875,
+      "revision": 3,
+      "cfdaNumber": "93.846",
+      "programTitle": "Arthritis, Musculoskeletal and Skin Diseases Research"
+     },
+     {
+      "id": 429754,
+      "opportunityId": 358875,
+      "revision": 3,
+      "cfdaNumber": "93.847",
+      "programTitle": "Diabetes, Digestive, and Kidney Diseases Extramural Research"
+     },
+     {
+      "id": 429740,
+      "opportunityId": 358875,
+      "revision": 3,
+      "cfdaNumber": "93.853",
+      "programTitle": "Extramural Research Programs in the Neurosciences and Neurological Disorders"
+     },
+     {
+      "id": 429746,
+      "opportunityId": 358875,
+      "revision": 3,
+      "cfdaNumber": "93.855",
+      "programTitle": "Allergy and Infectious Diseases Research"
+     },
+     {
+      "id": 428292,
+      "opportunityId": 358875,
+      "revision": 3,
+      "cfdaNumber": "93.859",
+      "programTitle": "Biomedical Research and Research Training"
+     },
+     {
+      "id": 429741,
+      "opportunityId": 358875,
+      "revision": 3,
+      "cfdaNumber": "93.865",
+      "programTitle": "Child Health and Human Development Extramural Research"
+     },
+     {
+      "id": 429736,
+      "opportunityId": 358875,
+      "revision": 3,
+      "cfdaNumber": "93.866",
+      "programTitle": "Aging Research"
+     },
+     {
+      "id": 429742,
+      "opportunityId": 358875,
+      "revision": 3,
+      "cfdaNumber": "93.867",
+      "programTitle": "Vision Research"
+     },
+     {
+      "id": 429744,
+      "opportunityId": 358875,
+      "revision": 3,
+      "cfdaNumber": "93.879",
+      "programTitle": "Medical Library Assistance"
+     }
+    ],
+    "synopsisModifiedFields": [],
+    "forecastModifiedFields": [
+     "revision",
+     "version",
+     "opportunityTitle",
+     "cfdas",
+     "sendEmail"
+    ]
+   }
+  ],
+  "opportunityPkgs": [
+   {
+    "id": 290967,
+    "topportunityId": 358875,
+    "familyId": 14,
+    "dialect": "XFDL2.2",
+    "opportunityNumber": "PAR-25-415",
+    "opportunityTitle": "Support for Research Excellence  First Independent Research (SuRE-First) Award (R16 - Clinical Trial Not Allowed)",
+    "openingDate": "2025-08-29",
+    "closingDate": "2028-09-07",
+    "owningAgencyCode": "HHS-NIH11",
+    "agencyDetails": {
+     "code": "NIH",
+     "seed": "HHS-NIH11",
+     "agencyName": "National Institutes of Health",
+     "agencyCode": "HHS-NIH11",
+     "topAgencyCode": "HHS"
+    },
+    "topAgencyDetails": {
+     "code": "HHS",
+     "seed": "HHS",
+     "agencyName": "Department of Health and Human Services",
+     "agencyCode": "HHS",
+     "topAgencyCode": "HHS"
+    },
+    "contactInfo": "eRA Service Desk Monday to Friday 7 am to 8 pm ET http://grants.nih.gov/support/",
+    "gracePeriod": 35,
+    "competitionId": "FORMS-I",
+    "competitionTitle": "Use for due dates on or after January 25, 2025",
+    "electronicRequired": "Y",
+    "expectedApplicationCount": 100,
+    "expectedApplicationSize": 0,
+    "openToApplicantType": 1,
+    "listed": "L",
+    "isMultiProject": "N",
+    "extension": "pdf",
+    "mimetype": "application/pdf",
+    "lastUpdate": "Jun 13, 2025 12:59:34 PM EDT",
+    "workspaceCompatibleFlag": "Y",
+    "packageId": "PKG00290967",
+    "openingDateStr": "2025-08-29-00-00-00",
+    "closingDateStr": "2028-09-07-00-00-00"
+   }
+  ],
+  "closedOpportunityPkgs": [],
+  "originalDueDate": "Sep 07, 2028 12:00:00 AM EDT",
+  "originalDueDateDesc": "",
+  "synopsisModifiedFields": [],
+  "forecastModifiedFields": [
+   "revision",
+   "version",
+   "archiveDate",
+   "modComments"
+  ],
+  "errorMessages": [],
+  "synPostDateInPast": true,
+  "docType": "synopsis",
+  "forecastHistCount": 4,
+  "synopsisHistCount": 0,
+  "assistCompatible": false,
+  "assistURL": "",
+  "relatedOpps": [],
+  "draftMode": "N",
+  "ost": "POSTED"
+ }
+}

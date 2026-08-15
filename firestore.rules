@@ -6,7 +6,17 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    match /corpusMeta/{docId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
     match /utahResources/{docId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    match /demoRoutes/{docId} {
       allow read: if request.auth != null;
       allow write: if false;
     }

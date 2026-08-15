@@ -1,4 +1,9 @@
-@if (!route()) {
+@if (isLoading()) {
+  <div class="route-loading">
+    <mat-progress-spinner mode="indeterminate" diameter="48" />
+    <p class="route-loading-text">Loading your route…</p>
+  </div>
+} @else if (!route()) {
   <div class="not-found">
     <p>Route not found.</p>
     <a routerLink="/" mat-stroked-button>← Return to home</a>

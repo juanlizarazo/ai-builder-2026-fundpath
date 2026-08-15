@@ -24,3 +24,6 @@ app/out-tsc/
 
 # IDE
 .idea/
+
+# LLM response cache (harness only)
+functions/.llm-cache/

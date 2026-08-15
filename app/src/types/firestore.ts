@@ -93,6 +93,16 @@ export namespace FundPath {
         isSttr?: boolean;
         programPhase?: 'I' | 'II' | 'D2P2';
         programUrl?: string;
+        curated?: boolean;
+        provenanceNote?: string;
+      }
+
+      export interface IUtahResourceMatch {
+        id: string;
+        title: string;
+        description: string;
+        link: string;
+        matchReason: string;
       }
 
       export interface IRoute {
@@ -103,6 +113,8 @@ export namespace FundPath {
         stops: IStop[];
         offRoute: IStop[];
         nonGrantAlternatives?: IStop[];
+        stackingNote?: string;
+        utahResources?: IUtahResourceMatch[];
         deepPassStatus: 'pending' | 'running' | 'complete';
         deepPassFoundNew: boolean;
         createdAt: Timestamp;

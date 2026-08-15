@@ -2,11 +2,19 @@ import { Timestamp } from 'firebase-admin/firestore';
 
 export type FitTier = 'likely' | 'potential' | 'adjacent' | 'probably-not';
 
+export interface IProvenance {
+  sourceUrl?: string;
+  verifiedAt: string;
+  verifiedBy: string;
+  note?: string;
+}
+
 export interface IOpportunity {
   id?: string;
-  source: 'grants-gov' | 'sbir' | 'assistance-listing' | 'usaspending' | 'utah';
+  source: 'grants-gov' | 'sbir' | 'assistance-listing' | 'usaspending' | 'utah' | 'seed';
   sourceId: string;
   aln?: string;
+  alnAll?: string[];
   alnResolved: boolean;
   title: string;
   description: string;
@@ -14,6 +22,7 @@ export interface IOpportunity {
   agencyCode?: string;
   fundingInstrument?: string;
   applicantTypeCodes?: string[];
+  applicantEligibilityDesc?: string;
   naicsCodes?: string[];
   keywords?: string[];
   minAward?: number;
@@ -24,6 +33,13 @@ export interface IOpportunity {
   isSbir?: boolean;
   isSttr?: boolean;
   status: 'posted' | 'forecasted' | 'closed' | 'archived';
+  placement?: 'primary' | 'alongside' | 'off-route' | 'non-grant';
+  programUrl?: string;
+  curated?: boolean;
+  provenance?: IProvenance;
+  recipientName?: string;
+  awardYear?: number;
+  awardAmount?: number;
   lastSyncedAt: Timestamp;
 }
 
@@ -82,6 +98,7 @@ export interface IStop {
   fitTierLabel: string;
   minAward?: number;
   maxAward?: number;
+  openDate?: Timestamp;
   closeDate?: Timestamp;
   registrationDeadline?: Timestamp;
   placement: 'primary' | 'alongside' | 'off-route' | 'non-grant';
@@ -97,6 +114,16 @@ export interface IStop {
   isSttr?: boolean;
   programPhase?: 'I' | 'II' | 'D2P2';
   programUrl?: string;
+  curated?: boolean;
+  provenanceNote?: string;
+}
+
+export interface IUtahResourceMatch {
+  id: string;
+  title: string;
+  description: string;
+  link: string;
+  matchReason: string;
 }
 
 export interface IRoute {
@@ -107,6 +134,8 @@ export interface IRoute {
   stops: IStop[];
   offRoute: IStop[];
   nonGrantAlternatives?: IStop[];
+  stackingNote?: string;
+  utahResources?: IUtahResourceMatch[];
   deepPassStatus: 'pending' | 'running' | 'complete';
   deepPassFoundNew: boolean;
   createdAt: Timestamp;
