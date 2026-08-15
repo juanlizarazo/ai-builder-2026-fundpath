@@ -64,3 +64,8 @@ export interface ICheckForNewResponse {
   addedCount: number;
   message: string;
 }
+
+export interface ISimulateNotificationResponse {
+  sentTo: string;
+  message: string;
+}

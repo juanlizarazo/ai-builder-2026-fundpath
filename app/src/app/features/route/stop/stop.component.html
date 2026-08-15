@@ -30,6 +30,33 @@
           }
         </div>
       }
+
+      @if (hasApplication()) {
+        <div class="stop-app-bar">
+          <span class="stop-app-badge">
+            <mat-icon>check_circle</mat-icon>
+            Application started
+          </span>
+          @if (hasSf424()) {
+            <a
+              class="stop-app-sf424"
+              [routerLink]="['/route', routeId(), 'apply', stop().id]"
+              [queryParams]="{ leg: 4 }"
+              (click)="$event.stopPropagation()"
+            >
+              <mat-icon>description</mat-icon>
+              View form
+            </a>
+          }
+          <a
+            class="stop-app-resume"
+            [routerLink]="['/route', routeId(), 'apply', stop().id]"
+            (click)="$event.stopPropagation()"
+          >
+            Resume →
+          </a>
+        </div>
+      }
     </div>
 
     <mat-icon class="open-icon" aria-hidden="true">chevron_right</mat-icon>

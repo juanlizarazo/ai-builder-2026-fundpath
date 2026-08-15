@@ -1,78 +1,72 @@
 <div class="runway" [class.runway--infeasible]="isInfeasible()">
-  <div class="runway-ruler fp-data" aria-hidden="true">
-    @for (tick of ticks(); track tick.label + tick.position) {
-      <span class="runway-tick" [style.left.%]="tick.position" [style.top.%]="tick.position">{{ tick.label }}</span>
-    }
-  </div>
-
-  <div class="runway-track" role="list">
-    <span class="runway-rail" aria-hidden="true"></span>
-
-    @for (row of steps(); track row.step.key) {
+  <!-- Compact time bar: shows how steps fill the window at a glance -->
+  <div class="runway-bar" aria-hidden="true">
+    <div class="runway-bar-track">
+      @for (row of steps(); track row.step.key) {
+        <span
+          class="runway-bar-segment"
+          [class.runway-bar-segment--done]="row.isDone"
+          [style.left.%]="row.startPct"
+          [style.width.%]="row.endPct - row.startPct"
+        ></span>
+      }
       <span
-        class="runway-segment"
-        [class.runway-segment--done]="row.isDone"
-        [style.left.%]="row.startPct"
-        [style.top.%]="row.startPct"
-        [style.width.%]="row.endPct - row.startPct"
-        [style.height.%]="row.endPct - row.startPct"
-        aria-hidden="true"
+        class="runway-bar-slack"
+        [style.left.%]="slackStartPct()"
+        [style.width.%]="slackEndPct() - slackStartPct()"
       ></span>
-    }
-
-    <span
-      class="runway-slack"
-      [style.left.%]="slackStartPct()"
-      [style.top.%]="slackStartPct()"
-      [style.width.%]="slackEndPct() - slackStartPct()"
-      [style.height.%]="slackEndPct() - slackStartPct()"
-      aria-hidden="true"
-    ></span>
-
-    <span class="runway-node runway-node--today" [style.left.%]="0" [style.top.%]="0" aria-hidden="true"></span>
-    <span class="runway-node runway-node--deadline" [style.left.%]="100" [style.top.%]="100" aria-hidden="true"></span>
-
-    @for (row of steps(); track row.step.key) {
-      <div
-        class="runway-station"
-        role="listitem"
-        [style.left.%]="row.startPct"
-        [style.top.%]="row.startPct"
-      >
-        <button
-          type="button"
-          class="runway-node runway-node--step"
-          [class.runway-node--lit]="row.isLit"
-          [class.runway-node--done]="row.isDone"
-          (click)="togglePopover(row.step.key)"
-          [attr.aria-expanded]="isPopoverOpen(row.step.key)"
-          [attr.aria-label]="row.step.label"
-        ></button>
-
-        @if (row.isLit) {
-          <span class="runway-start-here fp-data">Start here</span>
-        }
-
-        @if (isPopoverOpen(row.step.key)) {
-          <div class="runway-popover">
-            <p class="runway-popover-label">{{ row.step.label }}</p>
-            <p class="runway-popover-system fp-data">{{ row.step.system }}</p>
-            @if (row.step.note) {
-              <p class="runway-popover-note">{{ row.step.note }}</p>
-            }
-            @if (row.step.url) {
-              <a class="runway-popover-link" [href]="row.step.url" target="_blank" rel="noopener noreferrer">
-                Open {{ row.step.system }} ↗
-              </a>
-            }
-            <button type="button" class="runway-popover-done" (click)="markDone(row.step)">
-              {{ row.isDone ? '✓ Done' : 'Mark done' }}
-            </button>
-          </div>
-        }
-      </div>
-    }
+    </div>
+    <div class="runway-bar-labels fp-data">
+      <span>Today · {{ todayLabel() }}</span>
+      <span class="runway-bar-slack-label">{{ slackLabel() }}</span>
+      <span class="runway-bar-deadline">{{ deadlineLabel() }}</span>
+    </div>
   </div>
 
-  <p class="runway-slack-label fp-data">{{ slackLabel() }}</p>
+  <!-- Step list: the actual to-do items -->
+  <ol class="runway-steps" role="list">
+    @for (row of steps(); track row.step.key; let i = $index) {
+      <li
+        class="runway-step"
+        [class.runway-step--done]="row.isDone"
+        [class.runway-step--lit]="row.isLit"
+        role="listitem"
+      >
+        <div class="runway-step-rail" aria-hidden="true">
+          <span class="runway-step-line" [class.runway-step-line--first]="i === 0" [class.runway-step-line--last]="i === steps().length - 1"></span>
+          <span class="runway-step-dot">
+            @if (row.isDone) {
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 8.5L6.5 11L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            }
+          </span>
+        </div>
+
+        <div class="runway-step-body">
+          <div class="runway-step-header">
+            <span class="runway-step-label">{{ row.step.label }}</span>
+            @if (row.isLit) {
+              <span class="runway-step-tag fp-data">Start here</span>
+            }
+          </div>
+          <div class="runway-step-meta fp-data">
+            <span>{{ row.step.system }}</span>
+            <span>~{{ row.step.durationBusinessDays }} days</span>
+            <span>by {{ formatStepDate(row.step.completeBy) }}</span>
+          </div>
+          @if (row.isLit || isPopoverOpen(row.step.key)) {
+            <div class="runway-step-actions">
+              @if (row.step.url) {
+                <a class="runway-step-link" [href]="row.step.url" target="_blank" rel="noopener noreferrer">
+                  Open {{ row.step.system }} ↗
+                </a>
+              }
+              <button type="button" class="runway-step-done-btn" (click)="markDone(row.step)">
+                {{ row.isDone ? '✓ Done' : 'Mark done' }}
+              </button>
+            </div>
+          }
+        </div>
+      </li>
+    }
+  </ol>
 </div>

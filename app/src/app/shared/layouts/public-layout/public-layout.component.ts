@@ -8,6 +8,7 @@ import { MatMenuModule } from '@angular/material/menu';
 
 import { AuthService } from '@app/core/services/auth.service';
 import { NotificationsService } from '@app/core/services/notifications.service';
+import { AlertBannerComponent } from '@app/shared/components/alert-banner/alert-banner.component';
 import { SidePanelComponent } from '@app/shared/components/side-panel/side-panel.component';
 import { formatRelativeTime } from '@app/shared/utils/format.utils';
 import { FundPath } from '../../../../types/firestore';
@@ -17,7 +18,7 @@ type INotification = FundPath.Firestore.Notifications.INotification;
 @Component({
   selector: 'ss-public-layout',
   standalone: true,
-  imports: [RouterModule, MatButtonModule, MatDividerModule, MatIconModule, MatMenuModule, SidePanelComponent],
+  imports: [RouterModule, MatButtonModule, MatDividerModule, MatIconModule, MatMenuModule, AlertBannerComponent, SidePanelComponent],
   templateUrl: './public-layout.component.html',
   styleUrl: './public-layout.component.scss'
 })
@@ -28,6 +29,9 @@ export class PublicLayoutComponent implements OnInit, OnDestroy {
 
   protected readonly isInboxOpen = signal(false);
   protected readonly formatRelativeTime = formatRelativeTime;
+  protected readonly isSimulating = signal(false);
+  protected readonly simulateMessage = signal('');
+  protected readonly simulateError = signal('');
 
   private readonly _authService = inject(AuthService);
   private readonly _notificationsService = inject(NotificationsService);
@@ -92,6 +96,31 @@ export class PublicLayoutComponent implements OnInit, OnDestroy {
         }, 300);
       });
     }
+  }
+
+  protected async simulateNotification(): Promise<void> {
+    if (this.isSimulating()) {
+      return;
+    }
+
+    this.simulateError.set('');
+    this.simulateMessage.set('');
+    this.isSimulating.set(true);
+
+    try {
+      const result = await this._notificationsService.simulateNotification();
+      this.simulateMessage.set(result.message);
+    } catch (err) {
+      const message = (err as { message?: string }).message;
+      this.simulateError.set(message || 'We could not send a test notification just now. Please try again.');
+    } finally {
+      this.isSimulating.set(false);
+    }
+  }
+
+  protected clearSimulateFeedback(): void {
+    this.simulateMessage.set('');
+    this.simulateError.set('');
   }
 
   protected deliveryLabel(notification: INotification): string {

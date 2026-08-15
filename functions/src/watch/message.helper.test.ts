@@ -86,6 +86,20 @@ describe('MessageHelper.routeReady', () => {
   });
 });
 
+describe('MessageHelper.demoTest', () => {
+  it('composes a test-alert message from the real first stop', () => {
+    const route = buildRoute();
+    const stop = buildStop();
+    const message = MessageHelper.demoTest(route, stop);
+
+    expect(message.subject).toBe('FundPath: test notification');
+    expect(message.body).toContain('test alert');
+    expect(message.body).toContain('Small Business Innovation Research');
+    expect(message.body).toContain('https://fundpath.dev/route/route-1');
+    expect(message.body.length).toBeLessThanOrEqual(320);
+  });
+});
+
 describe('MessageHelper.newStops', () => {
   it('leads with the highest-ranked stop and appends a +n more clause', () => {
     const route = buildRoute();

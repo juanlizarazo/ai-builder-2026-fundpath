@@ -106,6 +106,62 @@
   color: #555;
 }
 
+.stop-app-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 6px;
+  border-top: 1px solid var(--fp-sand);
+  margin-top: 4px;
+}
+
+.stop-app-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fp-sage);
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.stop-app-sf424 {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fp-basin);
+  text-decoration: none;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.stop-app-resume {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fp-basin);
+  text-decoration: none;
+  margin-left: auto;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 .open-icon {
   color: #aaa;
   flex-shrink: 0;

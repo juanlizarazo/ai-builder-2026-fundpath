@@ -2,6 +2,7 @@ import { Component, computed, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { ApplicationService } from '../../application/services/application.service';
+import { FundpathService, IStarterKitSummary } from '../../../core/services/fundpath.service';
 import { FundPath, FIT_TIER_ICONS, FIT_TIER_LABELS } from '../../../../types/firestore';
 import { formatDollars, formatDate, toDate } from '../../../shared/utils/format.utils';
 import { linearPosition } from '../../../shared/utils/scale.utils';
@@ -33,15 +34,26 @@ interface ILedgerRow {
 })
 export class StopDetailPanelComponent {
   private readonly _applicationService = inject(ApplicationService);
+  private readonly _fundpathService = inject(FundpathService);
 
   public readonly stop = input.required<IStop>();
   public readonly routeId = input.required<string>();
   public readonly taskState = input<Record<string, boolean>>({});
-  /** The founder's own ask range, for the proof bar's marker — `null` until the profile loads. */
   public readonly askMin = input<number | null>(null);
   public readonly askMax = input<number | null>(null);
 
   protected readonly isChecklistExpanded = signal(false);
+
+  protected readonly starterKitForStop = computed<IStarterKitSummary | null>(() => {
+    const stopId = this.stop().id;
+    const routeId = this.routeId();
+    return this._fundpathService.myStarterKits().find(
+      kit => kit.routeId === routeId && kit.stopId === stopId
+    ) ?? null;
+  });
+
+  protected readonly hasApplication = computed<boolean>(() => !!this.starterKitForStop());
+  protected readonly hasSf424 = computed<boolean>(() => this.starterKitForStop()?.hasSf424 ?? false);
 
   protected readonly formatDollars = formatDollars;
   protected readonly formatDate = formatDate;

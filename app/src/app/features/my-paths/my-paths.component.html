@@ -22,6 +22,14 @@
                 <span class="my-paths-row-title">{{ path.verdictLine }}</span>
                 <span class="my-paths-row-meta fp-data">
                   {{ stopCount(path) }} PROGRAM{{ stopCount(path) === 1 ? '' : 'S' }}
+                  @if (applicationCount(path) > 0) {
+                    <span aria-hidden="true">·</span>
+                    <span class="my-paths-row-apps">{{ applicationCount(path) }} APPLICATION{{ applicationCount(path) === 1 ? '' : 'S' }} STARTED</span>
+                  }
+                  @if (sf424Count(path) > 0) {
+                    <span aria-hidden="true">·</span>
+                    <span class="my-paths-row-forms">{{ sf424Count(path) }} FORM{{ sf424Count(path) === 1 ? '' : 'S' }}</span>
+                  }
                   <span aria-hidden="true">·</span>
                   {{ formatRelativeTime(path.createdAt) }}
                 </span>

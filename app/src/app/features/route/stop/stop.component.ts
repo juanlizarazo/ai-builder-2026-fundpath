@@ -1,5 +1,7 @@
-import { Component, computed, input, output } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
+import { FundpathService } from '../../../core/services/fundpath.service';
 import { FundPath, FIT_TIER_LABELS, FIT_TIER_ICONS } from '../../../../types/firestore';
 import { formatDollars, formatDate, toDate } from '../../../shared/utils/format.utils';
 
@@ -34,13 +36,17 @@ const MAX_FIT_CHIPS = 3;
   selector: 'app-stop',
   standalone: true,
   imports: [
-    MatIconModule
+    MatIconModule,
+    RouterLink
   ],
   templateUrl: './stop.component.html',
   styleUrl: './stop.component.scss'
 })
 export class StopComponent {
+  private readonly _fundpathService = inject(FundpathService);
+
   public readonly stop = input.required<FundPath.Firestore.Routes.IStop>();
+  public readonly routeId = input<string>('');
 
   /**
    * Emitted whenever the collapsed station card is activated.
@@ -116,6 +122,18 @@ export class StopComponent {
 
     return '';
   }
+
+  protected readonly starterKit = computed(() => {
+    const stopId = this.stop().id;
+    const routeId = this.routeId();
+    if (!routeId) { return null; }
+    return this._fundpathService.myStarterKits().find(
+      kit => kit.routeId === routeId && kit.stopId === stopId
+    ) ?? null;
+  });
+
+  protected readonly hasApplication = computed(() => !!this.starterKit());
+  protected readonly hasSf424 = computed(() => this.starterKit()?.hasSf424 ?? false);
 
   protected open(): void {
     this.opened.emit(this.stop());

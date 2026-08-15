@@ -1,0 +1,46 @@
+<div class="legal-page">
+  <h1 class="legal-title">Security</h1>
+  <p class="legal-updated">Last updated August 2026</p>
+
+  <p>
+    FundPath handles company and funding data, so we build with security as a default, not an
+    afterthought. Here's what's actually in place.
+  </p>
+
+  <h2>Per-user data isolation</h2>
+  <p>
+    Every record in Firestore and Storage is scoped to the signed-in user who owns it. Firestore
+    and Storage security rules enforce this at the database layer — a user can only read or write
+    their own profile, funding path, and uploaded documents. Shared reference data (grant program
+    listings) is read-only from the client and can only be written by trusted backend services.
+  </p>
+
+  <h2>Authenticated, validated backend</h2>
+  <p>
+    Every Cloud Function that touches your data requires a verified sign-in token before it runs.
+    Inputs are validated against an expected schema before processing, and sensitive actions
+    (like sending notifications) are rate-limited per user to prevent abuse.
+  </p>
+
+  <h2>OWASP-aligned security headers</h2>
+  <p>
+    The app is served with HTTP Strict Transport Security, a Content-Security-Policy that
+    restricts what scripts and origins can run, <code>X-Frame-Options: DENY</code> to block
+    clickjacking, <code>X-Content-Type-Options: nosniff</code>, and a strict referrer policy —
+    headers recommended by the OWASP Secure Headers Project.
+  </p>
+
+  <h2>Encryption</h2>
+  <p>
+    All traffic to and from FundPath is encrypted in transit over HTTPS/TLS. Data at rest in
+    Firestore and Cloud Storage is encrypted by default.
+  </p>
+
+  <h2>Questions</h2>
+  <p>
+    If you find a security issue or have questions about how we protect your data, email us at
+    <a href="mailto:security@fundpath.dev">security&#64;fundpath.dev</a>.
+  </p>
+
+  <p><a routerLink="/">← Back to FundPath</a></p>
+</div>

@@ -54,6 +54,19 @@ export class MessageHelper {
     return { subject, body, html };
   }
 
+  public static demoTest(route: IRoute, stop: IStop): IComposedMessage {
+    const link = routeLink(route.id ?? '');
+    const facts = stopFacts(stop);
+
+    let body = `FundPath test alert: this is what a real notification looks like — ${facts}. ${link}`;
+    body = truncateAtSentenceBoundary(body, SHORT_LINE_MAX_LENGTH);
+
+    const subject = 'FundPath: test notification';
+    const html = EmailTemplateHelper.demoTest(route, stop);
+
+    return { subject, body, html };
+  }
+
   public static newStops(route: IRoute, freshStops: IStop[]): IComposedMessage {
     const link = routeLink(route.id ?? '');
     const [topStop, ...rest] = freshStops;

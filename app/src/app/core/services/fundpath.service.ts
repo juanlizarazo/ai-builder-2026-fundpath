@@ -17,6 +17,17 @@ import {
 import { Observable, catchError, map, of, switchMap } from 'rxjs';
 import { FundPath } from '../../../types/firestore';
 
+export interface IStarterKitSummary {
+  id: string;
+  routeId: string;
+  stopId: string;
+  opportunityTitle: string;
+  agency: string;
+  hasSf424: boolean;
+  sf424StoragePath?: string;
+  createdAt: FundPath.Firestore.Applications.IStarterKit['createdAt'];
+}
+
 const COMPANY_NAME_SESSION_KEY = 'fundpath.companyName';
 
 const BUILD_ROUTE_TIMEOUT_MS = 300000;
@@ -50,6 +61,36 @@ export class FundpathService {
 
   /** Every path (route) the signed-in founder has built, newest first — powers the "My paths" menu. */
   public readonly myRoutes = toSignal(this._myRoutes$, { initialValue: [] });
+
+  private readonly _myStarterKits$: Observable<IStarterKitSummary[]> = authState(this._auth).pipe(
+    switchMap(user => {
+      if (!user || user.isAnonymous) {
+        return of<IStarterKitSummary[]>([]);
+      }
+
+      const kitsQuery = query(
+        collection(this._firestore, 'starterKits'),
+        where('uid', '==', user.uid),
+        orderBy('createdAt', 'desc')
+      );
+
+      return (collectionData(kitsQuery, { idField: 'id' }) as Observable<FundPath.Firestore.Applications.IStarterKit[]>).pipe(
+        map(kits => kits.map(kit => ({
+          id: kit.id!,
+          routeId: kit.routeId,
+          stopId: kit.stopId,
+          opportunityTitle: kit.opportunityTitle,
+          agency: kit.agency,
+          hasSf424: !!kit.sf424?.storagePath,
+          sf424StoragePath: kit.sf424?.storagePath,
+          createdAt: kit.createdAt
+        })))
+      );
+    }),
+    catchError(() => of<IStarterKitSummary[]>([]))
+  );
+
+  public readonly myStarterKits = toSignal(this._myStarterKits$, { initialValue: [] });
 
   public async buildRoute(
     description: string,

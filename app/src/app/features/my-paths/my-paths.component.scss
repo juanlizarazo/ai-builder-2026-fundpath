@@ -104,6 +104,16 @@
   color: #777;
 }
 
+.my-paths-row-apps {
+  color: var(--fp-basin);
+  font-weight: var(--fp-weight-semibold);
+}
+
+.my-paths-row-forms {
+  color: var(--fp-sage);
+  font-weight: var(--fp-weight-semibold);
+}
+
 .my-paths-row-arrow {
   color: #999;
   flex-shrink: 0;

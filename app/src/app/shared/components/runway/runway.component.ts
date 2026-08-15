@@ -53,10 +53,24 @@ export class RunwayComponent {
     const deadline = this._deadline();
     if (!deadline) { return []; }
 
-    return monthTicks(this._today, deadline).map(date => ({
-      label: date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
-      position: this._fraction(date) * 100
-    }));
+    return monthTicks(this._today, deadline)
+      .filter(date => {
+        const pct = this._fraction(date) * 100;
+        return pct > 8 && pct < 92;
+      })
+      .map(date => ({
+        label: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        position: this._fraction(date) * 100
+      }));
+  });
+
+  protected readonly todayLabel = computed<string>(() =>
+    this._today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  );
+
+  protected readonly deadlineLabel = computed<string>(() => {
+    const d = this._deadline();
+    return d ? d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
   });
 
   /** Unclamped fraction — unlike `scale.utils.ts::datePosition`, this can exceed 1 so overflow is visible. */
@@ -116,8 +130,22 @@ export class RunwayComponent {
   protected readonly isInfeasible = computed<boolean>(() => this.timeline().slackBusinessDays < 0);
 
   protected readonly slackLabel = computed<string>(() => {
-    const days = this.timeline().slackBusinessDays;
-    return days < 0 ? `${Math.abs(days)} days short` : `${days} days slack`;
+    const deadline = this._deadline();
+    if (!deadline) { return ''; }
+
+    const stepsEnd = this.steps().reduce((max, s) => {
+      const end = toDate(s.step.completeBy);
+      return end && end.getTime() > max ? end.getTime() : max;
+    }, this._today.getTime());
+
+    const span = deadline.getTime() - this._today.getTime();
+    const used = stepsEnd - this._today.getTime();
+    const bufferMs = span - used;
+    const bufferDays = Math.round(bufferMs / (1000 * 60 * 60 * 24));
+
+    if (bufferDays < 0) { return `${Math.abs(bufferDays)} days short`; }
+    if (bufferDays === 0) { return 'No buffer — start now'; }
+    return `${bufferDays} day${bufferDays === 1 ? '' : 's'} of buffer`;
   });
 
   protected formatStepDate(value: unknown): string {

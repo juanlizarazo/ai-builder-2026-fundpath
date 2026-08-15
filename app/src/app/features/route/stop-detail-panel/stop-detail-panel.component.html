@@ -24,14 +24,38 @@
         </p>
       }
 
+      @if (hasApplication()) {
+        <div class="detail-app-status">
+          <div class="detail-app-status-badge">
+            <mat-icon aria-hidden="true">check_circle</mat-icon>
+            <span>Application started</span>
+          </div>
+          @if (hasSf424()) {
+            <a
+              class="detail-app-sf424-link"
+              [routerLink]="['/route', routeId(), 'apply', stop().id]"
+              [queryParams]="{ leg: 4 }"
+            >
+              <mat-icon aria-hidden="true">description</mat-icon>
+              View SF-424
+            </a>
+          }
+        </div>
+      }
+
       <div class="detail-cta-row">
         @if (canStartApplication()) {
           <a
             class="detail-cta-primary"
             [routerLink]="['/route', routeId(), 'apply', stop().id]"
           >
-            <mat-icon aria-hidden="true">rocket_launch</mat-icon>
-            Start my application
+            @if (hasApplication()) {
+              <mat-icon aria-hidden="true">edit_note</mat-icon>
+              Resume application
+            } @else {
+              <mat-icon aria-hidden="true">rocket_launch</mat-icon>
+              Start my application
+            }
           </a>
         }
 
