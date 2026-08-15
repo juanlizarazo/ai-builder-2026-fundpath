@@ -45,7 +45,7 @@ export const buildRoute = onCall(
       );
     }
 
-    const notifyEmail = payload.notifyEmail?.trim();
+    const notifyEmail = payload.notifyEmail?.trim() || request.auth?.token.email;
     if (notifyEmail && !EMAIL_PATTERN.test(notifyEmail)) {
       throw new HttpsError('invalid-argument', 'That email address does not look valid.');
     }
