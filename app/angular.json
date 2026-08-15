@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "govfit": {
+    "fundpath": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -61,10 +61,10 @@
           },
           "configurations": {
             "production": {
-              "buildTarget": "govfit:build:production"
+              "buildTarget": "fundpath:build:production"
             },
             "development": {
-              "buildTarget": "govfit:build:development"
+              "buildTarget": "fundpath:build:development"
             }
           },
           "defaultConfiguration": "development"

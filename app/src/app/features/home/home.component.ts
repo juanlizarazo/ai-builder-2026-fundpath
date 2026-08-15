@@ -5,7 +5,7 @@ import { Component } from '@angular/core';
   standalone: true,
   template: `
     <div class="home">
-      <h1>GovFit</h1>
+      <h1>FundPath</h1>
       <p>Government Funding for Utah Startups</p>
     </div>
   `,

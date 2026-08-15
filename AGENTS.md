@@ -2,13 +2,13 @@
 
 ## Project Overview
 
-This is the GovFit — Startup State / AI Builder Day Hackathon project for the GOEO Challenge (Aug 14, 2026). The goal: answer "I'm a [industry] startup in Utah with [N] employees and a $[Y] need — what government resources should I know about, and why?"
+This is the FundPath — Startup State / AI Builder Day Hackathon project for the GOEO Challenge (Aug 14, 2026). The goal: answer "I'm a [industry] startup in Utah with [N] employees and a $[Y] need — what government resources should I know about, and why?"
 
 **Stack:** Angular 21+ (standalone components) + Tailwind CSS, backed by Firebase Cloud Functions (TypeScript). AI layer handles startup profile extraction and opportunity explanation prose.
 
-**Product name:** GovFit
+**Product name:** FundPath
 
-**Domain context:** Utah startups miss non-dilutive federal funding (SBIR/STTR, grants, loans, procurement) because government language is opaque, eligibility rules are complex, and most tools either hallucinate matches or return keyword noise. GovFit translates startup language into ranked, explained, honestly-tiered government opportunities — and knows when to say there's no good match (the Case 5 abstention test).
+**Domain context:** Utah startups miss non-dilutive federal funding (SBIR/STTR, grants, loans, procurement) because government language is opaque, eligibility rules are complex, and most tools either hallucinate matches or return keyword noise. FundPath translates startup language into ranked, explained, honestly-tiered government opportunities — and knows when to say there's no good match (the Case 5 abstention test).
 
 **Key files:** `docs/PROJECT_CONTEXT.md` — full challenge brief, judging rubric, 5 test cases, eligibility logic. `docs/RESEARCH.md` — deep API reference, endpoint schemas, Utah programs. Read both before touching any feature.
 
@@ -190,11 +190,11 @@ Types are shared between frontend and backend using local virtual npm packages:
 When adding new Firestore collections:
 1. Add interface to `functions/lib/firestore/index.d.ts` (uses `@google-cloud/firestore` types)
 2. Add matching interface to `app/src/types/firestore.d.ts` (uses `firebase.firestore.Timestamp`)
-3. Use namespace pattern: `GovFit.Firestore.[Feature].I[InterfaceName]`
+3. Use namespace pattern: `FundPath.Firestore.[Feature].I[InterfaceName]`
 
 Example:
 ```typescript
-namespace GovFit.Firestore.Opportunities {
+namespace FundPath.Firestore.Opportunities {
   export interface IOpportunityMatch {
     id?: string;
     startupId: string;

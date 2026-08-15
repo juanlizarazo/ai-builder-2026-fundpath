@@ -7,7 +7,7 @@ setGlobalOptions({ region: 'us-central1', maxInstances: 10, minInstances: 1 });
 export const hello = onRequest({ cors: true }, async (req, res) => {
   try {
     logger.info('hello called');
-    res.json({ message: 'GovFit is alive' });
+    res.json({ message: 'FundPath is alive' });
   } catch (err) {
     logger.error('hello error', { error: (err as Error).message });
     res.status(500).json({ error: (err as Error).message });

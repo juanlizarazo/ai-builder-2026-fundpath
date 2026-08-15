@@ -1,4 +1,4 @@
-# GovFit
+# FundPath
 
 Government funding opportunity finder for Utah startups. Translates startup language into matched federal programs (SBIR/STTR, grants, loans, procurement), ranks real fits, explains eligibility, and shows historical award data — with honest abstention when there's no good match.
 

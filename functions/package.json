@@ -1,6 +1,6 @@
 {
-  "name": "govfit-functions",
-  "description": "Cloud Functions for GovFit",
+  "name": "fundpath-functions",
+  "description": "Cloud Functions for FundPath",
   "scripts": {
     "build": "tsc",
     "serve": "yarn build && firebase emulators:start --only functions",
