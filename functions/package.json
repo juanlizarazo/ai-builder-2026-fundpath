@@ -13,6 +13,7 @@
     "dev:sync": "tsx src/dev/run-sync.ts",
     "dev:coverage": "tsx src/dev/check-coverage.ts",
     "dev:cases": "tsx src/dev/run-cases.ts",
+    "dev:kit": "tsx src/dev/run-kit.ts",
     "seed:export": "tsx src/dev/export-corpus.ts",
     "seed:restore": "tsx src/dev/restore-corpus.ts"
   },
