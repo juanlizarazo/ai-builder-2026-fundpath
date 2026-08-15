@@ -9,14 +9,14 @@ import { provideHttpClient } from '@angular/common/http';
 import { routes } from './app.routes';
 import { AuthService } from '@app/core';
 
-// TODO: Replace with your Firebase project config after creating the project
 export const firebaseConfig = {
-  apiKey: '',
-  authDomain: '',
-  projectId: '',
-  storageBucket: '',
-  messagingSenderId: '',
-  appId: ''
+  apiKey: 'AIzaSyDgsn5M4e0GCz1FAugpmmt0XiAN3gr7vAE',
+  authDomain: 'ai-builder-2026-fundpath.firebaseapp.com',
+  projectId: 'ai-builder-2026-fundpath',
+  storageBucket: 'ai-builder-2026-fundpath.firebasestorage.app',
+  messagingSenderId: '695847904476',
+  appId: '1:695847904476:web:77abd02636ffbc2db58019',
+  measurementId: 'G-YHE7CNT9PM'
 };
 
 export const appConfig: ApplicationConfig = {

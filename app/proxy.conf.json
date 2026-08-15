@@ -1,6 +1,6 @@
 {
   "/api": {
-    "target": "http://localhost:5001/ai-builder-2026-opportunity-finder/us-central1",
+    "target": "http://localhost:5001/ai-builder-2026-fundpath/us-central1",
     "secure": false,
     "changeOrigin": true,
     "pathRewrite": {
