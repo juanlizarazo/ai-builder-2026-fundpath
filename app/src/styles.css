@@ -3,15 +3,76 @@
 @tailwind utilities;
 
 :root {
-  --app-theme--primary: #15445b;
-  --app-theme--tertiary: #32a32f;
+  /* --- Basin & Range: core palette --- */
+  --fp-ink:       #14181D; /* graphite — hero base, headings */
+  --fp-limestone: #F6F4F0; /* working surface */
+  --fp-basin:     #12454F; /* primary — route line, buttons, links */
+  --fp-signal:    #D9502B; /* deadlines, urgency, typed accent — used sparingly, never decoratively */
+  --fp-sage:      #2E6B4F; /* verified / likely fit */
+  --fp-sand:      #E3DDD1; /* hairlines, dividers, untraversed rail */
+
+  /* Fit-tier ramp — always paired with its text label, never color alone */
+  --fp-tier-likely:       var(--fp-sage);
+  --fp-tier-potential:    #B0761A;
+  --fp-tier-adjacent:     #A0562C;
+  --fp-tier-probably-not: #7E4141;
+
+  /* --- Type faces --- */
+  --fp-font-display: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --fp-font-body:    'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --fp-font-data:    'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* --- Type scale --- */
+  --fp-display-xl-size:     clamp(2.6rem, 6vw, 4.25rem);
+  --fp-display-xl-line:     1.02;
+  --fp-display-xl-tracking: -0.03em;
+  --fp-display-l-size:      2rem;
+  --fp-display-l-line:      1.1;
+  --fp-h1-size:             1.625rem;
+  --fp-eyebrow-size:        0.6875rem;
+  --fp-eyebrow-tracking:    0.08em;
+  --fp-body-size:           0.9375rem;
+  --fp-body-line:           1.6;
+  --fp-meta-size:           0.8125rem;
+  --fp-data-size:           0.875rem;
+
+  --fp-weight-regular:  400;
+  --fp-weight-medium:   500;
+  --fp-weight-semibold: 600;
+
+  /* --- Spacing --- */
+  --fp-space-1: 4px;
+  --fp-space-2: 8px;
+  --fp-space-3: 12px;
+  --fp-space-4: 16px;
+  --fp-space-5: 24px;
+  --fp-space-6: 32px;
+  --fp-space-7: 48px;
+
+  /* --- Radius --- */
+  --fp-radius-sm:   6px;
+  --fp-radius-md:   10px;
+  --fp-radius-lg:   16px;
+  --fp-radius-full: 999px;
+
+  /* --- Motion --- */
+  --fp-ease-standard:  cubic-bezier(0.16, 1, 0.3, 1);
+  --fp-ease-out:       cubic-bezier(0.22, 1, 0.36, 1);
+  --fp-duration-fast:  150ms;
+  --fp-duration-base:  300ms;
+  --fp-duration-slow:  450ms;
+
+  /* --- Legacy aliases: keep old --app-theme--* names working during migration.
+     Migrate call sites opportunistically; do not repo-wide rename in this task. --- */
+  --app-theme--primary:    var(--fp-basin);
+  --app-theme--tertiary:   var(--fp-sage);
   --app-theme--tertiary-bg: #e8f5e9;
-  --app-theme--accent: #d97706;
-  --app-theme--error: #d32f2f;
+  --app-theme--accent:     var(--fp-signal);
+  --app-theme--error:      var(--fp-signal);
   --app-theme--error-dark: #ba1a1a;
-  --app-theme--error-bg: #ffebee;
-  --app-theme--surface: #fafafa;
-  --app-theme--border: #e0e0e0;
+  --app-theme--error-bg:   #ffebee;
+  --app-theme--surface:    var(--fp-limestone);
+  --app-theme--border:     var(--fp-sand);
 }
 
 *, *::before, *::after {
@@ -20,7 +81,7 @@
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--fp-font-body);
   background: var(--app-theme--surface);
   color: #0f172a;
   -webkit-font-smoothing: antialiased;
@@ -28,6 +89,25 @@ body {
 
 body.ss-panel-open {
   overflow: hidden;
+}
+
+/* Global focus-visible ring — keyboard focus only, never on mouse click */
+:focus-visible {
+  outline: 2px solid var(--fp-basin);
+  outline-offset: 2px;
+}
+
+/*
+ * Reduced-motion convention: any element that runs a decorative, looping
+ * animation (float/blink/shimmer/pulse, etc. — wired up in later tasks)
+ * should carry the `.fp-motion` class so it can be killed here in one place.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .fp-motion,
+  .fp-motion * {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 
 @keyframes slideUp {
@@ -40,12 +120,108 @@ body.ss-panel-open {
   to   { opacity: 1; }
 }
 
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes letterReveal {
+  from { opacity: 0; transform: translateY(0.4em); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes barProgress {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes barShimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes cursorBlink {
+  0%, 49%   { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes dotPulse {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40%           { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
 .animate-slide-up {
-  animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: slideUp 0.45s var(--fp-ease-standard) both;
 }
 
 .animate-fade-in {
   animation: fadeIn 0.3s ease both;
+}
+
+/*
+ * Fix for the spinner-under-text bug: Material's internal label wrapper
+ * overrides `display: flex` set on the button host (see intake.component.scss
+ * `.submit-button`). Apply this class to the inline content wrapper inside a
+ * mat-button/mat-raised-button label to keep the spinner and text aligned.
+ */
+.fp-btn-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* --- Type scale utility classes --- */
+.fp-display-xl {
+  font-family: var(--fp-font-display);
+  font-size: var(--fp-display-xl-size);
+  line-height: var(--fp-display-xl-line);
+  letter-spacing: var(--fp-display-xl-tracking);
+  font-weight: var(--fp-weight-semibold);
+  font-variation-settings: 'wdth' 112;
+}
+
+.fp-display-l {
+  font-family: var(--fp-font-display);
+  font-size: var(--fp-display-l-size);
+  line-height: var(--fp-display-l-line);
+  font-weight: var(--fp-weight-semibold);
+  font-variation-settings: 'wdth' 108;
+}
+
+.fp-h1 {
+  font-family: var(--fp-font-display);
+  font-size: var(--fp-h1-size);
+  font-weight: var(--fp-weight-semibold);
+  font-variation-settings: 'wdth' 100;
+}
+
+.fp-eyebrow {
+  font-family: var(--fp-font-data);
+  font-size: var(--fp-eyebrow-size);
+  text-transform: uppercase;
+  letter-spacing: var(--fp-eyebrow-tracking);
+}
+
+.fp-body {
+  font-family: var(--fp-font-body);
+  font-size: var(--fp-body-size);
+  line-height: var(--fp-body-line);
+}
+
+.fp-meta {
+  font-family: var(--fp-font-body);
+  font-size: var(--fp-meta-size);
+}
+
+.fp-data {
+  font-family: var(--fp-font-data);
+  font-size: var(--fp-data-size);
+  font-variant-numeric: tabular-nums;
 }
 
 .ss-card-grid {
