@@ -116,25 +116,10 @@ export const generateSf424 = onCall(
       const pdfBytes = await SF424Helper.fill(SF424Helper.loadBasePdf(), values);
       const storagePath = `applications/${uid}/${payload.routeId}/${payload.stopId}/sf424.pdf`;
 
+      let signed: { url: string; expiresAt: string } | undefined;
+
       try {
-        const { url, expiresAt } = await uploadAndSign(storagePath, pdfBytes);
-
-        // Only persist `storagePath` once we have a working signed URL: a caller
-        // that only ever got the base64 fallback should never be pointed at a
-        // storagePath it can't itself read without a fresh signed URL it doesn't
-        // have. If `.save()` succeeded but `getSignedUrl()` then threw, the object
-        // may genuinely be sitting in the bucket — but recording that state here
-        // would leak a path this response never handed back a way to reach, so we
-        // deliberately do not distinguish "upload ok, sign failed" as a special
-        // case; the whole sequence is one unit and only its success is recorded.
-        const kitRef = db.collection('starterKits').doc(`${uid}_${payload.routeId}_${payload.stopId}`);
-
-        await kitRef.set(
-          { sf424: { storagePath, generatedAt: Timestamp.now() } },
-          { merge: true }
-        );
-
-        return { url, expiresAt };
+        signed = await uploadAndSign(storagePath, pdfBytes);
       } catch (storageErr) {
         logger.warn('generateSf424 Storage upload/sign unavailable, falling back to base64', {
           uid,
@@ -145,6 +130,19 @@ export const generateSf424 = onCall(
 
         return { base64: Buffer.from(pdfBytes).toString('base64') };
       }
+
+      // Only reachable once uploadAndSign has genuinely succeeded, so a caller
+      // that got a base64 fallback is never pointed at a storagePath it can't
+      // itself read. This write is deliberately outside the try/catch above: a
+      // failure here (e.g. a transient Firestore error) is a real bug, not a
+      // tolerated Storage-provisioning gap, and must not discard an already
+      // valid signed URL by falling back to base64 — it should surface as the
+      // outer catch's generic HttpsError instead.
+      const kitRef = db.collection('starterKits').doc(`${uid}_${payload.routeId}_${payload.stopId}`);
+
+      await kitRef.set({ sf424: { storagePath, generatedAt: Timestamp.now() } }, { merge: true });
+
+      return signed;
     } catch (err) {
       logger.error('generateSf424 failed', {
         uid,
