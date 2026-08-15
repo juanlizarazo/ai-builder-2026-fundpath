@@ -234,5 +234,24 @@ export namespace FundPath {
         readAt?: Timestamp;
       }
     }
+
+    export namespace CorpusMeta {
+      /**
+       * `corpusMeta/stats` — written by `functions/src/ingest/sync.function.ts`
+       * (`runSync`, around line 253). Field names must stay in lockstep with
+       * that write side.
+       */
+      export interface IStats {
+        lastSyncedAt: Timestamp;
+        countGrantsGov: number;
+        countGrantsGovHydrated: number;
+        countSeed: number;
+        countSbir: number;
+        countUtah: number;
+        countAssistanceListings: number;
+        countUSASpending: number;
+        totalCount: number;
+      }
+    }
   }
 }

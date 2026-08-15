@@ -1,0 +1,15 @@
+:host {
+  display: inline;
+  color: var(--fp-signal);
+}
+
+.typed-caret {
+  display: inline-block;
+  margin-left: 2px;
+  animation: cursorBlink 1s step-end infinite;
+}
+
+.typed-caret--settled {
+  animation: none;
+  opacity: 1;
+}

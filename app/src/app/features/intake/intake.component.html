@@ -1,3 +1,25 @@
+<section class="hero">
+  <ss-terrain-field />
+
+  <div class="hero-content">
+    <p class="hero-eyebrow fp-eyebrow">FundPath</p>
+    <h1 class="hero-headline fp-display-xl">
+      <span class="hero-headline-line">There's federal money for</span>
+      <span class="hero-headline-line hero-headline-line--typed">
+        <span class="fp-sr-only">
+          There's federal money for a nurse-AI platform, composite parts for launch vehicles, a water-leak sensor
+          network — or an honest "no."
+        </span>
+        <span aria-hidden="true">
+          <ss-typed-line [phrases]="heroTypedPhrases" />
+        </span>
+      </span>
+    </h1>
+
+    <ss-stat-strip />
+  </div>
+</section>
+
 <div class="intake-wrapper">
   <div class="intake-container animate-slide-up">
     <div class="intake-header">

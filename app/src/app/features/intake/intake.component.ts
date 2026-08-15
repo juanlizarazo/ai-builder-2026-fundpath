@@ -7,9 +7,24 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AlertBannerComponent } from '@app/shared/components/alert-banner/alert-banner.component';
+import { TerrainFieldComponent } from '@app/shared/components/terrain-field/terrain-field.component';
+import { TypedLineComponent } from '@app/shared/components/typed-line/typed-line.component';
+import { StatStripComponent } from '@app/shared/components/stat-strip/stat-strip.component';
 import { FundpathService } from '@app/core/services/fundpath.service';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * Cycled second line of the hero headline — maps to the plan's founder-needs
+ * framing, not generic adjectives, so keep these concrete like the examples
+ * below rather than reaching for buzzwords.
+ */
+const HERO_TYPED_PHRASES = [
+  'a nurse-AI platform.',
+  'composite parts for launch vehicles.',
+  'a water-leak sensor network.',
+  '— or an honest "no."'
+];
 
 const EXAMPLE_LABELS = [
   'Example 1: Healthcare AI',
@@ -38,7 +53,10 @@ const EXAMPLE_DESCRIPTIONS = [
     MatButtonModule,
     MatCheckboxModule,
     MatProgressSpinnerModule,
-    AlertBannerComponent
+    AlertBannerComponent,
+    TerrainFieldComponent,
+    TypedLineComponent,
+    StatStripComponent
   ],
   templateUrl: './intake.component.html',
   styleUrl: './intake.component.scss'
@@ -47,6 +65,8 @@ export class IntakeComponent implements AfterViewChecked {
   private readonly _router = inject(Router);
   private readonly _fundpathService = inject(FundpathService);
   private _shouldFocusPhone = false;
+
+  protected readonly heroTypedPhrases = HERO_TYPED_PHRASES;
 
   @ViewChild('phoneInput') private _phoneInput?: ElementRef<HTMLInputElement>;
 

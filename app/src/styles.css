@@ -169,6 +169,19 @@ body.ss-panel-open {
  * `.submit-button`). Apply this class to the inline content wrapper inside a
  * mat-button/mat-raised-button label to keep the spinner and text aligned.
  */
+/* Visually hidden but still available to screen readers — pairs with content marked aria-hidden. */
+.fp-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .fp-btn-content {
   display: inline-flex;
   align-items: center;

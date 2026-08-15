@@ -1,0 +1,11 @@
+@if (hasStats()) {
+  <div class="stat-strip fp-data">
+    <span class="stat-strip-item">
+      <span class="stat-strip-number">{{ displayedCount() | number }}</span> programs indexed
+    </span>
+    <span class="stat-strip-dot" aria-hidden="true">·</span>
+    <span class="stat-strip-item"><span class="stat-strip-number">{{ sourceCount }}</span> sources</span>
+    <span class="stat-strip-dot" aria-hidden="true">·</span>
+    <span class="stat-strip-item">synced {{ syncedLabel() }}</span>
+  </div>
+}
