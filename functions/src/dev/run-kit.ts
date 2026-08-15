@@ -1,7 +1,64 @@
+import * as fs from 'fs';
+import { Firestore, Timestamp } from 'firebase-admin/firestore';
 import { AdminHelper } from './admin.helper';
 import { SecretsHelper } from './secrets.helper';
 import { CASE_DESCRIPTIONS, CASE_LABELS, HARNESS_UID } from './cases.fixture';
-import { IRoute, IStarterKit, IStop } from '../firestore';
+import { IApplicantDetails, IOpportunity, IRoute, IStarterKit, IStop } from '../firestore';
+import { ISf424FillValues } from '../application/application.interfaces';
+import { SF424Helper } from '../application/sf424.helper';
+
+/**
+ * Stand-in for the applicant details Stage 6 will collect from the founder —
+ * profiles carry no `applicantDetails` yet, so the harness synthesises a
+ * plausible fake one. Deliberately has no EIN/UEI: FundPath never collects them,
+ * so 8b/8c stay blank on the generated form.
+ */
+const SAMPLE_APPLICANT: IApplicantDetails = {
+  legalName: 'Wasatch Photonics Research, Inc.',
+  street1: '2500 South State Street, Suite 410',
+  street2: 'Innovation Annex B',
+  city: 'Salt Lake City',
+  state: 'UT: Utah',
+  zip: '84115-1204',
+  county: 'Salt Lake',
+  contactFirstName: 'Maria',
+  contactLastName: 'Alvarez-Whitfield',
+  contactTitle: 'Chief Executive Officer',
+  contactEmail: 'maria@wasatchphotonics.example',
+  contactPhone: '801-555-0142',
+  projectTitle: 'Photonic sensing platform for early detection of grid-scale battery thermal runaway',
+  projectStartDate: Timestamp.fromDate(new Date('2027-01-04T00:00:00Z')),
+  projectEndDate: Timestamp.fromDate(new Date('2027-12-31T00:00:00Z')),
+  fundingRequested: 274500,
+};
+
+async function writeSf424(db: Firestore, stop: IStop, caseNumber: number): Promise<void> {
+  // The Grants.gov opportunity number lives on the opportunity doc (`sourceId`),
+  // not on the stop. The ALN *title* is not stored anywhere yet, so field 11's
+  // title box stays blank here rather than being filled with invented text.
+  const opportunity = stop.opportunityId
+    ? ((await db.collection('opportunities').doc(stop.opportunityId).get()).data() as IOpportunity | undefined)
+    : undefined;
+  const values: ISf424FillValues = {
+    ...SAMPLE_APPLICANT,
+    alnNumber: stop.aln,
+    fundingOpportunityNumber: opportunity?.source === 'grants-gov' ? opportunity.sourceId : undefined,
+    fundingOpportunityTitle: stop.title,
+    applicantType: 'Small Business',
+    typeOfSubmission: 'Application',
+    typeOfApplication: 'New',
+  };
+
+  const filled = await SF424Helper.fill(SF424Helper.loadBasePdf(), values);
+  const outputPath = `/tmp/sf424-case${caseNumber}.pdf`;
+
+  fs.writeFileSync(outputPath, filled);
+
+  console.log(`\n${'='.repeat(78)}\nSF-424\n${'='.repeat(78)}`);
+  console.log(`  applicant: ${values.legalName} (sample data — Stage 6 collects the real thing)`);
+  console.log(`  aln: ${values.alnNumber ?? '(none)'}  opportunity: ${values.fundingOpportunityNumber ?? '(none)'}`);
+  console.log(`  wrote ${outputPath} (${filled.length} bytes)`);
+}
 
 function printTimeline(kit: IStarterKit): void {
   console.log(`\n${'='.repeat(78)}\nREGISTRATION TIMELINE (${kit.timeline.mode})\n${'='.repeat(78)}`);
@@ -91,7 +148,7 @@ async function main(): Promise<void> {
     console.log(`      ${narrative.draft.substring(0, 140)}${narrative.draft.length > 140 ? '…' : ''}`);
   }
 
-  // TODO(Task 4): write /tmp/sf424-case<N>.pdf once SF424Helper exists
+  await writeSf424(db, stop, caseNumber);
 
   const updatedRouteSnapshot = await db.collection('routes').doc(result.routeId).get();
   const updatedRoute = updatedRouteSnapshot.data() as IRoute | undefined;
