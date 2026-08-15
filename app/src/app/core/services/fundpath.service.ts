@@ -44,4 +44,14 @@ export class FundpathService {
       catchError(() => of(null))
     );
   }
+
+  /** Profile docs are keyed by `profileId` (the founder's uid) in the `profiles` collection. */
+  public watchProfile(profileId: string): Observable<FundPath.Firestore.Profiles.IStartupProfile | null> {
+    const profileRef = doc(this._firestore, 'profiles', profileId) as DocumentReference<FundPath.Firestore.Profiles.IStartupProfile>;
+
+    return docData(profileRef, { idField: 'id' }).pipe(
+      map((profile) => profile ?? null),
+      catchError(() => of(null))
+    );
+  }
 }

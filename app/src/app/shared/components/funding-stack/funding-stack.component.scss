@@ -1,0 +1,153 @@
+.funding-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fp-space-2);
+  padding: var(--fp-space-4) 0;
+}
+
+.funding-stack-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fp-space-3);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--fp-basin);
+}
+
+.funding-stack-need {
+  font-weight: var(--fp-weight-semibold);
+}
+
+.funding-stack-shortfall-tag {
+  color: #7a6a4a;
+}
+
+.funding-stack-overshoot-tag {
+  color: var(--fp-signal);
+  font-weight: var(--fp-weight-semibold);
+}
+
+.funding-stack-track-wrap {
+  position: relative;
+  /* Deliberately not `overflow: hidden` — overshoot must be able to spill past 100%. */
+  overflow: visible;
+  padding-right: 2px;
+}
+
+.funding-stack-track {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  height: 20px;
+  width: 100%;
+  background: var(--fp-sand);
+  border-radius: var(--fp-radius-sm);
+  overflow: visible;
+}
+
+.funding-stack-segment {
+  flex: 0 0 auto;
+  min-width: 2px;
+  height: 100%;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: filter var(--fp-duration-fast) var(--fp-ease-out), transform var(--fp-duration-fast) var(--fp-ease-out);
+
+  &:first-child {
+    border-top-left-radius: var(--fp-radius-sm);
+    border-bottom-left-radius: var(--fp-radius-sm);
+  }
+
+  &:hover,
+  &:focus-visible,
+  &--hovered {
+    filter: brightness(1.15);
+    transform: scaleY(1.15);
+    outline: none;
+    z-index: 1;
+  }
+}
+
+.funding-stack-gap {
+  flex: 0 0 auto;
+  height: 100%;
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(20, 24, 29, 0.12),
+    rgba(20, 24, 29, 0.12) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  background-color: var(--fp-limestone);
+}
+
+/* Marks the 100%-of-askMax cap so the overshoot piece reads as spilling past it. */
+.funding-stack-cap-line {
+  position: absolute;
+  top: -3px;
+  left: 100%;
+  width: 0;
+  height: 26px;
+  border-left: 2px dashed var(--fp-signal);
+  z-index: 2;
+}
+
+.funding-stack-overshoot {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  height: 100%;
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--fp-signal),
+    var(--fp-signal) 4px,
+    rgba(217, 80, 43, 0.55) 4px,
+    rgba(217, 80, 43, 0.55) 8px
+  );
+  border-top-right-radius: var(--fp-radius-sm);
+  border-bottom-right-radius: var(--fp-radius-sm);
+}
+
+.funding-stack-labels {
+  display: flex;
+  align-items: flex-start;
+}
+
+.funding-stack-label {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-right: var(--fp-space-2);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.funding-stack-label-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--fp-ink);
+  font-weight: var(--fp-weight-medium);
+}
+
+.funding-stack-label-amount {
+  font-family: var(--fp-font-data);
+  color: #666;
+  white-space: nowrap;
+}
+
+.funding-stack-label--gap .funding-stack-label-amount {
+  color: #7a6a4a;
+}
+
+.funding-stack-label--hovered .funding-stack-label-title {
+  color: var(--fp-basin);
+}
+
+@media (max-width: 480px) {
+  .funding-stack-label-title {
+    display: none;
+  }
+}

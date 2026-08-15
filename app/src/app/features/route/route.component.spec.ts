@@ -31,6 +31,21 @@ function makeStop(overrides: Partial<IStop> & Pick<IStop, 'id' | 'title'>): ISto
   };
 }
 
+function makeProfile(overrides: Partial<FundPath.Firestore.Profiles.IStartupProfile> = {}): FundPath.Firestore.Profiles.IStartupProfile {
+  return {
+    uid: 'uid-1',
+    rawDescription: '',
+    industry: '',
+    technologyKeywords: [],
+    location: { state: 'UT' },
+    employees: 5,
+    hasRdCore: true,
+    createdAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+    ...overrides
+  };
+}
+
 function daysFromNow(days: number): Timestamp {
   const date = new Date();
   date.setDate(date.getDate() + days);
@@ -52,7 +67,9 @@ function makeRoute(overrides: Partial<IRoute> = {}): IRoute {
   };
 }
 
-function createFixture(route: IRoute | null) {
+type IStartupProfile = FundPath.Firestore.Profiles.IStartupProfile;
+
+function createFixture(route: IRoute | null, profile: IStartupProfile | null = null) {
   TestBed.configureTestingModule({
     imports: [RouteComponent],
     providers: [
@@ -68,7 +85,8 @@ function createFixture(route: IRoute | null) {
         provide: FundpathService,
         useValue: {
           currentRoute: () => route,
-          watchRoute: vi.fn()
+          watchRoute: vi.fn(),
+          watchProfile: vi.fn().mockReturnValue(of(profile))
         }
       },
       { provide: AuthService, useValue: { user$: of(null) } },
@@ -242,6 +260,59 @@ describe('RouteComponent', () => {
       const row = fixture.nativeElement.querySelector('.ruled-out-row');
       expect(row.textContent).toContain('Ineligible Program');
       expect(row.textContent).toContain('No R&D core.');
+    });
+  });
+
+  describe('abstention restyle', () => {
+    it('renders the confident-decision headline instead of the old warning-style copy', () => {
+      const route = makeRoute({
+        stops: [],
+        nonGrantAlternatives: [makeStop({ id: 'n', title: 'Non-grant', placement: 'non-grant' })]
+      });
+      const fixture = createFixture(route);
+      fixture.detectChanges();
+
+      const headline = fixture.nativeElement.querySelector('.abstention-headline');
+      expect(headline.textContent).toContain("No strong federal grant match — and that's the honest answer.");
+      expect(fixture.nativeElement.querySelector('.abstention-badge')).toBeNull();
+    });
+  });
+
+  describe('funding-stack mount', () => {
+    it('mounts app-funding-stack with the profile askMax once the profile loads', async () => {
+      const route = makeRoute({
+        stops: [makeStop({ id: 'a', title: 'A', placement: 'primary', sequenceMonth: 0, minAward: 100_000, maxAward: 300_000 })]
+      });
+      const fixture = createFixture(route, makeProfile({ askMin: 500_000, askMax: 2_000_000 }));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const stack = fixture.nativeElement.querySelector('[data-seam="funding-stack"] app-funding-stack');
+      expect(stack).not.toBeNull();
+    });
+
+    it('does not mount the funding-stack while the profile (and its askMax) has not loaded', () => {
+      const route = makeRoute({
+        stops: [makeStop({ id: 'a', title: 'A', placement: 'primary', sequenceMonth: 0, minAward: 100_000, maxAward: 300_000 })]
+      });
+      const fixture = createFixture(route, null);
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('[data-seam="funding-stack"] app-funding-stack')).toBeNull();
+    });
+
+    it('does not mount the funding-stack on the abstention path', async () => {
+      const route = makeRoute({
+        stops: [],
+        nonGrantAlternatives: [makeStop({ id: 'n', title: 'Non-grant', placement: 'non-grant' })]
+      });
+      const fixture = createFixture(route, makeProfile({ askMax: 2_000_000 }));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('[data-seam="funding-stack"] app-funding-stack')).toBeNull();
     });
   });
 

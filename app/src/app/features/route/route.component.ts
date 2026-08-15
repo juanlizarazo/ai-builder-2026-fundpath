@@ -1,16 +1,17 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { Observable, catchError, filter, of, switchMap } from 'rxjs';
+import { Observable, catchError, distinctUntilChanged, filter, map, of, switchMap } from 'rxjs';
 import { FundpathService } from '@app/core/services/fundpath.service';
 import { AuthService } from '@app/core/services/auth.service';
 import { NotificationsService } from '@app/core/services/notifications.service';
 import { LoadingService } from '@app/core/services/loading.service';
 import { AlertBannerComponent } from '@app/shared/components/alert-banner/alert-banner.component';
 import { SidePanelComponent } from '@app/shared/components/side-panel/side-panel.component';
+import { FundingStackComponent } from '@app/shared/components/funding-stack/funding-stack.component';
 import { formatDollars, formatRelativeTime, toDate } from '@app/shared/utils/format.utils';
 import { datePosition, monthTicks } from '@app/shared/utils/scale.utils';
 import { toSentences } from '@app/shared/utils/text.utils';
@@ -51,7 +52,8 @@ const URGENT_DEADLINE_DAYS = 45;
     MatButtonModule,
     AlertBannerComponent,
     SidePanelComponent,
-    StopComponent
+    StopComponent,
+    FundingStackComponent
   ],
   templateUrl: './route.component.html',
   styleUrl: './route.component.scss'
@@ -118,6 +120,31 @@ export class RouteComponent {
 
     return !!currentRoute && (currentRoute.stops?.length ?? 0) === 0 && (currentRoute.nonGrantAlternatives?.length ?? 0) > 0;
   });
+
+  /**
+   * The founder's profile (for `askMin`/`askMax`), re-fetched whenever the
+   * route's `profileId` changes. Nothing else on this page needed the
+   * profile before now — `FundpathService` only carries `currentProfileId`,
+   * which is transient and not populated on a fresh `/route/:routeId` load,
+   * so this reads live from Firestore the same way `_liveRoute` does.
+   */
+  private readonly _liveProfile = toSignal(
+    toObservable(this.route).pipe(
+      map(route => route?.profileId ?? null),
+      distinctUntilChanged(),
+      switchMap(profileId => (profileId ? this._fundpathService.watchProfile(profileId) : of(null)))
+    ),
+    { initialValue: null }
+  );
+
+  /** The founder's funding need — the funding-stack's scale domain. `null` until the profile loads (or if unset). */
+  protected readonly askMax = computed<number | null>(() => this._liveProfile()?.askMax ?? null);
+
+  /** Primary + alongside stops passed to the funding-stack bar (same set the survey-line diagram renders). */
+  protected readonly fundingStackStops = computed<IStop[]>(() => this.route()?.stops ?? []);
+
+  /** Shared with `FundingStackComponent`: which stop, if any, is hovered/focused — read by the spine below to light up the matching station. */
+  protected readonly hoveredStopId = signal<string | null>(null);
 
   protected readonly isDeepRunning = computed<boolean>(() =>
     this.route()?.deepPassStatus === 'running'

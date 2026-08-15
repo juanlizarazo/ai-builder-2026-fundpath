@@ -186,7 +186,7 @@
 }
 
 .funding-stack-seam {
-  /* Task 6 inserts the funding-stack bar here. Empty by design in this task. */
+  /* app-funding-stack (Task 6) mounts here, directly under the summary rail. */
 }
 
 .deep-pass-pill {
@@ -320,6 +320,11 @@
     background: var(--fp-limestone);
     border: 2px solid var(--fp-sand);
   }
+
+  &--highlighted {
+    background: var(--fp-signal);
+    box-shadow: 0 0 0 4px rgba(217, 80, 43, 0.18);
+  }
 }
 
 .survey-stations {
@@ -365,6 +370,11 @@
     border-radius: 50%;
     background: var(--fp-limestone);
     border: 2px solid var(--fp-sand);
+  }
+
+  &--highlighted {
+    background: var(--fp-signal);
+    box-shadow: 0 0 0 5px rgba(217, 80, 43, 0.18);
   }
 }
 
@@ -458,25 +468,24 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  background: #fffbf0;
-  border: 2px solid #fde68a;
-  border-radius: 12px;
+  background: var(--fp-limestone);
+  border-radius: var(--fp-radius-md);
   padding: 24px;
 }
 
-.abstention-badge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--app-theme--accent);
+.abstention-rule {
+  width: 48px;
+  height: 3px;
+  background: var(--fp-signal);
+  border-radius: var(--fp-radius-full);
+}
 
-  mat-icon {
-    font-size: 22px;
-    height: 22px;
-    width: 22px;
-  }
+.abstention-headline {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--fp-ink);
+  margin: 0;
+  line-height: 1.35;
 }
 
 .abstention-explanation {

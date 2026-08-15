@@ -78,14 +78,22 @@
       </header>
 
       <!-- Task 6 seam: funding-stack bar renders here, directly under the summary rail. -->
-      <div class="funding-stack-seam" data-seam="funding-stack"></div>
+      <div class="funding-stack-seam" data-seam="funding-stack">
+        @if (!isAbstention() && askMax(); as ask) {
+          @if (fundingStackStops().length > 0) {
+            <app-funding-stack
+              [stops]="fundingStackStops()"
+              [askMax]="ask"
+              [(hoveredStopId)]="hoveredStopId"
+            />
+          }
+        }
+      </div>
 
       @if (isAbstention()) {
         <section class="abstention-section">
-          <div class="abstention-badge">
-            <mat-icon>info</mat-icon>
-            <span>No strong federal grant match</span>
-          </div>
+          <div class="abstention-rule" aria-hidden="true"></div>
+          <h2 class="abstention-headline">No strong federal grant match — and that's the honest answer.</h2>
           <p class="abstention-explanation">
             Your company profile does not align well with federal SBIR/STTR grant programs at this stage.
             Federal research grants require an R&D core and a technology-development mandate.
@@ -116,6 +124,7 @@
                 @for (station of diagramStations(); track station.stop.id) {
                   <span
                     class="survey-marker survey-marker--{{ station.kind }}"
+                    [class.survey-marker--highlighted]="hoveredStopId() === station.stop.id"
                     [style.left.%]="station.position * 100"
                   ></span>
                 }
@@ -131,7 +140,11 @@
                     [id]="'stop-' + station.stop.id"
                     role="listitem"
                   >
-                    <span class="survey-node survey-node--{{ station.kind }}" aria-hidden="true"></span>
+                    <span
+                      class="survey-node survey-node--{{ station.kind }}"
+                      [class.survey-node--highlighted]="hoveredStopId() === station.stop.id"
+                      aria-hidden="true"
+                    ></span>
                     <span class="survey-stub" aria-hidden="true"></span>
                     <app-stop
                       [stop]="station.stop"
