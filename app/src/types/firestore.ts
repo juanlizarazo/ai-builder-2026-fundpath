@@ -38,7 +38,15 @@ export namespace FundPath {
         targetCustomer?: string;
         productMaturity?: string;
         ownershipSignals?: string[];
+        /** Client-only, captured in Guided intake's optional "Company name" field — prefills Leg 3's legal name. */
+        companyName?: string;
         applicantDetails?: Applications.IApplicantDetails;
+        /** Client-only autosave target for the Sherpa's Leg 2 narrative editors — keyed by section, persists across visits. */
+        narrativeDrafts?: Partial<Record<Applications.INarrativeStarter['section'], string>>;
+        notifyEmail?: string;
+        notifyPhone?: string;
+        smsOptIn?: boolean;
+        smsOptInAt?: Timestamp;
         createdAt: Timestamp;
         updatedAt: Timestamp;
       }
@@ -206,6 +214,47 @@ export namespace FundPath {
         sf424?: { storagePath: string; generatedAt: Timestamp };
         createdAt: Timestamp;
         updatedAt: Timestamp;
+      }
+    }
+
+    export namespace Notifications {
+      export type NotificationKind = 'route-ready' | 'new-stops';
+      export type NotifyChannel = 'inbox' | 'email' | 'telegram' | 'whatsapp' | 'sms';
+      export type DeliveryStatus = 'inbox-only' | 'sent' | 'failed';
+
+      export interface INotification {
+        id?: string;
+        uid: string;
+        routeId: string;
+        kind: NotificationKind;
+        title: string;
+        body: string;
+        stopIds: string[];
+        channel: NotifyChannel;
+        deliveryStatus: DeliveryStatus;
+        providerMessageId?: string;
+        errorMessage?: string;
+        createdAt: Timestamp;
+        readAt?: Timestamp;
+      }
+    }
+
+    export namespace CorpusMeta {
+      /**
+       * `corpusMeta/stats` — written by `functions/src/ingest/sync.function.ts`
+       * (`runSync`, around line 253). Field names must stay in lockstep with
+       * that write side.
+       */
+      export interface IStats {
+        lastSyncedAt: Timestamp;
+        countGrantsGov: number;
+        countGrantsGovHydrated: number;
+        countSeed: number;
+        countSbir: number;
+        countUtah: number;
+        countAssistanceListings: number;
+        countUSASpending: number;
+        totalCount: number;
       }
     }
   }

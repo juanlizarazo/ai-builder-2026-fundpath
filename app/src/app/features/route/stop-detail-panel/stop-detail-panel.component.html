@@ -1,0 +1,220 @@
+<div class="detail-panel">
+  <div class="detail-scroll">
+    <header class="detail-header">
+      <div class="detail-badges">
+        <span class="tier-plate tier-plate--{{ stop().fitTier }}">
+          <span class="tier-icon" aria-hidden="true">{{ tierIcon() }}</span>
+          <span class="tier-label">{{ tierLabel() }}</span>
+        </span>
+        @if (deadlineInfo(); as dl) {
+          <span class="deadline-chip" [class.deadline-chip--urgent]="dl.urgent">
+            <mat-icon aria-hidden="true">schedule</mat-icon>
+            {{ dl.days !== null ? (dl.days + ' days left') : ('Apply by ' + dl.label) }}
+          </span>
+        }
+      </div>
+
+      <span class="detail-agency fp-eyebrow">{{ stop().agency }}</span>
+      <h3 class="detail-title">{{ stop().title }}</h3>
+
+      @if (formatAmount(); as amount) {
+        <p class="detail-meta fp-data">
+          {{ amount }}
+          @if (deadlineInfo(); as dl) { · Apply by {{ dl.label }} }
+        </p>
+      }
+
+      <div class="detail-cta-row">
+        @if (canStartApplication()) {
+          <a
+            class="detail-cta-primary"
+            [routerLink]="['/route', routeId(), 'apply', stop().id]"
+          >
+            <mat-icon aria-hidden="true">rocket_launch</mat-icon>
+            Start my application
+          </a>
+        }
+
+        @if (stop().programUrl) {
+          <a
+            class="detail-cta-secondary"
+            [href]="stop().programUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Program page ↗
+          </a>
+        }
+      </div>
+    </header>
+
+    <!-- 1. Why you fit -->
+    <section class="fit-primary">
+      <h4 class="section-eyebrow fp-eyebrow">Why you fit</h4>
+      @if (fitRows().length > 0) {
+        <ul class="fit-list" role="list">
+          @for (row of fitRows(); track row.text) {
+            <li class="fit-row">
+              <span aria-hidden="true">✓</span>
+              <span>{{ row.text }}</span>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="ledger-empty">No specific fit signals recorded.</p>
+      }
+    </section>
+
+    <!-- 2. Proof — leads with confidence before caveats. Historical-award cross-referencing -->
+    <!-- is the "goes beyond search" signal most teams skip; give it a card of its own. -->
+    <section class="proof-card">
+      <div class="proof-heading">
+        <mat-icon class="proof-icon" aria-hidden="true">workspace_premium</mat-icon>
+        <h4 class="proof-eyebrow">Proven track record</h4>
+      </div>
+
+      @if (stop().historicalProof; as proof) {
+        @if (totalDollarsLabel(); as total) {
+          <p class="proof-hero">
+            <span class="proof-hero-number">{{ total }}</span>
+            <span class="proof-hero-label">awarded to comparable companies</span>
+          </p>
+        }
+
+        @if (hasAwardRange()) {
+          <div class="award-bar">
+            <div class="award-bar-track">
+              <div class="award-bar-span" [style.left.%]="minPct()" [style.width.%]="maxPct() - minPct()"></div>
+              @if (proof.medianAward) {
+                <div class="award-bar-tick award-bar-tick--median" [style.left.%]="medianPct()" title="Median award"></div>
+              }
+              @if (askPct() !== null) {
+                <div class="award-bar-tick award-bar-tick--ask" [style.left.%]="askPct()" title="Your ask"></div>
+              }
+            </div>
+            <p class="award-bar-label fp-data">
+              {{ formatAmount() }} range
+              @if (proof.medianAward) { · {{ formatDollars(proof.medianAward) }} median }
+            </p>
+          </div>
+        }
+
+        <div class="proof-stats">
+          <div class="proof-stat">
+            <span class="proof-stat-number fp-data">{{ proof.countUtah }}</span>
+            <span class="proof-stat-label">in Utah</span>
+          </div>
+          <div class="proof-stat">
+            <span class="proof-stat-number fp-data">{{ proof.countVertical }}</span>
+            <span class="proof-stat-label">in your vertical</span>
+          </div>
+          <div class="proof-stat">
+            <span class="proof-stat-number fp-data">{{ proof.countTotal }}</span>
+            <span class="proof-stat-label">total awards</span>
+          </div>
+        </div>
+
+        @if (namedWinners().length > 0) {
+          <div class="winner-chips">
+            @for (winner of namedWinners(); track winner) {
+              <span class="winner-chip">{{ winner }}</span>
+            }
+          </div>
+        }
+
+        <p class="proof-source fp-meta">Sourced from USAspending.gov &amp; SBIR.gov award history.</p>
+      } @else {
+        <p class="proof-empty">No historical award data on file for this program yet.</p>
+      }
+    </section>
+
+    <!-- Ineligibility caveats, collapsed unless something's actually blocking -->
+    <details class="accordion" [attr.open]="hasBlockingFlag() ? '' : null">
+      <summary>Check before you apply ({{ ineligibleRows().length }})</summary>
+      <div class="accordion-body">
+        @if (ineligibleRows().length > 0) {
+          <ul class="fit-list" role="list">
+            @for (row of ineligibleRows(); track row.text) {
+              <li class="fit-row fit-row--warn">
+                <span aria-hidden="true">⚠</span>
+                <span>{{ row.text }}</span>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="ledger-empty">Nothing flagged.</p>
+        }
+
+        <p class="disclaimer fp-data">
+          An assessment, not an eligibility determination. Verify with the agency.
+        </p>
+      </div>
+    </details>
+
+    <!-- 3. Verify before you apply -->
+    @if (verifyRows().length > 0) {
+      <details class="accordion">
+        <summary>Verify before you apply ({{ verifyRows().length }})</summary>
+        <div class="accordion-body">
+          <ul class="verify-list" role="list">
+            @for (row of verifyRows(); track row) {
+              <li><span aria-hidden="true">○</span> {{ row }}</li>
+            }
+          </ul>
+        </div>
+      </details>
+    }
+
+    <!-- 4. Do next -->
+    @if (doNextRows().length > 0) {
+      <details class="accordion" open>
+        <summary>Do next ({{ doNextRows().length }})</summary>
+        <div class="accordion-body">
+          <ol class="do-next-list">
+            @for (row of doNextRows(); track row) {
+              <li>{{ row }}</li>
+            }
+          </ol>
+        </div>
+      </details>
+    }
+
+    <!-- 5. Checklist -->
+    @if (tasks().length > 0) {
+      <section class="checklist">
+        <button
+          type="button"
+          class="checklist-toggle fp-data"
+          (click)="toggleChecklist()"
+          [attr.aria-expanded]="isChecklistExpanded()"
+        >
+          Checklist {{ checkedTaskCount() }}/{{ tasks().length }}
+        </button>
+        <div class="checklist-progress" aria-hidden="true">
+          <div class="checklist-progress-fill" [style.width.%]="(checkedTaskCount() / tasks().length) * 100"></div>
+        </div>
+
+        @if (isChecklistExpanded()) {
+          <ul class="task-list" role="list">
+            @for (task of tasks(); track task.id) {
+              <li class="task-item">
+                <label class="task-label">
+                  <input
+                    type="checkbox"
+                    class="task-checkbox"
+                    [checked]="isTaskChecked(task)"
+                    (change)="toggleTask(task)"
+                  />
+                  <span [class.task-label--done]="isTaskChecked(task)">{{ task.label }}</span>
+                </label>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+
+    <!-- 6. Provenance -->
+    <p class="provenance fp-data">{{ provenanceNote() }}</p>
+  </div>
+</div>

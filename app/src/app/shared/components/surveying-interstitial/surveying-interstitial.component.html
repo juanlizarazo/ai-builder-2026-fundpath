@@ -1,0 +1,31 @@
+<div class="surveying-overlay" role="status" aria-live="polite">
+  <ss-terrain-field class="surveying-terrain" />
+
+  <div class="surveying-content">
+    <div class="surveying-wordmark" aria-hidden="true">
+      @for (letter of wordmarkLetters; track $index; let i = $index) {
+        <span class="surveying-letter" [class.is-animated]="!reducedMotion" [style.--i]="i">{{ letter }}</span>
+      }
+    </div>
+    <span class="fp-sr-only">Surveying federal funding programs for your company</span>
+
+    <div class="surveying-track" aria-hidden="true">
+      <div class="surveying-track-fill">
+        <div class="surveying-bar" [class.is-animated]="!reducedMotion">
+          @if (!reducedMotion) {
+            <span class="surveying-bar-shimmer"></span>
+          }
+        </div>
+      </div>
+    </div>
+
+    @switch (messageIndex()) {
+      @case (0) { <p class="surveying-message" [class.is-animated]="!reducedMotion">{{ currentMessage }}</p> }
+      @case (1) { <p class="surveying-message" [class.is-animated]="!reducedMotion">{{ currentMessage }}</p> }
+      @case (2) { <p class="surveying-message" [class.is-animated]="!reducedMotion">{{ currentMessage }}</p> }
+      @case (3) { <p class="surveying-message" [class.is-animated]="!reducedMotion">{{ currentMessage }}</p> }
+      @case (4) { <p class="surveying-message" [class.is-animated]="!reducedMotion">{{ currentMessage }}</p> }
+      @case (5) { <p class="surveying-message" [class.is-animated]="!reducedMotion">{{ currentMessage }}</p> }
+    }
+  </div>
+</div>

@@ -1,0 +1,104 @@
+.surveying-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--fp-ink);
+}
+
+.surveying-terrain {
+  position: absolute;
+  inset: 0;
+}
+
+.surveying-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--fp-space-6);
+  text-align: center;
+  padding: var(--fp-space-5);
+}
+
+.surveying-wordmark {
+  display: flex;
+  align-items: baseline;
+  font-family: var(--fp-font-display);
+  font-size: clamp(2.2rem, 6vw, 3.2rem);
+  font-weight: var(--fp-weight-semibold);
+  color: var(--fp-limestone);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.surveying-letter {
+  display: inline-block;
+  opacity: 1;
+
+  &.is-animated {
+    opacity: 0;
+    animation: letterReveal 0.6s var(--fp-ease-standard) forwards;
+    animation-delay: calc(var(--i) * 0.05s);
+  }
+}
+
+.surveying-track {
+  width: 220px;
+  height: 3px;
+  background: rgba(246, 244, 240, 0.14);
+  border-radius: var(--fp-radius-full);
+  overflow: hidden;
+}
+
+// The track-fill is fixed at 85% width; the bar itself scales 0→1 *within*
+// that, so the shared `barProgress` keyframe (0%→100%) reads visually as
+// "eases to 85% and stops" without needing a bespoke keyframe.
+.surveying-track-fill {
+  width: 85%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.surveying-bar {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: var(--fp-signal);
+  border-radius: var(--fp-radius-full);
+  transform-origin: left center;
+  transform: scaleX(1);
+
+  &.is-animated {
+    transform: scaleX(0);
+    animation: barProgress 2.4s var(--fp-ease-out) forwards;
+    animation-delay: 0.3s;
+  }
+}
+
+.surveying-bar-shimmer {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.65), transparent);
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: barShimmer 1.8s linear infinite;
+  animation-delay: 2.7s;
+}
+
+.surveying-message {
+  font-family: var(--fp-font-body);
+  font-size: var(--fp-body-size);
+  color: var(--fp-sand);
+  min-height: 1.6em;
+  margin: 0;
+
+  &.is-animated {
+    animation: fadeUp var(--fp-duration-base) var(--fp-ease-standard) both;
+  }
+}

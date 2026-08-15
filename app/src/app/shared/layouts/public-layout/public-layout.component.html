@@ -1,17 +1,39 @@
 <nav class="public-nav">
   <a routerLink="/" class="nav-brand">FundPath</a>
   <div class="nav-actions">
+    <button
+      mat-icon-button
+      class="inbox-bell"
+      (click)="openInbox()"
+      aria-label="Notifications"
+    >
+      <mat-icon>notifications</mat-icon>
+      @if (unreadCount() > 0) {
+        <span class="unread-badge">{{ unreadCount() }}</span>
+      }
+    </button>
+
     @if (isAuthenticated) {
-      <button mat-button [matMenuTriggerFor]="userMenu" class="user-btn">
+      <div class="nav-divider" aria-hidden="true"></div>
+      <button mat-button [matMenuTriggerFor]="userMenu" class="user-btn" [attr.aria-label]="'Account menu for ' + userEmail">
         <div class="user-btn-inner">
           <div class="user-avatar">{{ userInitials }}</div>
-          <span class="user-email">{{ userEmail }}</span>
+          <mat-icon class="user-caret">expand_more</mat-icon>
         </div>
       </button>
-      <mat-menu #userMenu="matMenu">
+      <mat-menu #userMenu="matMenu" panelClass="fp-user-menu" xPosition="before">
+        <div class="fp-user-menu-header">
+          <div class="user-avatar user-avatar--lg">{{ userInitials }}</div>
+          <span class="fp-user-menu-email">{{ userEmail }}</span>
+        </div>
+        <mat-divider></mat-divider>
+        <a mat-menu-item routerLink="/paths">
+          <mat-icon>route</mat-icon>
+          <span>My paths</span>
+        </a>
         <button mat-menu-item (click)="signOut()">
           <mat-icon>logout</mat-icon>
-          Sign out
+          <span>Sign out</span>
         </button>
       </mat-menu>
     } @else {
@@ -23,3 +45,32 @@
 <div class="page-content">
   <router-outlet></router-outlet>
 </div>
+
+<footer class="public-footer">
+  <a routerLink="/privacy">Privacy</a>
+  <a routerLink="/terms">Terms</a>
+</footer>
+
+<ss-side-panel title="Notifications" [isOpen]="isInboxOpen()" (closed)="closeInbox()">
+  @if (notifications().length === 0) {
+    <p class="inbox-empty">Nothing here yet — you'll see updates when your path is ready or new opportunities match.</p>
+  } @else {
+    <div class="inbox-list">
+      @for (notification of notifications(); track notification.id) {
+        <button
+          type="button"
+          class="inbox-entry"
+          [class.unread]="!notification.readAt"
+          (click)="onNotificationClick(notification)"
+        >
+          <span class="inbox-entry-title">{{ notification.title }}</span>
+          <span class="inbox-entry-body">{{ notification.body }}</span>
+          <span class="inbox-entry-meta">
+            <span>{{ formatRelativeTime(notification.createdAt) }}</span>
+            <span class="inbox-entry-delivery">{{ deliveryLabel(notification) }}</span>
+          </span>
+        </button>
+      }
+    </div>
+  }
+</ss-side-panel>

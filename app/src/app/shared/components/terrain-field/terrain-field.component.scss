@@ -1,0 +1,59 @@
+:host {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  pointer-events: none;
+
+  /* Defaults so the light/parallax sit at rest until the rAF loop (if any) starts writing these. */
+  --mx: 0;
+  --my: 0;
+  --px: 0;
+  --py: 0;
+}
+
+.terrain-field {
+  position: absolute;
+  inset: -4%;
+}
+
+.terrain-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: var(--fp-sand);
+  stroke-width: 1.5;
+
+  path:first-child {
+    fill: rgba(246, 244, 240, 0.03);
+    stroke: none;
+  }
+}
+
+.terrain-layer--far {
+  opacity: 0.16;
+  transform: translate3d(calc(var(--px) * 14px), calc(var(--py) * 10px), 0);
+}
+
+.terrain-layer--mid {
+  opacity: 0.24;
+  transform: translate3d(calc(var(--px) * 28px), calc(var(--py) * 20px), 0);
+}
+
+.terrain-layer--near {
+  opacity: 0.34;
+  transform: translate3d(calc(var(--px) * 46px), calc(var(--py) * 32px), 0);
+}
+
+.survey-light {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60vmax;
+  height: 60vmax;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(18, 69, 79, 0.35) 0%, rgba(18, 69, 79, 0) 68%);
+  transform: translate3d(calc(-50% + var(--mx) * 100%), calc(-50% + var(--my) * 100%), 0);
+}

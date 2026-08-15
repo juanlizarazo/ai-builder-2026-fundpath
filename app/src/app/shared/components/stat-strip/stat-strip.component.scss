@@ -1,0 +1,46 @@
+:host {
+  display: block;
+}
+
+.stat-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--fp-space-2);
+  color: var(--fp-sand);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stat-strip-item {
+  white-space: nowrap;
+}
+
+.stat-strip-number {
+  display: inline-block;
+  min-width: 4ch;
+  text-align: right;
+  color: var(--fp-limestone);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-strip-dot {
+  opacity: 0.5;
+}
+
+.stat-strip-live {
+  display: inline-block;
+  vertical-align: middle;
+  width: 6px;
+  height: 6px;
+  margin-right: var(--fp-space-1);
+  margin-bottom: 1px;
+  border-radius: 50%;
+  background: var(--fp-limestone);
+  animation: statLivePulse 2.2s ease-in-out infinite;
+}
+
+@keyframes statLivePulse {
+  0%, 100% { opacity: 0.3; box-shadow: 0 0 0 0 rgba(246, 244, 240, 0.25); }
+  50% { opacity: 1; box-shadow: 0 0 4px 1px rgba(246, 244, 240, 0.4); }
+}

@@ -1,7 +1,7 @@
 <div class="application-page">
   <div class="application-content animate-slide-up">
     <header class="application-header">
-      <a [routerLink]="['/route', routeId]" class="back-link">← Back to route</a>
+      <a [routerLink]="['/route', routeId]" class="back-link">← Back to path</a>
       <h1 #pageHeading class="page-title" tabindex="-1">
         {{ stop()?.title ?? 'Start your application' }}
       </h1>
@@ -29,238 +29,321 @@
         <p class="kit-loading-text">Building your application starter kit…</p>
       </div>
     } @else if (kit()) {
-      <!-- Registration timeline -->
-      @if (timeline(); as t) {
-        <section class="application-section">
-          <h2 class="section-title">Registration timeline</h2>
-
-          @if (!t.feasible) {
-            <ss-alert-banner [message]="t.headline" type="warning" [dismissible]="false" />
-          } @else {
-            <p class="timeline-headline">{{ t.headline }}</p>
+      <div class="sherpa">
+        <!-- Desktop: thin left rail, echoing the route page's spine language. -->
+        <nav class="sherpa-rail fp-data" aria-label="Application steps">
+          @for (leg of legs; track leg) {
+            <button
+              type="button"
+              class="sherpa-rail-item"
+              [class.sherpa-rail-item--current]="currentLeg() === leg"
+              (click)="goToLeg(leg)"
+            >
+              <span class="sherpa-rail-numeral">{{ leg }}</span>
+              <span class="sherpa-rail-label">{{ legTitles[leg] }}</span>
+            </button>
           }
+        </nav>
 
-          <ol class="timeline-steps">
-            @for (step of t.steps; track step.key) {
-              <li class="timeline-step">
-                <div class="timeline-step-label">{{ step.label }}</div>
-                <div class="timeline-step-system">{{ step.system }}</div>
-                <div class="timeline-step-dates">
-                  <span>Start by {{ formatDate(step.startBy) }}</span>
-                  <span>Complete by {{ formatDate(step.completeBy) }}</span>
-                </div>
-                @if (step.note) {
-                  <p class="timeline-step-note">{{ step.note }}</p>
-                }
-              </li>
-            }
-          </ol>
-        </section>
-      }
+        <!-- Mobile: 4-segment progress bar for Legs 1-4 (Leg 0 is a pre-screen). -->
+        <div class="sherpa-progress" aria-hidden="true">
+          @for (leg of numberedLegs; track leg) {
+            <span class="sherpa-progress-segment" [class.sherpa-progress-segment--done]="currentLeg() >= leg"></span>
+          }
+        </div>
 
-      <!-- Documents checklist -->
-      @if (checklistTasks().length > 0) {
-        <section class="application-section">
-          <h2 class="section-title">Documents &amp; registration checklist</h2>
-          <ul class="task-list" role="list">
-            @for (task of checklistTasks(); track task.id) {
-              <li class="task-item" role="listitem">
-                <label class="task-label">
-                  <input
-                    type="checkbox"
-                    class="task-checkbox"
-                    [checked]="isTaskChecked(task)"
-                    (change)="toggleTask(task)"
-                  />
-                  <span [class.task-label--done]="isTaskChecked(task)">{{ task.label }}</span>
-                </label>
-              </li>
-            }
-          </ul>
-        </section>
-      }
-
-      <!-- Portals & submission mechanics -->
-      @if (portals().length > 0 || submissionMechanics().length > 0) {
-        <section class="application-section">
-          <h2 class="section-title">Portals &amp; submission mechanics</h2>
-
-          @if (portals().length > 0) {
-            <ul class="portal-list" role="list">
-              @for (portal of portals(); track portal.name) {
-                <li>
-                  @if (portal.url) {
-                    <a [href]="portal.url" target="_blank" rel="noopener noreferrer">{{ portal.name }}</a>
+        <div class="sherpa-content">
+          @switch (currentLeg()) {
+            @case (0) {
+              <section class="leg leg-0">
+                @if (timeline(); as t) {
+                  @if (t.feasible) {
+                    <h2 class="leg-headline">Yes — you can make this deadline.</h2>
+                    <p class="leg-subline fp-data">
+                      You have {{ daysAvailable() }} days. You need {{ daysNeeded() }} days.
+                      That leaves {{ slackDays() }} days of slack.
+                    </p>
                   } @else {
-                    <span>{{ portal.name }}</span>
+                    <h2 class="leg-headline leg-headline--signal">This one's tight.</h2>
+                    <p class="leg-subline fp-data leg-subline--signal">{{ t.headline }}</p>
                   }
-                </li>
-              }
-            </ul>
-          }
 
-          @if (submissionMechanics().length > 0) {
-            <dl class="mechanics-list">
-              @for (mechanic of submissionMechanics(); track mechanic.label) {
-                <div class="mechanics-item">
-                  <dt>{{ mechanic.label }}</dt>
-                  <dd>{{ mechanic.detail }}</dd>
-                </div>
-              }
-            </dl>
-          }
-        </section>
-      }
+                  <app-runway
+                    [timeline]="t"
+                    [checkedStepKeys]="checkedStepKeys()"
+                    (stepToggled)="toggleRunwayStep($event)"
+                  />
+                }
 
-      <!-- Narrative starters -->
-      @if (narratives().length > 0) {
-        <section class="application-section">
-          <h2 class="section-title">Narrative starters</h2>
-          <div class="narrative-grid">
-            @for (narrative of narratives(); track narrative.section) {
-              <div class="narrative-card">
-                <div class="narrative-card-header">
-                  <h3 class="narrative-heading">{{ narrative.heading }}</h3>
-                  <button
-                    mat-stroked-button
-                    class="copy-button"
-                    type="button"
-                    (click)="copyNarrative(narrative)"
-                    [attr.aria-label]="'Copy ' + narrative.heading + ' draft to clipboard'"
-                  >
-                    {{ copiedSection() === narrative.section ? 'Copied' : 'Copy' }}
-                  </button>
-                </div>
-                <p class="narrative-draft">{{ narrative.draft }}</p>
-              </div>
+                <button type="button" class="leg-primary-action" (click)="nextLeg()">
+                  Continue →
+                </button>
+              </section>
             }
-          </div>
-        </section>
-      }
+            @case (1) {
+              <section class="leg leg-1">
+                @if (timeline(); as t) {
+                  <app-runway
+                    [timeline]="t"
+                    [checkedStepKeys]="checkedStepKeys()"
+                    (stepToggled)="toggleRunwayStep($event)"
+                  />
 
-      <!-- Applicant details form -->
-      <section class="application-section">
-        <h2 class="section-title">Applicant details</h2>
-        <p class="privacy-note">
-          FundPath never asks for or stores your EIN, UEI, or SSN. Boxes 8b and 8c will be left
-          blank on the downloaded form for you to fill in yourself.
-        </p>
+                  @if (doneStepsCount() > 0) {
+                    <p class="leg-1-done-count fp-data">✓ {{ doneStepsCount() }} done</p>
+                  }
 
-        <form class="applicant-form">
-          <mat-form-field appearance="outline">
-            <mat-label>Legal business name</mat-label>
-            <input matInput [value]="applicantForm().legalName" (input)="updateField('legalName', $event)" required />
-          </mat-form-field>
+                  @if (currentStep(); as step) {
+                    <div class="step-card">
+                      <h3 class="step-card-title">{{ step.label }}</h3>
+                      <p class="step-card-duration fp-data">Takes about {{ step.durationBusinessDays }} business days</p>
+                      @if (step.note) {
+                        <p class="step-card-note">{{ step.note }}</p>
+                      }
+                      <div class="step-card-actions">
+                        @if (step.url) {
+                          <a class="step-card-open" [href]="step.url" target="_blank" rel="noopener noreferrer">
+                            Open {{ step.system }} ↗
+                          </a>
+                        }
+                        <button type="button" class="step-card-done" (click)="toggleRunwayStep(step.key)">
+                          Mark done
+                        </button>
+                      </div>
+                    </div>
+                  } @else {
+                    <p class="step-card-complete">All registration steps are done.</p>
+                  }
+                }
 
-          <mat-form-field appearance="outline">
-            <mat-label>Street address</mat-label>
-            <input matInput [value]="applicantForm().street1" (input)="updateField('street1', $event)" required />
-          </mat-form-field>
+                <button type="button" class="leg-primary-action" (click)="nextLeg()">
+                  Next section →
+                </button>
+              </section>
+            }
+            @case (2) {
+              <section class="leg leg-2">
+                @if (narratives().length > 0) {
+                  <p class="leg-2-progress fp-data">{{ draftedNarrativeCount() }} of {{ narratives().length }} drafted</p>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Street address line 2</mat-label>
-            <input matInput [value]="applicantForm().street2" (input)="updateField('street2', $event)" />
-          </mat-form-field>
+                  <div class="narrative-tabs" role="tablist">
+                    @for (narrative of narratives(); track narrative.section; let i = $index) {
+                      <button
+                        type="button"
+                        role="tab"
+                        class="narrative-tab"
+                        [class.narrative-tab--current]="currentNarrativeIndex() === i"
+                        [attr.aria-selected]="currentNarrativeIndex() === i"
+                        (click)="goToNarrativeTab(i)"
+                      >
+                        @if (isNarrativeDrafted(narrative.section)) {
+                          <span aria-hidden="true">✓</span>
+                        }
+                        {{ narrative.heading }}
+                      </button>
+                    }
+                  </div>
 
-          <div class="form-row">
-            <mat-form-field appearance="outline">
-              <mat-label>City</mat-label>
-              <input matInput [value]="applicantForm().city" (input)="updateField('city', $event)" required />
-            </mat-form-field>
+                  @if (narratives()[currentNarrativeIndex()]; as narrative) {
+                    <div class="narrative-editor">
+                      <div class="narrative-editor-header">
+                        <h3 class="narrative-editor-heading">{{ narrative.heading }}</h3>
+                        <button
+                          type="button"
+                          class="narrative-copy-button"
+                          (click)="copyNarrative(narrative)"
+                          [attr.aria-label]="'Copy ' + narrative.heading + ' draft to clipboard'"
+                        >
+                          {{ copiedSection() === narrative.section ? 'Copied' : 'Copy' }}
+                        </button>
+                      </div>
 
-            <mat-form-field appearance="outline">
-              <mat-label>State</mat-label>
-              <input matInput [value]="applicantForm().state" (input)="updateField('state', $event)" required />
-            </mat-form-field>
+                      <textarea
+                        cdkTextareaAutosize
+                        class="narrative-textarea"
+                        [value]="narrativeDraftsState()[narrative.section] ?? narrative.draft"
+                        (input)="updateNarrativeDraft(narrative.section, $any($event.target).value)"
+                      ></textarea>
 
-            <mat-form-field appearance="outline">
-              <mat-label>ZIP</mat-label>
-              <input matInput [value]="applicantForm().zip" (input)="updateField('zip', $event)" required />
-            </mat-form-field>
-          </div>
+                      <p class="narrative-word-count fp-data">
+                        {{ wordCount(narrativeDraftsState()[narrative.section]) }} words
+                      </p>
+                    </div>
+                  }
 
-          <mat-form-field appearance="outline">
-            <mat-label>County</mat-label>
-            <input matInput [value]="applicantForm().county" (input)="updateField('county', $event)" />
-          </mat-form-field>
+                  <button
+                    type="button"
+                    class="leg-primary-action"
+                    (click)="nextNarrativeSection()"
+                    [disabled]="currentNarrativeIndex() >= narratives().length - 1"
+                  >
+                    Next section →
+                  </button>
+                }
+              </section>
+            }
+            @case (3) {
+              <section class="leg leg-3">
+                <p class="leg-3-hint">Prefilled from your profile — check and edit</p>
+                <p class="leg-3-count fp-data">{{ filledFieldCount() }} of 16 filled</p>
 
-          <div class="form-row">
-            <mat-form-field appearance="outline">
-              <mat-label>Contact first name</mat-label>
-              <input matInput [value]="applicantForm().contactFirstName" (input)="updateField('contactFirstName', $event)" required />
-            </mat-form-field>
+                @switch (currentFormScreen()) {
+                  @case (0) {
+                    <form class="applicant-form">
+                      <h3 class="form-screen-title">Your business</h3>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Legal business name</mat-label>
+                        <input matInput [value]="applicantForm().legalName" (input)="updateField('legalName', $event)" required />
+                      </mat-form-field>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Street address</mat-label>
+                        <input matInput [value]="applicantForm().street1" (input)="updateField('street1', $event)" required />
+                      </mat-form-field>
+                      <div class="form-row">
+                        <mat-form-field appearance="outline">
+                          <mat-label>City</mat-label>
+                          <input matInput [value]="applicantForm().city" (input)="updateField('city', $event)" required />
+                        </mat-form-field>
+                        <mat-form-field appearance="outline">
+                          <mat-label>State</mat-label>
+                          <input matInput [value]="applicantForm().state" (input)="updateField('state', $event)" required />
+                        </mat-form-field>
+                        <mat-form-field appearance="outline">
+                          <mat-label>ZIP</mat-label>
+                          <input matInput [value]="applicantForm().zip" (input)="updateField('zip', $event)" required />
+                        </mat-form-field>
+                      </div>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Contact last name</mat-label>
-              <input matInput [value]="applicantForm().contactLastName" (input)="updateField('contactLastName', $event)" required />
-            </mat-form-field>
-          </div>
+                      <button type="button" class="optional-toggle" (click)="toggleOptionalFields(0)">
+                        + optional
+                      </button>
+                      @if (optionalFieldsOpen()[0]) {
+                        <mat-form-field appearance="outline">
+                          <mat-label>Street address line 2</mat-label>
+                          <input matInput [value]="applicantForm().street2" (input)="updateField('street2', $event)" />
+                        </mat-form-field>
+                        <mat-form-field appearance="outline">
+                          <mat-label>County</mat-label>
+                          <input matInput [value]="applicantForm().county" (input)="updateField('county', $event)" />
+                        </mat-form-field>
+                      }
+                    </form>
+                  }
+                  @case (1) {
+                    <form class="applicant-form">
+                      <h3 class="form-screen-title">Who to contact</h3>
+                      <div class="form-row">
+                        <mat-form-field appearance="outline">
+                          <mat-label>Contact first name</mat-label>
+                          <input matInput [value]="applicantForm().contactFirstName" (input)="updateField('contactFirstName', $event)" required />
+                        </mat-form-field>
+                        <mat-form-field appearance="outline">
+                          <mat-label>Contact last name</mat-label>
+                          <input matInput [value]="applicantForm().contactLastName" (input)="updateField('contactLastName', $event)" required />
+                        </mat-form-field>
+                      </div>
+                      <div class="form-row">
+                        <mat-form-field appearance="outline">
+                          <mat-label>Contact email</mat-label>
+                          <input matInput type="email" [value]="applicantForm().contactEmail" (input)="updateField('contactEmail', $event)" required />
+                        </mat-form-field>
+                        <mat-form-field appearance="outline">
+                          <mat-label>Contact phone</mat-label>
+                          <input matInput type="tel" [value]="applicantForm().contactPhone" (input)="updateField('contactPhone', $event)" required />
+                        </mat-form-field>
+                      </div>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Contact title</mat-label>
-            <input matInput [value]="applicantForm().contactTitle" (input)="updateField('contactTitle', $event)" />
-          </mat-form-field>
+                      <button type="button" class="optional-toggle" (click)="toggleOptionalFields(1)">
+                        + optional
+                      </button>
+                      @if (optionalFieldsOpen()[1]) {
+                        <mat-form-field appearance="outline">
+                          <mat-label>Contact title</mat-label>
+                          <input matInput [value]="applicantForm().contactTitle" (input)="updateField('contactTitle', $event)" />
+                        </mat-form-field>
+                      }
+                    </form>
+                  }
+                  @case (2) {
+                    <form class="applicant-form">
+                      <h3 class="form-screen-title">Your project</h3>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Project title</mat-label>
+                        <input matInput [value]="applicantForm().projectTitle" (input)="updateField('projectTitle', $event)" required />
+                      </mat-form-field>
+                      <div class="form-row">
+                        <mat-form-field appearance="outline">
+                          <mat-label>Proposed project start date</mat-label>
+                          <input matInput type="date" [value]="applicantForm().projectStartDate" (input)="updateField('projectStartDate', $event)" />
+                        </mat-form-field>
+                        <mat-form-field appearance="outline">
+                          <mat-label>Proposed project end date</mat-label>
+                          <input matInput type="date" [value]="applicantForm().projectEndDate" (input)="updateField('projectEndDate', $event)" />
+                        </mat-form-field>
+                      </div>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Funding requested</mat-label>
+                        <input matInput type="number" [value]="applicantForm().fundingRequested" (input)="updateField('fundingRequested', $event)" />
+                      </mat-form-field>
 
-          <div class="form-row">
-            <mat-form-field appearance="outline">
-              <mat-label>Contact email</mat-label>
-              <input matInput type="email" [value]="applicantForm().contactEmail" (input)="updateField('contactEmail', $event)" required />
-            </mat-form-field>
+                      <p class="privacy-note">
+                        FundPath never asks for or stores your EIN, UEI, or SSN. Boxes 8b and 8c will be left
+                        blank on the downloaded form for you to fill in yourself.
+                      </p>
+                    </form>
+                  }
+                }
 
-            <mat-form-field appearance="outline">
-              <mat-label>Contact phone</mat-label>
-              <input matInput type="tel" [value]="applicantForm().contactPhone" (input)="updateField('contactPhone', $event)" required />
-            </mat-form-field>
-          </div>
+                <div class="leg-form-actions">
+                  <button type="button" class="leg-secondary-action" (click)="previousFormScreen()">← Back</button>
+                  <button type="button" class="leg-primary-action" (click)="nextFormScreen()">Looks right →</button>
+                </div>
+              </section>
+            }
+            @case (4) {
+              <section class="leg leg-4">
+                @if (sf424Error()) {
+                  <ss-alert-banner [message]="sf424Error()" type="error" (dismissed)="clearSf424Error()" />
+                }
 
-          <mat-form-field appearance="outline">
-            <mat-label>Project title</mat-label>
-            <input matInput [value]="applicantForm().projectTitle" (input)="updateField('projectTitle', $event)" required />
-          </mat-form-field>
+                @if (sf424SafeUrl(); as safeUrl) {
+                  <div class="sf424-actions">
+                    <button type="button" class="sf424-download" (click)="downloadSf424()" [disabled]="isDownloading()">
+                      <span class="fp-btn-content">
+                        @if (isDownloading()) {
+                          <mat-progress-spinner mode="indeterminate" diameter="16" />
+                        }
+                        <span>Download</span>
+                      </span>
+                    </button>
+                    <button type="button" class="sf424-open" (click)="openSf424InNewTab()">Open in new tab ↗</button>
+                  </div>
 
-          <div class="form-row">
-            <mat-form-field appearance="outline">
-              <mat-label>Proposed project start date</mat-label>
-              <input matInput type="date" [value]="applicantForm().projectStartDate" (input)="updateField('projectStartDate', $event)" />
-            </mat-form-field>
+                  <iframe class="sf424-viewer" [src]="safeUrl" title="Your filled SF-424"></iframe>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Proposed project end date</mat-label>
-              <input matInput type="date" [value]="applicantForm().projectEndDate" (input)="updateField('projectEndDate', $event)" />
-            </mat-form-field>
-          </div>
+                  <p class="sf424-fallback-note">
+                    Can't see the form above? <a [href]="sf424Result()?.url ?? '#'" (click)="openSf424InNewTab()">Open it directly ↗</a>
+                  </p>
+                } @else if (isGeneratingSf424()) {
+                  <p class="sf424-generating fp-data">Generating your filled SF-424…</p>
+                } @else {
+                  <p class="sf424-waiting">Finish Leg 3 and your filled SF-424 will appear here automatically.</p>
+                }
 
-          <mat-form-field appearance="outline">
-            <mat-label>Funding requested</mat-label>
-            <input matInput type="number" [value]="applicantForm().fundingRequested" (input)="updateField('fundingRequested', $event)" />
-          </mat-form-field>
-        </form>
-      </section>
+                <p class="sf424-privacy-note">
+                  Boxes 8b and 8c are blank — those are your EIN and UEI, and we never ask for them.
+                </p>
 
-      @if (downloadError()) {
-        <ss-alert-banner
-          [message]="downloadError()"
-          type="error"
-          (dismissed)="clearDownloadError()"
-        />
-      }
+                @if (portalsFootnote()) {
+                  <p class="sf424-portals-footnote fp-data">{{ portalsFootnote() }}</p>
+                }
 
-      <section class="application-section application-section--download">
-        <button
-          mat-flat-button
-          class="download-button"
-          type="button"
-          (click)="downloadSf424()"
-          [disabled]="!isFormComplete() || isDownloading()"
-        >
-          @if (isDownloading()) {
-            <mat-progress-spinner mode="indeterminate" diameter="18" class="download-spinner" />
-            <span>Generating your SF-424…</span>
-          } @else {
-            <span>Download filled SF-424</span>
+                <button type="button" class="leg-secondary-action" (click)="previousFormScreen()">← Back</button>
+              </section>
+            }
           }
-        </button>
-      </section>
+        </div>
+      </div>
     }
   </div>
 </div>

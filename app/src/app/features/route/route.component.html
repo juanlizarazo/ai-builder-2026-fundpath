@@ -1,41 +1,78 @@
 @if (isLoading()) {
   <div class="route-loading">
     <mat-progress-spinner mode="indeterminate" diameter="48" />
-    <p class="route-loading-text">Loading your route…</p>
+    <p class="route-loading-text">Loading your path…</p>
   </div>
 } @else if (!route()) {
   <div class="not-found">
-    <p>Route not found.</p>
+    <p>Path not found.</p>
     <a routerLink="/" mat-stroked-button>← Return to home</a>
   </div>
 } @else {
   <div class="route-page">
     <div class="route-content animate-slide-up">
       <header class="route-header">
-        <a routerLink="/" class="back-link">← New search</a>
+        <div class="route-header-top">
+          <a routerLink="/" class="back-link">← New search</a>
+        </div>
+        <div class="verdict-rule" aria-hidden="true"></div>
         <h1 class="verdict-line">{{ route()!.verdictLine }}</h1>
 
-        @if (isDeepRunning()) {
-          <div class="deep-pass-indicator deep-pass-indicator--running">
-            <mat-progress-spinner mode="indeterminate" diameter="16" />
-            <span>Still searching deeper…</span>
+        @if (!isAbstention()) {
+          <div class="summary-rail fp-data">
+            <span class="summary-item">{{ stopCount() }} PROGRAM{{ stopCount() === 1 ? '' : 'S' }}</span>
+            @if (awardRange(); as range) {
+              <span class="summary-sep" aria-hidden="true">·</span>
+              <span class="summary-item">{{ formatDollars(range.min) }}–{{ formatDollars(range.max) }} RANGE</span>
+            }
+            @if (nextDeadlineDays() !== null) {
+              <span class="summary-sep" aria-hidden="true">·</span>
+              <span class="summary-item" [class.summary-item--urgent]="isDeadlineUrgent()">
+                NEXT DEADLINE IN {{ nextDeadlineDays() }} DAYS
+              </span>
+            }
+            <span class="summary-sep" aria-hidden="true">·</span>
+            <span class="summary-item">{{ offRouteStops().length }} RULED OUT</span>
           </div>
         }
 
-        @if (deepPassFoundNew()) {
-          <div class="deep-pass-indicator deep-pass-indicator--found">
-            <mat-icon>check_circle</mat-icon>
-            <span>Found more opportunities</span>
+        <div class="discovery-bar">
+          <div class="discovery-status" [class.discovery-status--running]="isDeepRunning()">
+            @if (isDeepRunning()) {
+              <span class="pulse-dot" aria-hidden="true"></span>
+              <span>Still searching deeper for more matches…</span>
+            } @else if (deepPassFoundNew()) {
+              <mat-icon class="discovery-status-icon">check_circle</mat-icon>
+              <span>We found new opportunities since your last visit</span>
+            } @else {
+              <mat-icon class="discovery-status-icon">search</mat-icon>
+              <span>You're seeing the current pool of matches</span>
+            }
           </div>
+
+          <button mat-stroked-button class="check-for-new-button" (click)="checkForNewPrograms()">
+            <mat-icon>refresh</mat-icon>
+            Check for new
+          </button>
+        </div>
+
+        @if (checkForNewError()) {
+          <ss-alert-banner
+            [message]="checkForNewError()"
+            type="error"
+            (dismissed)="clearCheckForNewError()"
+          />
+        }
+
+        @if (checkForNewMessage()) {
+          <p class="check-for-new-message">{{ checkForNewMessage() }}</p>
         }
       </header>
 
       @if (isAbstention()) {
         <section class="abstention-section">
-          <div class="abstention-badge">
-            <mat-icon>info</mat-icon>
-            <span>No strong federal grant match</span>
-          </div>
+          <div class="abstention-rule" aria-hidden="true"></div>
+          <h2 class="abstention-headline">No strong federal grant match — and that's the honest answer.</h2>
           <p class="abstention-explanation">
             Your company profile does not align well with federal SBIR/STTR grant programs at this stage.
             Federal research grants require an R&D core and a technology-development mandate.
@@ -44,74 +81,108 @@
           <h2 class="section-title section-title--amber">Alternative path</h2>
           <div class="stops-list">
             @for (stop of nonGrantStops(); track stop.id) {
-              <div class="timeline-node timeline-node--nongrant">
-                <app-stop [stop]="stop" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" />
+              <div [id]="'stop-' + stop.id">
+                <app-stop [stop]="stop" (opened)="openStopDetail($event)" />
               </div>
             }
           </div>
         </section>
+      } @else if (!hasAnyContent()) {
+        <div class="empty-route">
+          <mat-icon>search</mat-icon>
+          <p>No matches yet. Try "Check for new opportunities" above, or check back after your next search.</p>
+        </div>
       } @else {
-        @if (primaryStops().length > 0) {
+        @if (diagramStations().length > 0 || offRouteStops().length > 0) {
           <section class="route-section">
-            <h2 class="section-title">Your Route</h2>
-            <div class="timeline">
-              @for (stop of primaryStops(); track stop.id) {
-                <div class="timeline-node timeline-node--primary">
-                  <app-stop [stop]="stop" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" />
-                </div>
+            <h2 class="section-title">Your Path</h2>
 
-                @for (alongside of alongsideForPrimary(stop); track alongside.id) {
-                  <div class="timeline-node timeline-node--alongside">
-                    <app-stop [stop]="alongside" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" />
+            @if (diagramStations().length > 0) {
+              <app-route-path
+                [stations]="diagramStations()"
+                [(hoveredStopId)]="hoveredStopId"
+                (opened)="openStopDetail($event)"
+              />
+            }
+
+            @if (offRouteStops().length > 0) {
+              <div class="ruled-out-block">
+                <button
+                  type="button"
+                  class="ruled-out-toggle fp-data"
+                  (click)="toggleRuledOut()"
+                  [attr.aria-expanded]="isRuledOutOpen()"
+                >
+                  <span aria-hidden="true">○</span>
+                  {{ offRouteStops().length }} ruled out
+                </button>
+
+                @if (isRuledOutOpen()) {
+                  <div class="ruled-out-list">
+                    @for (stop of offRouteStops(); track stop.id) {
+                      <div class="ruled-out-row" [id]="'stop-' + stop.id">
+                        <span class="ruled-out-title">{{ stop.title }}</span>
+                        <span class="ruled-out-reason">{{ ruledOutReason(stop) }}</span>
+                      </div>
+                    }
                   </div>
                 }
-              }
-
-              @for (stop of alongsideStops(); track stop.id) {
-                @if (stop.sequenceMonth === undefined) {
-                  <div class="timeline-node timeline-node--alongside">
-                    <app-stop [stop]="stop" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" />
-                  </div>
-                }
-              }
-            </div>
+              </div>
+            }
           </section>
         }
 
         @if (nonGrantStops().length > 0) {
           <section class="route-section route-section--amber">
             <h2 class="section-title section-title--amber">Alternative path</h2>
+            <p class="section-subtitle">Grants aren't the right fit here, but these programs are worth a look.</p>
             <div class="stops-list">
               @for (stop of nonGrantStops(); track stop.id) {
-                <div class="timeline-node timeline-node--nongrant">
-                  <app-stop [stop]="stop" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" />
+                <div [id]="'stop-' + stop.id">
+                  <app-stop [stop]="stop" (opened)="openStopDetail($event)" />
                 </div>
               }
             </div>
           </section>
         }
 
-        @if (offRouteStops().length > 0) {
-          <section class="route-section">
-            <mat-expansion-panel class="off-route-panel">
-              <mat-expansion-panel-header>
-                <mat-panel-title>
-                  Programs we ruled out ({{ offRouteStops().length }})
-                </mat-panel-title>
-                <mat-panel-description>
-                  Not a fit right now — see why
-                </mat-panel-description>
-              </mat-expansion-panel-header>
-
-              <div class="stops-list">
-                @for (stop of offRouteStops(); track stop.id) {
-                  <app-stop [stop]="stop" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" />
-                }
-              </div>
-            </mat-expansion-panel>
+        @if (utahResources().length > 0) {
+          <section class="route-section utah-resources">
+            <h2 class="section-title">Utah resources</h2>
+            <div class="resource-chips">
+              @for (resource of utahResources(); track resource.id) {
+                <a
+                  class="resource-chip"
+                  [href]="resource.link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  [title]="resource.matchReason"
+                >
+                  <mat-icon>place</mat-icon>
+                  {{ resource.title }}
+                </a>
+              }
+            </div>
           </section>
         }
       }
     </div>
   </div>
+
+  <ss-side-panel
+    [title]="selectedStopForDetail()?.title ?? 'Program details'"
+    [isOpen]="isStopDetailOpen()"
+    [width]="780"
+    (closed)="closeStopDetail()"
+  >
+    @if (selectedStopForDetail(); as detailStop) {
+      <app-stop-detail-panel
+        [stop]="detailStop"
+        [routeId]="routeId!"
+        [taskState]="route()?.taskState ?? {}"
+        [askMin]="askMin()"
+        [askMax]="askMax()"
+      />
+    }
+  </ss-side-panel>
 }

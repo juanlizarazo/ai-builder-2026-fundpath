@@ -1,4 +1,4 @@
-import { Component, EventEmitter, HostListener, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, Output, SimpleChanges, inject } from '@angular/core';
 
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,7 +12,14 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
     @if (isOpen) {
       <div class="side-panel-backdrop" [class.dark]="theme === 'dark'" (click)="closable && close()" [@fadeInOut]></div>
     }
-    <div class="side-panel" [class.open]="isOpen" [class.bottom-sheet]="isMobile" [class.theme-dark]="theme === 'dark'" [@slideInOut]="getAnimationState()">
+    <div
+      class="side-panel"
+      [class.open]="isOpen"
+      [class.bottom-sheet]="isMobile"
+      [class.theme-dark]="theme === 'dark'"
+      [style.width.px]="!isMobile ? width : null"
+      [@slideInOut]="getAnimationState()"
+    >
       <div class="side-panel-header">
         <span class="side-panel-title">{{ title }}</span>
         <button mat-icon-button (click)="close()" aria-label="Close panel" [disabled]="!closable">
@@ -117,10 +124,15 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
 export class SidePanelComponent implements OnChanges, OnDestroy {
   private static _openCount = 0;
 
+  private readonly _elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+  private _previouslyFocused: HTMLElement | null = null;
+
   @Input() public title = '';
   @Input() public isOpen = false;
   @Input() public closable = true;
   @Input() public theme: 'light' | 'dark' = 'light';
+  /** Desktop panel width in px (ignored on mobile, where it's always full-width). */
+  @Input() public width = 420;
   @Output() public closed = new EventEmitter<void>();
 
   public isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
@@ -130,6 +142,13 @@ export class SidePanelComponent implements OnChanges, OnDestroy {
     this.isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
   }
 
+  @HostListener('window:keydown.escape')
+  public onEscape(): void {
+    if (this.isOpen && this.closable) {
+      this.close();
+    }
+  }
+
   public ngOnChanges(changes: SimpleChanges): void {
     if (changes['isOpen']) {
       const wasOpen = changes['isOpen'].previousValue === true;
@@ -137,8 +156,12 @@ export class SidePanelComponent implements OnChanges, OnDestroy {
 
       if (!wasOpen && nowOpen) {
         SidePanelComponent._openCount++;
+        this._previouslyFocused = document.activeElement as HTMLElement | null;
+        setTimeout(() => this._focusFirst(), 0);
       } else if (wasOpen && !nowOpen) {
         SidePanelComponent._openCount = Math.max(0, SidePanelComponent._openCount - 1);
+        this._previouslyFocused?.focus();
+        this._previouslyFocused = null;
       }
 
       this._syncBodyClass();
@@ -150,6 +173,15 @@ export class SidePanelComponent implements OnChanges, OnDestroy {
       SidePanelComponent._openCount = Math.max(0, SidePanelComponent._openCount - 1);
       this._syncBodyClass();
     }
+  }
+
+  private _focusFirst(): void {
+    const panel = this._elementRef.nativeElement.querySelector<HTMLElement>('.side-panel');
+    const firstFocusable = panel?.querySelector<HTMLElement>(
+      'button, a[href], input, textarea, select, [tabindex]:not([tabindex="-1"])'
+    );
+
+    firstFocusable?.focus();
   }
 
   public getAnimationState(): string {

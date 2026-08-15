@@ -11,7 +11,7 @@ export const deepPass = onDocumentCreated(
     region: 'us-central1',
     timeoutSeconds: 300,
     memory: '1GiB',
-    secrets: ['ANTHROPIC_API_KEY'],
+    secrets: ['ANTHROPIC_API_KEY', 'RESEND_API_KEY'],
   },
   async event => {
     const routeId = event.params['routeId'];

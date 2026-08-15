@@ -62,6 +62,10 @@ export interface IStartupProfile {
   productMaturity?: string;
   ownershipSignals?: string[];
   applicantDetails?: IApplicantDetails;
+  notifyEmail?: string;
+  notifyPhone?: string;
+  smsOptIn?: boolean;
+  smsOptInAt?: Timestamp;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -238,4 +242,24 @@ export interface IStarterKit {
   sf424?: { storagePath: string; generatedAt: Timestamp };
   createdAt: Timestamp;
   updatedAt: Timestamp;
+}
+
+export type NotificationKind = 'route-ready' | 'new-stops';
+export type NotifyChannel = 'inbox' | 'email' | 'telegram' | 'whatsapp' | 'sms';
+export type DeliveryStatus = 'inbox-only' | 'sent' | 'failed';
+
+export interface INotification {
+  id?: string;
+  uid: string;
+  routeId: string;
+  kind: NotificationKind;
+  title: string;
+  body: string;
+  stopIds: string[];
+  channel: NotifyChannel;
+  deliveryStatus: DeliveryStatus;
+  providerMessageId?: string;
+  errorMessage?: string;
+  createdAt: Timestamp;
+  readAt?: Timestamp;
 }

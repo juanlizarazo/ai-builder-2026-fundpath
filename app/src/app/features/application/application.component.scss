@@ -305,3 +305,388 @@
     gap: 0;
   }
 }
+
+// --- Sherpa: leg shell ------------------------------------------------------
+
+.sherpa {
+  display: flex;
+  gap: 32px;
+}
+
+.sherpa-rail {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 160px;
+}
+
+.sherpa-rail-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 4px;
+  background: none;
+  border: none;
+  border-left: 2px solid var(--fp-sand);
+  text-align: left;
+  cursor: pointer;
+  color: #999;
+
+  &--current {
+    border-left-color: var(--fp-basin);
+    color: var(--fp-ink);
+    font-weight: 600;
+  }
+}
+
+.sherpa-rail-numeral {
+  width: 18px;
+  flex-shrink: 0;
+}
+
+.sherpa-rail-label {
+  font-size: 13px;
+  font-family: var(--fp-font-body);
+}
+
+.sherpa-progress {
+  display: none;
+  gap: 4px;
+}
+
+.sherpa-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.leg {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.leg-headline {
+  font-family: var(--fp-font-display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--fp-ink);
+  margin: 0;
+
+  &--signal {
+    color: var(--fp-signal);
+  }
+}
+
+.leg-subline {
+  color: #555;
+  margin: 0;
+
+  &--signal {
+    color: var(--fp-signal);
+  }
+}
+
+.leg-primary-action {
+  align-self: flex-start;
+  padding: 12px 20px;
+  background: var(--fp-basin);
+  color: #fff;
+  border: none;
+  border-radius: var(--fp-radius-sm);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.92;
+  }
+}
+
+.leg-stub {
+  color: #888;
+  font-style: italic;
+}
+
+@media (max-width: 767px) {
+  .sherpa {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .sherpa-rail {
+    display: none;
+  }
+
+  .sherpa-progress {
+    display: flex;
+  }
+
+  .sherpa-progress-segment {
+    flex: 1;
+    height: 4px;
+    background: var(--fp-sand);
+    border-radius: var(--fp-radius-full);
+
+    &--done {
+      background: var(--fp-basin);
+    }
+  }
+}
+
+// --- Leg 1: registration ---------------------------------------------------
+
+.leg-1-done-count {
+  color: var(--fp-sage);
+  font-weight: 600;
+}
+
+.step-card {
+  border: 1px solid var(--fp-sand);
+  border-radius: var(--fp-radius-sm);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.step-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--fp-ink);
+  margin: 0;
+}
+
+.step-card-duration {
+  color: #888;
+  margin: 0;
+}
+
+.step-card-note {
+  font-size: 13px;
+  color: #555;
+  margin: 0;
+}
+
+.step-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 4px;
+}
+
+.step-card-open {
+  color: var(--fp-basin);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.step-card-done {
+  padding: 6px 14px;
+  background: var(--fp-basin);
+  color: #fff;
+  border: none;
+  border-radius: var(--fp-radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.step-card-complete {
+  color: var(--fp-sage);
+  font-weight: 600;
+}
+
+// --- Leg 2: narratives -------------------------------------------------------
+
+.leg-2-progress {
+  color: #888;
+}
+
+.narrative-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.narrative-tab {
+  padding: 6px 12px;
+  border: 1px solid var(--fp-sand);
+  border-radius: var(--fp-radius-full);
+  background: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: #666;
+
+  &--current {
+    border-color: var(--fp-basin);
+    color: var(--fp-ink);
+    font-weight: 600;
+  }
+}
+
+.narrative-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.narrative-editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.narrative-editor-heading {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--fp-ink);
+}
+
+.narrative-copy-button {
+  font-size: 12px;
+  padding: 4px 10px;
+  border: 1px solid var(--fp-sand);
+  border-radius: var(--fp-radius-sm);
+  background: none;
+  cursor: pointer;
+  color: #666;
+}
+
+.narrative-textarea {
+  width: 100%;
+  min-height: 140px;
+  padding: 12px;
+  border: 1px solid var(--fp-sand);
+  border-radius: var(--fp-radius-sm);
+  font-family: var(--fp-font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--fp-ink);
+  resize: vertical;
+
+  &:focus-visible {
+    outline: 2px solid var(--fp-basin);
+    outline-offset: 1px;
+  }
+}
+
+.narrative-word-count {
+  color: #999;
+  align-self: flex-end;
+}
+
+// --- Leg 3: fill the form ---------------------------------------------------
+
+.leg-3-hint {
+  color: var(--fp-basin);
+  font-weight: 600;
+  margin: 0;
+}
+
+.leg-3-count {
+  color: #888;
+  margin: 0 0 8px;
+}
+
+.form-screen-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--fp-ink);
+  margin: 0 0 8px;
+}
+
+.optional-toggle {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: var(--fp-basin);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.leg-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.leg-secondary-action {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 0;
+}
+
+// --- Leg 4: your form --------------------------------------------------------
+
+.sf424-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.sf424-download,
+.sf424-open {
+  padding: 10px 18px;
+  border-radius: var(--fp-radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sf424-download {
+  background: var(--fp-basin);
+  color: #fff;
+  border: none;
+
+  &[disabled] {
+    opacity: 0.55;
+  }
+}
+
+.sf424-open {
+  background: none;
+  border: 1px solid var(--fp-sand);
+  color: var(--fp-ink);
+}
+
+.sf424-viewer {
+  width: 100%;
+  height: 700px;
+  border: 1px solid var(--fp-sand);
+  border-radius: var(--fp-radius-sm);
+}
+
+.sf424-fallback-note {
+  font-size: 12px;
+  color: #888;
+
+  a {
+    color: var(--fp-basin);
+  }
+}
+
+.sf424-generating,
+.sf424-waiting {
+  color: #666;
+}
+
+.sf424-privacy-note {
+  font-size: 13px;
+  color: #666;
+}
+
+.sf424-portals-footnote {
+  color: #888;
+}

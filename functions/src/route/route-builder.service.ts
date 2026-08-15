@@ -14,6 +14,7 @@ import { HistoricalHelper } from './historical.helper';
 import { ResourcesHelper } from './resources.helper';
 import { ExtractionService } from './extraction.service';
 import { ExplanationService } from './explanation.service';
+import { NotifyService } from '../watch/notify.service';
 import {
   IAbstentionVerdict,
   ICandidate,
@@ -39,10 +40,17 @@ export interface IBuildResult {
   drops: IPipelineDrop[];
 }
 
+export interface INotifyFields {
+  notifyEmail?: string;
+  notifyPhone?: string;
+  smsOptIn?: boolean;
+}
+
 export class RouteBuilderService {
   private readonly _retrieval = new RetrievalService();
   private readonly _extraction = new ExtractionService();
   private readonly _explanation = new ExplanationService();
+  private readonly _notify = new NotifyService();
 
   private static _registrationDeadline(opportunity: IOpportunity): Timestamp | undefined {
     const timeline = RegistrationTimelineHelper.build({
@@ -221,7 +229,7 @@ export class RouteBuilderService {
     };
   }
 
-  public async deepPass(db: Firestore, routeId: string): Promise<void> {
+  public async deepPass(db: Firestore, routeId: string, force = false): Promise<IStop[]> {
     const routeRef = db.collection('routes').doc(routeId);
     const snapshot = await routeRef.get();
     const existing = snapshot.data() as IRoute | undefined;
@@ -229,11 +237,11 @@ export class RouteBuilderService {
     if (!existing) {
       logger.warn('Deep pass skipped — route not found', { routeId });
 
-      return;
+      return [];
     }
 
-    if (existing.deepPassStatus === 'complete') {
-      return;
+    if (existing.deepPassStatus === 'complete' && !force) {
+      return [];
     }
 
     const profileSnapshot = await db.collection('profiles').doc(existing.profileId).get();
@@ -243,7 +251,7 @@ export class RouteBuilderService {
       logger.warn('Deep pass skipped — profile not found', { routeId });
       await routeRef.update({ deepPassStatus: 'complete', updatedAt: Timestamp.now() });
 
-      return;
+      return [];
     }
 
     const startedAt = Date.now();
@@ -271,7 +279,7 @@ export class RouteBuilderService {
         elapsedMs: Date.now() - startedAt,
       });
 
-      return;
+      return [];
     }
 
     const explanations = await this._explanation.explain(profile, freshStops);
@@ -287,8 +295,10 @@ export class RouteBuilderService {
       }
     }
 
+    const updatedStops = [...(existing.stops ?? []), ...freshStops];
+
     await routeRef.update({
-      stops: [...(existing.stops ?? []), ...freshStops],
+      stops: updatedStops,
       verdictLine: assembled.verdict.verdictLine,
       stackingNote: assembled.stacking.note,
       deepPassStatus: 'complete',
@@ -301,9 +311,18 @@ export class RouteBuilderService {
       added: freshStops.length,
       elapsedMs: Date.now() - startedAt,
     });
+
+    await this._notify.newStops(db, { ...existing, stops: updatedStops }, freshStops);
+
+    return freshStops;
   }
 
-  public async build(db: Firestore, uid: string, description: string): Promise<IBuildResult> {
+  public async build(
+    db: Firestore,
+    uid: string,
+    description: string,
+    notifyFields: INotifyFields = {}
+  ): Promise<IBuildResult> {
     const drops: IPipelineDrop[] = [];
     const startedAt = Date.now();
 
@@ -319,7 +338,22 @@ export class RouteBuilderService {
     });
 
     const profileRef = db.collection('profiles').doc(uid);
-    await profileRef.set({ ...profile, id: uid }, { merge: true });
+    const profileWrite: IStartupProfile & { id: string } = { ...profile, id: uid };
+
+    if (notifyFields.notifyEmail) {
+      profileWrite.notifyEmail = notifyFields.notifyEmail;
+    }
+    if (notifyFields.notifyPhone) {
+      profileWrite.notifyPhone = notifyFields.notifyPhone;
+    }
+    if (notifyFields.smsOptIn) {
+      profileWrite.smsOptIn = true;
+      profileWrite.smsOptInAt = Timestamp.now();
+    } else if (notifyFields.smsOptIn === false) {
+      profileWrite.smsOptIn = false;
+    }
+
+    await profileRef.set(profileWrite, { merge: true });
 
     const assembled = await this._assemble(db, profile, expansion, drops, false);
     const { stops, offRoute, nonGrantAlternatives, verdict, stacking } = assembled;
