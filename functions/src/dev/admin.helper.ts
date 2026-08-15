@@ -28,6 +28,14 @@ interface IFirebaseCliStore {
 export class AdminHelper {
   private static _db: Firestore | null = null;
 
+  public static readCliRefreshToken(): string | null {
+    return AdminHelper._readCliRefreshToken();
+  }
+
+  public static getCliClientCredentials(): { clientId: string; clientSecret: string } {
+    return { clientId: FIREBASE_CLI_CLIENT_ID, clientSecret: FIREBASE_CLI_CLIENT_SECRET };
+  }
+
   private static _readCliRefreshToken(): string | null {
     const storePath = path.join(os.homedir(), '.config', 'configstore', 'firebase-tools.json');
 
