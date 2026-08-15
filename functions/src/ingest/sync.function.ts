@@ -1,9 +1,9 @@
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { onCall } from 'firebase-functions/v2/https';
 import * as logger from 'firebase-functions/logger';
-import { initializeApp, getApps, App } from 'firebase-admin/app';
-import { getFirestore, Firestore, Timestamp } from 'firebase-admin/firestore';
+import { Timestamp } from 'firebase-admin/firestore';
 import { CallableGuardHelper } from '../shared/callable-guard.helper';
+import { FirebaseHelper } from '../shared/firebase.helper';
 import { GrantsGovHelper } from './grants-gov';
 import { SbirHelper } from './sbir';
 import { AssistanceListingsHelper } from './assistance-listings';
@@ -14,24 +14,6 @@ import { UtahResourcesHelper } from './utah-resources';
 import { Normalizer } from './normalizer';
 import { IOpportunity } from '../firestore';
 import { AGENCY_ALN_PREFIXES, VERTICAL_NAICS_MAP } from '../route/expansion.constants';
-
-const app: App = getApps().length ? getApps()[0] : initializeApp();
-
-let cachedDb: Firestore | null = null;
-
-function getDb(): Firestore {
-  if (!cachedDb) {
-    cachedDb = getFirestore(app);
-
-    try {
-      cachedDb.settings({ ignoreUndefinedProperties: true });
-    } catch (err) {
-      logger.warn('Firestore settings already applied', { error: (err as Error).message });
-    }
-  }
-
-  return cachedDb;
-}
 
 const ALLOWED_ALN_PREFIXES = new Set(Object.values(AGENCY_ALN_PREFIXES));
 const WRITE_BATCH_SIZE = 400;
@@ -47,7 +29,7 @@ function isAllowedAln(opportunity: IOpportunity): boolean {
 }
 
 export async function runSync(): Promise<void> {
-  const db = getDb();
+  const db = FirebaseHelper.getDb();
   let countGrantsGov = 0;
   let countSeed = 0;
   let countHydrated = 0;

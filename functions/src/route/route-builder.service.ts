@@ -1,6 +1,6 @@
 import { Firestore, Timestamp } from 'firebase-admin/firestore';
 import * as logger from 'firebase-functions/logger';
-import { IHistoricalProof, IOpportunity, IRoute, IStop, ITask } from '../firestore';
+import { IHistoricalProof, IOpportunity, IRoute, IStartupProfile, IStop, ITask } from '../firestore';
 import { ExpansionHelper } from './expansion.helper';
 import { RetrievalService } from './retrieval.service';
 import { EligibilityRulesHelper } from './eligibility.rules';
@@ -13,8 +13,23 @@ import { HistoricalHelper } from './historical.helper';
 import { ResourcesHelper } from './resources.helper';
 import { ExtractionService } from './extraction.service';
 import { ExplanationService } from './explanation.service';
-import { ICandidate, IPipelineDrop, ISequencedCandidate } from './route.interfaces';
+import {
+  IAbstentionVerdict,
+  ICandidate,
+  IExpansion,
+  IPipelineDrop,
+  ISequencedCandidate,
+  IStackingPlan,
+} from './route.interfaces';
 import { REGISTRATION_LEAD_BUSINESS_DAYS, ROUTE_LIMITS } from './retrieval.constants';
+
+interface IAssembledRoute {
+  stops: IStop[];
+  offRoute: IStop[];
+  nonGrantAlternatives: IStop[];
+  verdict: IAbstentionVerdict;
+  stacking: IStackingPlan;
+}
 
 export interface IBuildResult {
   profileId: string;
@@ -125,26 +140,14 @@ export class RouteBuilderService {
     });
   }
 
-  public async build(db: Firestore, uid: string, description: string): Promise<IBuildResult> {
-    const drops: IPipelineDrop[] = [];
-    const startedAt = Date.now();
-
-    const profile = await this._extraction.extract(uid, description);
-    const expansion = ExpansionHelper.expand(profile);
-    logger.info('Profile extracted', {
-      industry: profile.industry,
-      vertical: expansion.verticalSlug,
-      employees: profile.employees,
-      hasRdCore: profile.hasRdCore,
-      askMin: profile.askMin,
-      askMax: profile.askMax,
-    });
-
-    const profileRef = db.collection('profiles').doc(uid);
-    await profileRef.set({ ...profile, id: uid }, { merge: true });
-
-    const retrieved = await this._retrieval.retrieve(db, expansion, drops);
-
+  private async _assemble(
+    db: Firestore,
+    profile: IStartupProfile,
+    expansion: IExpansion,
+    drops: IPipelineDrop[],
+    deep: boolean
+  ): Promise<IAssembledRoute> {
+    const retrieved = await this._retrieval.retrieve(db, expansion, drops, deep);
     const candidates: ICandidate[] = [];
     const proofBySourceId = new Map<string, IHistoricalProof | undefined>();
 
@@ -177,7 +180,7 @@ export class RouteBuilderService {
 
     const primaryEntries = sequenced
       .filter(entry => entry.placement === 'primary')
-      .slice(0, ROUTE_LIMITS.maxPrimary);
+      .slice(0, deep ? ROUTE_LIMITS.deepMaxPrimary : ROUTE_LIMITS.maxPrimary);
     const primaryMonths = new Set(primaryEntries.map(entry => entry.sequenceMonth));
     const alongsideEntries = sequenced
       .filter(
@@ -185,7 +188,7 @@ export class RouteBuilderService {
           entry.placement === 'alongside' &&
           (entry.sequenceMonth === undefined || primaryMonths.has(entry.sequenceMonth))
       )
-      .slice(0, ROUTE_LIMITS.maxAlongside);
+      .slice(0, deep ? ROUTE_LIMITS.deepMaxAlongside : ROUTE_LIMITS.maxAlongside);
     const stopEntries = [...primaryEntries, ...alongsideEntries];
     const offRouteEntries = sequenced
       .filter(entry => entry.placement === 'off-route')
@@ -213,8 +216,118 @@ export class RouteBuilderService {
     }
 
     const kept = [...stopEntries, ...offRouteEntries, ...nonGrantEntries];
-    const verdict = AbstentionHelper.decide(kept);
-    const stacking = StackingHelper.plan(profile, kept);
+
+    return {
+      stops,
+      offRoute,
+      nonGrantAlternatives,
+      verdict: AbstentionHelper.decide(kept),
+      stacking: StackingHelper.plan(profile, kept),
+    };
+  }
+
+  public async deepPass(db: Firestore, routeId: string): Promise<void> {
+    const routeRef = db.collection('routes').doc(routeId);
+    const snapshot = await routeRef.get();
+    const existing = snapshot.data() as IRoute | undefined;
+
+    if (!existing) {
+      logger.warn('Deep pass skipped — route not found', { routeId });
+
+      return;
+    }
+
+    if (existing.deepPassStatus === 'complete') {
+      return;
+    }
+
+    const profileSnapshot = await db.collection('profiles').doc(existing.profileId).get();
+    const profile = profileSnapshot.data() as IStartupProfile | undefined;
+
+    if (!profile) {
+      logger.warn('Deep pass skipped — profile not found', { routeId });
+      await routeRef.update({ deepPassStatus: 'complete', updatedAt: Timestamp.now() });
+
+      return;
+    }
+
+    const startedAt = Date.now();
+    const drops: IPipelineDrop[] = [];
+    const expansion = ExpansionHelper.expand(profile);
+    const assembled = await this._assemble(db, profile, expansion, drops, true);
+
+    const knownIds = new Set(
+      [
+        ...(existing.stops ?? []),
+        ...(existing.offRoute ?? []),
+        ...(existing.nonGrantAlternatives ?? []),
+      ].map(stop => stop.id)
+    );
+    const freshStops = assembled.stops.filter(stop => !knownIds.has(stop.id));
+
+    if (freshStops.length === 0) {
+      await routeRef.update({
+        deepPassStatus: 'complete',
+        deepPassFoundNew: false,
+        updatedAt: Timestamp.now(),
+      });
+      logger.info('Deep pass complete — nothing new', {
+        routeId,
+        elapsedMs: Date.now() - startedAt,
+      });
+
+      return;
+    }
+
+    const explanations = await this._explanation.explain(profile, freshStops);
+
+    for (const stop of freshStops) {
+      const explanation = explanations.get(stop.id);
+
+      if (explanation) {
+        stop.whyFit = explanation.whyFit;
+        stop.whyIneligible = explanation.whyIneligible;
+        stop.whatToVerify = explanation.whatToVerify;
+        stop.whatToDoNext = explanation.whatToDoNext;
+      }
+    }
+
+    await routeRef.update({
+      stops: [...(existing.stops ?? []), ...freshStops],
+      verdictLine: assembled.verdict.verdictLine,
+      stackingNote: assembled.stacking.note,
+      deepPassStatus: 'complete',
+      deepPassFoundNew: true,
+      updatedAt: Timestamp.now(),
+    });
+
+    logger.info('Deep pass complete — added stops', {
+      routeId,
+      added: freshStops.length,
+      elapsedMs: Date.now() - startedAt,
+    });
+  }
+
+  public async build(db: Firestore, uid: string, description: string): Promise<IBuildResult> {
+    const drops: IPipelineDrop[] = [];
+    const startedAt = Date.now();
+
+    const profile = await this._extraction.extract(uid, description);
+    const expansion = ExpansionHelper.expand(profile);
+    logger.info('Profile extracted', {
+      industry: profile.industry,
+      vertical: expansion.verticalSlug,
+      employees: profile.employees,
+      hasRdCore: profile.hasRdCore,
+      askMin: profile.askMin,
+      askMax: profile.askMax,
+    });
+
+    const profileRef = db.collection('profiles').doc(uid);
+    await profileRef.set({ ...profile, id: uid }, { merge: true });
+
+    const assembled = await this._assemble(db, profile, expansion, drops, false);
+    const { stops, offRoute, nonGrantAlternatives, verdict, stacking } = assembled;
 
     const explainable = [...stops, ...nonGrantAlternatives, ...offRoute];
     const explanations = await this._explanation.explain(profile, explainable);
@@ -243,7 +356,7 @@ export class RouteBuilderService {
       nonGrantAlternatives,
       stackingNote: stops.length > 0 ? stacking.note : undefined,
       utahResources,
-      deepPassStatus: 'complete',
+      deepPassStatus: 'running',
       deepPassFoundNew: false,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),

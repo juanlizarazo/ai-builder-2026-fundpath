@@ -111,8 +111,13 @@ export class RetrievalService {
   public async retrieve(
     db: Firestore,
     expansion: IExpansion,
-    drops: IPipelineDrop[]
+    drops: IPipelineDrop[],
+    deep = false
   ): Promise<IOpportunity[]> {
+    const minRelevance = deep ? RETRIEVAL_LIMITS.deepMinRelevance : RETRIEVAL_LIMITS.minRelevance;
+    const maxCandidates = deep
+      ? RETRIEVAL_LIMITS.deepMaxCandidates
+      : RETRIEVAL_LIMITS.maxCandidates;
     const all = await this.loadOpenOpportunities(db);
     const scored = all
       .map(opportunity => ({
@@ -132,30 +137,30 @@ export class RetrievalService {
 
     const kept = scored.filter(
       entry =>
-        entry.relevance >= RETRIEVAL_LIMITS.minRelevance || isAlwaysAvailable(entry.opportunity)
+        entry.relevance >= minRelevance || isAlwaysAvailable(entry.opportunity)
     );
 
     for (const entry of scored) {
-      if (entry.relevance < RETRIEVAL_LIMITS.minRelevance && !isAlwaysAvailable(entry.opportunity)) {
+      if (entry.relevance < minRelevance && !isAlwaysAvailable(entry.opportunity)) {
         drops.push({
           sourceId: entry.opportunity.sourceId,
           title: entry.opportunity.title,
           stage: 'retrieve',
-          reason: `relevance ${entry.relevance} below minimum ${RETRIEVAL_LIMITS.minRelevance}`,
+          reason: `relevance ${entry.relevance} below minimum ${minRelevance}`,
         });
       }
     }
 
     const ranked = kept.filter(entry => !isAlwaysAvailable(entry.opportunity));
     const alwaysAvailable = kept.filter(entry => isAlwaysAvailable(entry.opportunity));
-    const limited = [...ranked.slice(0, RETRIEVAL_LIMITS.maxCandidates), ...alwaysAvailable];
+    const limited = [...ranked.slice(0, maxCandidates), ...alwaysAvailable];
 
-    for (const entry of ranked.slice(RETRIEVAL_LIMITS.maxCandidates)) {
+    for (const entry of ranked.slice(maxCandidates)) {
       drops.push({
         sourceId: entry.opportunity.sourceId,
         title: entry.opportunity.title,
         stage: 'retrieve',
-        reason: `beyond candidate cap of ${RETRIEVAL_LIMITS.maxCandidates}`,
+        reason: `beyond candidate cap of ${maxCandidates}`,
       });
     }
 

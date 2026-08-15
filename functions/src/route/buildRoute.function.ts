@@ -1,28 +1,9 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import * as logger from 'firebase-functions/logger';
-import { initializeApp, getApps, App } from 'firebase-admin/app';
-import { getFirestore, Firestore } from 'firebase-admin/firestore';
 import { CallableGuardHelper } from '../shared/callable-guard.helper';
+import { FirebaseHelper } from '../shared/firebase.helper';
 import { IBuildRouteRequest, IBuildRouteResponse } from '../types';
 import { RouteBuilderService } from './route-builder.service';
-
-const app: App = getApps().length ? getApps()[0] : initializeApp();
-
-let cachedDb: Firestore | null = null;
-
-function getDb(): Firestore {
-  if (!cachedDb) {
-    cachedDb = getFirestore(app);
-
-    try {
-      cachedDb.settings({ ignoreUndefinedProperties: true });
-    } catch (err) {
-      logger.warn('Firestore settings already applied', { error: (err as Error).message });
-    }
-  }
-
-  return cachedDb;
-}
 
 const routeBuilder = new RouteBuilderService();
 
@@ -48,7 +29,7 @@ export const buildRoute = onCall(
     }
 
     try {
-      const result = await routeBuilder.build(getDb(), uid, description);
+      const result = await routeBuilder.build(FirebaseHelper.getDb(), uid, description);
 
       return {
         profileId: result.profileId,
