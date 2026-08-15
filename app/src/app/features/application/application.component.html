@@ -183,13 +183,162 @@
               </section>
             }
             @case (3) {
-              <section class="leg leg-stub">
-                <p>Leg 3 content — Task 10</p>
+              <section class="leg leg-3">
+                <p class="leg-3-hint">Prefilled from your profile — check and edit</p>
+                <p class="leg-3-count fp-data">{{ filledFieldCount() }} of 16 filled</p>
+
+                @switch (currentFormScreen()) {
+                  @case (0) {
+                    <form class="applicant-form">
+                      <h3 class="form-screen-title">Your business</h3>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Legal business name</mat-label>
+                        <input matInput [value]="applicantForm().legalName" (input)="updateField('legalName', $event)" required />
+                      </mat-form-field>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Street address</mat-label>
+                        <input matInput [value]="applicantForm().street1" (input)="updateField('street1', $event)" required />
+                      </mat-form-field>
+                      <div class="form-row">
+                        <mat-form-field appearance="outline">
+                          <mat-label>City</mat-label>
+                          <input matInput [value]="applicantForm().city" (input)="updateField('city', $event)" required />
+                        </mat-form-field>
+                        <mat-form-field appearance="outline">
+                          <mat-label>State</mat-label>
+                          <input matInput [value]="applicantForm().state" (input)="updateField('state', $event)" required />
+                        </mat-form-field>
+                        <mat-form-field appearance="outline">
+                          <mat-label>ZIP</mat-label>
+                          <input matInput [value]="applicantForm().zip" (input)="updateField('zip', $event)" required />
+                        </mat-form-field>
+                      </div>
+
+                      <button type="button" class="optional-toggle" (click)="toggleOptionalFields(0)">
+                        + optional
+                      </button>
+                      @if (optionalFieldsOpen()[0]) {
+                        <mat-form-field appearance="outline">
+                          <mat-label>Street address line 2</mat-label>
+                          <input matInput [value]="applicantForm().street2" (input)="updateField('street2', $event)" />
+                        </mat-form-field>
+                        <mat-form-field appearance="outline">
+                          <mat-label>County</mat-label>
+                          <input matInput [value]="applicantForm().county" (input)="updateField('county', $event)" />
+                        </mat-form-field>
+                      }
+                    </form>
+                  }
+                  @case (1) {
+                    <form class="applicant-form">
+                      <h3 class="form-screen-title">Who to contact</h3>
+                      <div class="form-row">
+                        <mat-form-field appearance="outline">
+                          <mat-label>Contact first name</mat-label>
+                          <input matInput [value]="applicantForm().contactFirstName" (input)="updateField('contactFirstName', $event)" required />
+                        </mat-form-field>
+                        <mat-form-field appearance="outline">
+                          <mat-label>Contact last name</mat-label>
+                          <input matInput [value]="applicantForm().contactLastName" (input)="updateField('contactLastName', $event)" required />
+                        </mat-form-field>
+                      </div>
+                      <div class="form-row">
+                        <mat-form-field appearance="outline">
+                          <mat-label>Contact email</mat-label>
+                          <input matInput type="email" [value]="applicantForm().contactEmail" (input)="updateField('contactEmail', $event)" required />
+                        </mat-form-field>
+                        <mat-form-field appearance="outline">
+                          <mat-label>Contact phone</mat-label>
+                          <input matInput type="tel" [value]="applicantForm().contactPhone" (input)="updateField('contactPhone', $event)" required />
+                        </mat-form-field>
+                      </div>
+
+                      <button type="button" class="optional-toggle" (click)="toggleOptionalFields(1)">
+                        + optional
+                      </button>
+                      @if (optionalFieldsOpen()[1]) {
+                        <mat-form-field appearance="outline">
+                          <mat-label>Contact title</mat-label>
+                          <input matInput [value]="applicantForm().contactTitle" (input)="updateField('contactTitle', $event)" />
+                        </mat-form-field>
+                      }
+                    </form>
+                  }
+                  @case (2) {
+                    <form class="applicant-form">
+                      <h3 class="form-screen-title">Your project</h3>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Project title</mat-label>
+                        <input matInput [value]="applicantForm().projectTitle" (input)="updateField('projectTitle', $event)" required />
+                      </mat-form-field>
+                      <div class="form-row">
+                        <mat-form-field appearance="outline">
+                          <mat-label>Proposed project start date</mat-label>
+                          <input matInput type="date" [value]="applicantForm().projectStartDate" (input)="updateField('projectStartDate', $event)" />
+                        </mat-form-field>
+                        <mat-form-field appearance="outline">
+                          <mat-label>Proposed project end date</mat-label>
+                          <input matInput type="date" [value]="applicantForm().projectEndDate" (input)="updateField('projectEndDate', $event)" />
+                        </mat-form-field>
+                      </div>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Funding requested</mat-label>
+                        <input matInput type="number" [value]="applicantForm().fundingRequested" (input)="updateField('fundingRequested', $event)" />
+                      </mat-form-field>
+
+                      <p class="privacy-note">
+                        FundPath never asks for or stores your EIN, UEI, or SSN. Boxes 8b and 8c will be left
+                        blank on the downloaded form for you to fill in yourself.
+                      </p>
+                    </form>
+                  }
+                }
+
+                <div class="leg-form-actions">
+                  <button type="button" class="leg-secondary-action" (click)="previousFormScreen()">← Back</button>
+                  <button type="button" class="leg-primary-action" (click)="nextFormScreen()">Looks right →</button>
+                </div>
               </section>
             }
             @case (4) {
-              <section class="leg leg-stub">
-                <p>Leg 4 content — Task 10</p>
+              <section class="leg leg-4">
+                @if (sf424Error()) {
+                  <ss-alert-banner [message]="sf424Error()" type="error" (dismissed)="clearSf424Error()" />
+                }
+
+                @if (sf424SafeUrl(); as safeUrl) {
+                  <div class="sf424-actions">
+                    <button type="button" class="sf424-download" (click)="downloadSf424()" [disabled]="isDownloading()">
+                      <span class="fp-btn-content">
+                        @if (isDownloading()) {
+                          <mat-progress-spinner mode="indeterminate" diameter="16" />
+                        }
+                        <span>Download</span>
+                      </span>
+                    </button>
+                    <button type="button" class="sf424-open" (click)="openSf424InNewTab()">Open in new tab ↗</button>
+                  </div>
+
+                  <iframe class="sf424-viewer" [src]="safeUrl" title="Your filled SF-424"></iframe>
+
+                  <p class="sf424-fallback-note">
+                    Can't see the form above? <a [href]="sf424Result()?.url ?? '#'" (click)="openSf424InNewTab()">Open it directly ↗</a>
+                  </p>
+                } @else if (isGeneratingSf424()) {
+                  <p class="sf424-generating fp-data">Generating your filled SF-424…</p>
+                } @else {
+                  <p class="sf424-waiting">Finish Leg 3 and your filled SF-424 will appear here automatically.</p>
+                }
+
+                <p class="sf424-privacy-note">
+                  Boxes 8b and 8c are blank — those are your EIN and UEI, and we never ask for them.
+                </p>
+
+                @if (portalsFootnote()) {
+                  <p class="sf424-portals-footnote fp-data">{{ portalsFootnote() }}</p>
+                }
+
+                <button type="button" class="leg-secondary-action" (click)="previousFormScreen()">← Back</button>
               </section>
             }
           }

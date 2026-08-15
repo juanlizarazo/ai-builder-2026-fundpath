@@ -404,6 +404,12 @@ export class IntakeComponent implements AfterViewChecked {
         notifyPhone: this.smsOptIn() ? this.notifyPhone().trim() || undefined : undefined,
         smsOptIn: this.smsOptIn()
       });
+
+      // After buildRoute resolves, never before — its own {merge:true} write would clobber an earlier one.
+      if (this.companyName().trim()) {
+        void this._fundpathService.saveCompanyName(result.profileId, this.companyName().trim());
+      }
+
       await this._router.navigate(['/route', result.routeId]);
     } catch {
       this.errorMessage.set('Something went wrong. Please try again.');

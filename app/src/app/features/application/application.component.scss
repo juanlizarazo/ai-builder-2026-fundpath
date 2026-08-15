@@ -581,3 +581,112 @@
   color: #999;
   align-self: flex-end;
 }
+
+// --- Leg 3: fill the form ---------------------------------------------------
+
+.leg-3-hint {
+  color: var(--fp-basin);
+  font-weight: 600;
+  margin: 0;
+}
+
+.leg-3-count {
+  color: #888;
+  margin: 0 0 8px;
+}
+
+.form-screen-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--fp-ink);
+  margin: 0 0 8px;
+}
+
+.optional-toggle {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: var(--fp-basin);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.leg-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.leg-secondary-action {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 0;
+}
+
+// --- Leg 4: your form --------------------------------------------------------
+
+.sf424-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.sf424-download,
+.sf424-open {
+  padding: 10px 18px;
+  border-radius: var(--fp-radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sf424-download {
+  background: var(--fp-basin);
+  color: #fff;
+  border: none;
+
+  &[disabled] {
+    opacity: 0.55;
+  }
+}
+
+.sf424-open {
+  background: none;
+  border: 1px solid var(--fp-sand);
+  color: var(--fp-ink);
+}
+
+.sf424-viewer {
+  width: 100%;
+  height: 700px;
+  border: 1px solid var(--fp-sand);
+  border-radius: var(--fp-radius-sm);
+}
+
+.sf424-fallback-note {
+  font-size: 12px;
+  color: #888;
+
+  a {
+    color: var(--fp-basin);
+  }
+}
+
+.sf424-generating,
+.sf424-waiting {
+  color: #666;
+}
+
+.sf424-privacy-note {
+  font-size: 13px;
+  color: #666;
+}
+
+.sf424-portals-footnote {
+  color: #888;
+}

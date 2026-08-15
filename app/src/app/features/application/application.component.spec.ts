@@ -89,7 +89,13 @@ function createFixture(options: ICreateFixtureOptions = {}) {
         provide: ActivatedRoute,
         useValue: { snapshot: { paramMap: { get: (key: string) => (key === 'routeId' ? 'route-1' : 'stop-1') } } }
       },
-      { provide: FundpathService, useValue: { watchRoute: vi.fn().mockReturnValue(of(null)) } },
+      {
+        provide: FundpathService,
+        useValue: {
+          watchRoute: vi.fn().mockReturnValue(of(null)),
+          watchProfile: vi.fn().mockReturnValue(of(null))
+        }
+      },
       { provide: AuthService, useValue: { user$: of(user) } },
       {
         provide: ApplicationService,

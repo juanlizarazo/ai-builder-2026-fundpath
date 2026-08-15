@@ -1,8 +1,10 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Functions, httpsCallable } from '@angular/fire/functions';
-import { DocumentReference, Firestore, doc, docData } from '@angular/fire/firestore';
+import { DocumentReference, Firestore, doc, docData, setDoc } from '@angular/fire/firestore';
 import { Observable, catchError, map, of } from 'rxjs';
 import { FundPath } from '../../../types/firestore';
+
+const COMPANY_NAME_SESSION_KEY = 'fundpath.companyName';
 
 const BUILD_ROUTE_TIMEOUT_MS = 300000;
 
@@ -53,5 +55,24 @@ export class FundpathService {
       map((profile) => profile ?? null),
       catchError(() => of(null))
     );
+  }
+
+  /**
+   * Must be called AFTER `buildRoute` resolves — the callable itself writes
+   * `profiles/{uid}` with `{merge: true}` mid-request, so persisting before
+   * that resolves would be clobbered. Mirrored to `sessionStorage` so a
+   * refresh before the write completes doesn't lose it.
+   */
+  public async saveCompanyName(profileId: string, companyName: string): Promise<void> {
+    if (!companyName.trim()) { return; }
+
+    try {
+      sessionStorage.setItem(COMPANY_NAME_SESSION_KEY, companyName);
+    } catch {
+      // sessionStorage can throw in locked-down/private-browsing contexts — non-critical, continue to the real write.
+    }
+
+    const profileRef = doc(this._firestore, 'profiles', profileId);
+    await setDoc(profileRef, { companyName }, { merge: true });
   }
 }

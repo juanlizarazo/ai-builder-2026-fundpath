@@ -38,6 +38,8 @@ export namespace FundPath {
         targetCustomer?: string;
         productMaturity?: string;
         ownershipSignals?: string[];
+        /** Client-only, captured in Guided intake's optional "Company name" field — prefills Leg 3's legal name. */
+        companyName?: string;
         applicantDetails?: Applications.IApplicantDetails;
         /** Client-only autosave target for the Sherpa's Leg 2 narrative editors — keyed by section, persists across visits. */
         narrativeDrafts?: Partial<Record<Applications.INarrativeStarter['section'], string>>;
