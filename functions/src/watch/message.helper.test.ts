@@ -93,7 +93,7 @@ describe('MessageHelper.newStops', () => {
     const message = MessageHelper.newStops(route, stops);
 
     expect(message.body).toContain('Top Program');
-    expect(message.body).toContain('+1 more on your route.');
+    expect(message.body).toContain('+1 more opportunities on your route.');
     expect(message.body).not.toContain('Second Program');
   });
 

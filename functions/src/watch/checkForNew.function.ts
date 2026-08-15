@@ -43,12 +43,12 @@ export const checkForNew = onCall(
       return {
         foundNew: true,
         addedCount: freshStops.length,
-        message: `Found ${freshStops.length} new program${freshStops.length === 1 ? '' : 's'} — check your route.`,
+        message: `Found ${freshStops.length} new funding opportunit${freshStops.length === 1 ? 'y' : 'ies'} — check your route.`,
       };
     } catch (err) {
       logger.error('checkForNew failed', { uid, routeId: payload.routeId, error: (err as Error).message });
 
-      throw new HttpsError('internal', 'We could not check for new programs just now. Please try again in a moment.');
+      throw new HttpsError('internal', 'We could not check for new funding opportunities just now. Please try again in a moment.');
     }
   }
 );

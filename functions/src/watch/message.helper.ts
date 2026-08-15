@@ -59,12 +59,12 @@ export class MessageHelper {
     const [topStop, ...rest] = freshStops;
     const facts = stopFacts(topStop);
     const whyFitClause = topStop.whyFit ? ` ${topStop.whyFit.split('. ')[0].trim().replace(/\.?$/, '.')}` : '';
-    const moreClause = rest.length > 0 ? ` +${rest.length} more on your route.` : '';
+    const moreClause = rest.length > 0 ? ` +${rest.length} more opportunities on your route.` : '';
 
-    let body = `FundPath: New stop on your route — ${facts}.${whyFitClause}${moreClause} ${link}`;
+    let body = `FundPath: New funding opportunity — ${facts}.${whyFitClause}${moreClause} ${link}`;
     body = truncateAtSentenceBoundary(body, SHORT_LINE_MAX_LENGTH);
 
-    const subject = freshStops.length > 1 ? `${freshStops.length} new stops on your FundPath route` : 'New stop on your FundPath route';
+    const subject = freshStops.length > 1 ? `${freshStops.length} new funding opportunities on your route` : 'New funding opportunity on your route';
     const html = EmailTemplateHelper.newStops(route, freshStops);
 
     return { subject, body, html };

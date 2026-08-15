@@ -55,7 +55,7 @@
         }
 
         <button mat-stroked-button class="check-for-new-button" (click)="checkForNewPrograms()">
-          Check for new programs
+          Check for new opportunities
         </button>
       </header>
 
@@ -146,7 +146,7 @@
 
   <ss-side-panel title="Notifications" [isOpen]="isInboxOpen()" (closed)="closeInbox()">
     @if (notifications().length === 0) {
-      <p class="inbox-empty">Nothing here yet — you'll see updates when your route is ready or new programs match.</p>
+      <p class="inbox-empty">Nothing here yet — you'll see updates when your route is ready or new opportunities match.</p>
     } @else {
       <div class="inbox-list">
         @for (notification of notifications(); track notification.id) {

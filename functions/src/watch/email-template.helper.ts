@@ -152,7 +152,7 @@ function renderMoreNote(count: number): string {
       <tr>
         <td width="10" style="font-size:0; line-height:0;">&nbsp;</td>
         <td style="padding:2px 0 0 18px;">
-          <div style="font-family:${FONT_BODY}; font-size:12px; color:${COLOR.muted};">+ ${count} more waiting on your route</div>
+          <div style="font-family:${FONT_BODY}; font-size:12px; color:${COLOR.muted};">+ ${count} more opportunit${count === 1 ? 'y' : 'ies'} waiting on your route</div>
         </td>
       </tr>
     </table>
@@ -172,10 +172,10 @@ export class EmailTemplateHelper {
 
   public static newStops(route: IRoute, freshStops: IStop[]): string {
     const [topStop, ...rest] = freshStops;
-    const headline = freshStops.length > 1 ? `We found ${freshStops.length} new stops.` : 'We found a new stop.';
+    const headline = freshStops.length > 1 ? `We found ${freshStops.length} new opportunities.` : 'We found a new opportunity.';
 
     return renderShell({
-      eyebrow: 'New stop on your route',
+      eyebrow: 'New funding opportunity',
       headline,
       contentHtml: renderStopCard(topStop) + renderMoreNote(rest.length),
       ctaLabel: 'View your full route →',
