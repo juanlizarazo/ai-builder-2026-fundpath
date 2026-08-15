@@ -61,6 +61,7 @@ export interface IStartupProfile {
   targetCustomer?: string;
   productMaturity?: string;
   ownershipSignals?: string[];
+  applicantDetails?: IApplicantDetails;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -86,6 +87,7 @@ export interface ITask {
   completed: boolean;
   dueDate?: Timestamp;
   category?: 'registration' | 'document' | 'narrative' | 'submission';
+  source?: 'route' | 'kit';
 }
 
 export interface IStop {
@@ -138,6 +140,7 @@ export interface IRoute {
   utahResources?: IUtahResourceMatch[];
   deepPassStatus: 'pending' | 'running' | 'complete';
   deepPassFoundNew: boolean;
+  taskState?: Record<string, boolean>;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -153,4 +156,86 @@ export interface IUtahResource {
   needs: string[];
   stage: string;
   enrichedAt?: Timestamp;
+}
+
+export interface IRegistrationStep {
+  key: string;
+  label: string;
+  system: string;
+  url?: string;
+  durationBusinessDays: number;
+  startBy: Timestamp;
+  completeBy: Timestamp;
+  note?: string;
+}
+
+export interface IRegistrationTimeline {
+  mode: 'deadline' | 'earliest-ready';
+  closeDate?: Timestamp;
+  submitBy?: Timestamp;
+  steps: IRegistrationStep[];
+  feasible: boolean;
+  slackBusinessDays: number;
+  headline: string;
+}
+
+export interface IDocumentItem {
+  id: string;
+  label: string;
+  required: boolean;
+  note?: string;
+  formUrl?: string;
+}
+
+export interface INarrativeStarter {
+  section: 'innovation' | 'commercialization' | 'team' | 'alignment';
+  heading: string;
+  draft: string;
+}
+
+export interface IApplicantDetails {
+  legalName: string;
+  street1: string;
+  street2?: string;
+  city: string;
+  state: string;
+  zip: string;
+  county?: string;
+  contactFirstName: string;
+  contactLastName: string;
+  contactTitle?: string;
+  contactEmail: string;
+  contactPhone: string;
+  projectTitle: string;
+  projectStartDate?: Timestamp;
+  projectEndDate?: Timestamp;
+  fundingRequested?: number;
+}
+
+export interface IPortalLink {
+  name: string;
+  url?: string;
+}
+
+export interface ISubmissionMechanic {
+  label: string;
+  detail: string;
+}
+
+export interface IStarterKit {
+  id?: string;
+  uid: string;
+  routeId: string;
+  stopId: string;
+  opportunityTitle: string;
+  agency: string;
+  aln?: string;
+  timeline: IRegistrationTimeline;
+  documents: IDocumentItem[];
+  portals: IPortalLink[];
+  submissionMechanics: ISubmissionMechanic[];
+  narratives: INarrativeStarter[];
+  sf424?: { storagePath: string; generatedAt: Timestamp };
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
 }
