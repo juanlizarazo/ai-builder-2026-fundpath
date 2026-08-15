@@ -44,20 +44,20 @@ function createFixture(stop: IStop, isTaskChecked: ReturnType<typeof vi.fn> = vi
 }
 
 describe('StopDetailPanelComponent', () => {
-  it('merges whyFit sentences with info-severity flags into the "why you fit" column', () => {
+  it('merges whyFit sentences with info-severity flags into the "why you fit" section', () => {
     const stop = makeStop({
       whyFit: 'You have a strong R&D core. Your team size fits the SBIR profile.',
       eligibilityFlags: [{ severity: 'info', code: 'REGISTRATION_LEAD_TIME', message: 'Plenty of lead time.' }]
     });
 
     const fixture = createFixture(stop);
-    const rows = fixture.nativeElement.querySelectorAll('.ledger-column:not(.ledger-column--warn) .ledger-row');
+    const rows = fixture.nativeElement.querySelectorAll('.fit-primary .fit-row');
 
     expect(rows.length).toBe(3);
     expect(rows[2].textContent).toContain('Plenty of lead time.');
   });
 
-  it('merges whyIneligible sentences with warn/block flags into the "ineligible" column, excluding info flags', () => {
+  it('merges whyIneligible sentences with warn/block flags into the "check before you apply" accordion, excluding info flags', () => {
     const stop = makeStop({
       whyIneligible: 'You may not meet the employee cap.',
       eligibilityFlags: [
@@ -68,11 +68,22 @@ describe('StopDetailPanelComponent', () => {
     });
 
     const fixture = createFixture(stop);
-    const warnColumn = fixture.nativeElement.querySelector('.ledger-column--warn') as HTMLElement;
-    const rows = warnColumn.querySelectorAll('.ledger-row');
+    const accordion = fixture.nativeElement.querySelector('.accordion') as HTMLElement;
+    const rows = accordion.querySelectorAll('.fit-row--warn');
 
     expect(rows.length).toBe(3);
-    expect(warnColumn.textContent).not.toContain('Should not appear here.');
+    expect(accordion.textContent).not.toContain('Should not appear here.');
+  });
+
+  it('auto-expands the "check before you apply" accordion when a block-severity flag is present', () => {
+    const stop = makeStop({
+      eligibilityFlags: [{ severity: 'block', code: 'NO_RD_CORE', message: 'Missing R&D core.' }]
+    });
+
+    const fixture = createFixture(stop);
+    const accordion = fixture.nativeElement.querySelector('.accordion') as HTMLDetailsElement;
+
+    expect(accordion.open).toBe(true);
   });
 
   it('shows the permanent "not an eligibility determination" disclaimer', () => {
@@ -102,15 +113,26 @@ describe('StopDetailPanelComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('.task-item').length).toBe(2);
   });
 
-  it('renders the sticky footer with Start application and Program page links', () => {
+  it('renders the sticky header with Start my application and Program page links', () => {
     const stop = makeStop({ placement: 'primary', programUrl: 'https://example.gov/program' });
     const fixture = createFixture(stop);
 
-    const primary = fixture.nativeElement.querySelector('.detail-footer-primary') as HTMLAnchorElement;
-    const secondary = fixture.nativeElement.querySelector('.detail-footer-secondary') as HTMLAnchorElement;
+    const primary = fixture.nativeElement.querySelector('.detail-cta-primary') as HTMLAnchorElement;
+    const secondary = fixture.nativeElement.querySelector('.detail-cta-secondary') as HTMLAnchorElement;
 
-    expect(primary.textContent).toContain('Start application');
+    expect(primary.textContent).toContain('Start my application');
     expect(secondary.href).toContain('https://example.gov/program');
+  });
+
+  it('shows a deadline chip with days remaining when the stop has a closeDate', () => {
+    const soon = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
+    const stop = makeStop({ closeDate: soon as unknown as IStop['closeDate'] });
+
+    const fixture = createFixture(stop);
+    const chip = fixture.nativeElement.querySelector('.deadline-chip') as HTMLElement;
+
+    expect(chip.textContent).toContain('days left');
+    expect(chip.classList.contains('deadline-chip--urgent')).toBe(true);
   });
 
   it('positions the award-range bar and the founder ask marker proportionally within the domain', () => {

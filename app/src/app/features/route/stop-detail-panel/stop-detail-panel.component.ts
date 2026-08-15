@@ -2,10 +2,13 @@ import { Component, computed, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { ApplicationService } from '../../application/services/application.service';
-import { FundPath } from '../../../../types/firestore';
-import { formatDollars, formatDate } from '../../../shared/utils/format.utils';
+import { FundPath, FIT_TIER_ICONS, FIT_TIER_LABELS } from '../../../../types/firestore';
+import { formatDollars, formatDate, toDate } from '../../../shared/utils/format.utils';
 import { linearPosition } from '../../../shared/utils/scale.utils';
 import { toSentences } from '../../../shared/utils/text.utils';
+
+/** A deadline is "urgent" (rendered in the filled `--fp-signal` treatment) inside this many days. */
+const URGENT_DEADLINE_DAYS = 14;
 
 type IStop = FundPath.Firestore.Routes.IStop;
 type IEligibilityFlag = FundPath.Firestore.Routes.IEligibilityFlag;
@@ -16,10 +19,10 @@ interface ILedgerRow {
 }
 
 /**
- * Stop-detail content mounted inside `ss-side-panel` (Task 7). Replaces the
- * ten stacked prose blocks the old inline-expanding station card rendered
- * with a structured, scannable layout: fit ledger, proof bar, verify list,
- * do-next list, collapsed checklist, and provenance note.
+ * Stop-detail content mounted inside `ss-side-panel` (Task 7). A sticky
+ * decision header (fit tier, deadline, amount, CTA) stays pinned above a
+ * scrollable body that leads with "why you fit" and tucks ineligibility
+ * caveats, verification steps, and next steps into accordions.
  */
 @Component({
   selector: 'app-stop-detail-panel',
@@ -39,7 +42,6 @@ export class StopDetailPanelComponent {
   public readonly askMax = input<number | null>(null);
 
   protected readonly isChecklistExpanded = signal(false);
-  protected readonly isFullAssessmentExpanded = signal(false);
 
   protected readonly formatDollars = formatDollars;
   protected readonly formatDate = formatDate;
@@ -48,7 +50,30 @@ export class StopDetailPanelComponent {
     this.stop().placement === 'primary' || this.stop().placement === 'alongside'
   );
 
+  protected readonly tierIcon = computed<string>(() => FIT_TIER_ICONS[this.stop().fitTier]);
+  protected readonly tierLabel = computed<string>(() => FIT_TIER_LABELS[this.stop().fitTier]);
+
   protected readonly eligibilityFlags = computed<IEligibilityFlag[]>(() => this.stop().eligibilityFlags ?? []);
+
+  protected readonly hasBlockingFlag = computed<boolean>(() =>
+    this.eligibilityFlags().some(flag => flag.severity === 'block')
+  );
+
+  /** Apply-by deadline for the header's countdown chip — `closeDate` first, `registrationDeadline` as a fallback. */
+  protected readonly deadlineInfo = computed<{ label: string; days: number | null; urgent: boolean } | null>(() => {
+    const s = this.stop();
+    const source = s.closeDate ?? s.registrationDeadline;
+    if (!source) { return null; }
+
+    const label = formatDate(source);
+    if (!label) { return null; }
+
+    const parsed = toDate(source);
+    const rawDays = parsed ? Math.ceil((parsed.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
+    const days = rawDays !== null && rawDays >= 0 ? rawDays : null;
+
+    return { label, days, urgent: days !== null && days <= URGENT_DEADLINE_DAYS };
+  });
 
   /** `WHY YOU FIT` column: sentences from `whyFit` plus `info`-severity flags. */
   protected readonly fitRows = computed<ILedgerRow[]>(() => {
@@ -146,9 +171,5 @@ export class StopDetailPanelComponent {
 
   protected toggleChecklist(): void {
     this.isChecklistExpanded.update(open => !open);
-  }
-
-  protected toggleFullAssessment(): void {
-    this.isFullAssessmentExpanded.update(open => !open);
   }
 }

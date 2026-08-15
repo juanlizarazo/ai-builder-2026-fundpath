@@ -1,34 +1,78 @@
 <div class="detail-panel">
   <div class="detail-scroll">
     <header class="detail-header">
-      <span class="detail-agency fp-eyebrow">{{ stop().agency }}</span>
-      <h3 class="detail-title">{{ stop().title }}</h3>
-    </header>
-
-    <!-- 1. Fit ledger -->
-    <section class="ledger">
-      <div class="ledger-column">
-        <h4 class="ledger-eyebrow fp-eyebrow">Why you fit</h4>
-        @if (fitRows().length > 0) {
-          <ul class="ledger-list" role="list">
-            @for (row of fitRows(); track row.text) {
-              <li class="ledger-row">
-                <span aria-hidden="true">✓</span>
-                <span>{{ row.text }}</span>
-              </li>
-            }
-          </ul>
-        } @else {
-          <p class="ledger-empty">No specific fit signals recorded.</p>
+      <div class="detail-badges">
+        <span class="tier-plate tier-plate--{{ stop().fitTier }}">
+          <span class="tier-icon" aria-hidden="true">{{ tierIcon() }}</span>
+          <span class="tier-label">{{ tierLabel() }}</span>
+        </span>
+        @if (deadlineInfo(); as dl) {
+          <span class="deadline-chip" [class.deadline-chip--urgent]="dl.urgent">
+            <mat-icon aria-hidden="true">schedule</mat-icon>
+            {{ dl.days !== null ? (dl.days + ' days left') : ('Apply by ' + dl.label) }}
+          </span>
         }
       </div>
 
-      <div class="ledger-column ledger-column--warn">
-        <h4 class="ledger-eyebrow fp-eyebrow">What could make you ineligible</h4>
+      <span class="detail-agency fp-eyebrow">{{ stop().agency }}</span>
+      <h3 class="detail-title">{{ stop().title }}</h3>
+
+      @if (formatAmount(); as amount) {
+        <p class="detail-meta fp-data">
+          {{ amount }}
+          @if (deadlineInfo(); as dl) { · Apply by {{ dl.label }} }
+        </p>
+      }
+
+      <div class="detail-cta-row">
+        @if (canStartApplication()) {
+          <a
+            class="detail-cta-primary"
+            [routerLink]="['/route', routeId(), 'apply', stop().id]"
+          >
+            <mat-icon aria-hidden="true">rocket_launch</mat-icon>
+            Start my application
+          </a>
+        }
+
+        @if (stop().programUrl) {
+          <a
+            class="detail-cta-secondary"
+            [href]="stop().programUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Program page ↗
+          </a>
+        }
+      </div>
+    </header>
+
+    <!-- 1. Why you fit -->
+    <section class="fit-primary">
+      <h4 class="section-eyebrow fp-eyebrow">Why you fit</h4>
+      @if (fitRows().length > 0) {
+        <ul class="fit-list" role="list">
+          @for (row of fitRows(); track row.text) {
+            <li class="fit-row">
+              <span aria-hidden="true">✓</span>
+              <span>{{ row.text }}</span>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="ledger-empty">No specific fit signals recorded.</p>
+      }
+    </section>
+
+    <!-- Ineligibility caveats, collapsed unless something's actually blocking -->
+    <details class="accordion" [attr.open]="hasBlockingFlag() ? '' : null">
+      <summary>Check before you apply ({{ ineligibleRows().length }})</summary>
+      <div class="accordion-body">
         @if (ineligibleRows().length > 0) {
-          <ul class="ledger-list" role="list">
+          <ul class="fit-list" role="list">
             @for (row of ineligibleRows(); track row.text) {
-              <li class="ledger-row">
+              <li class="fit-row fit-row--warn">
                 <span aria-hidden="true">⚠</span>
                 <span>{{ row.text }}</span>
               </li>
@@ -37,24 +81,12 @@
         } @else {
           <p class="ledger-empty">Nothing flagged.</p>
         }
+
+        <p class="disclaimer fp-data">
+          An assessment, not an eligibility determination. Verify with the agency.
+        </p>
       </div>
-    </section>
-
-    @if (stop().whyFit || stop().whyIneligible) {
-      <details class="full-assessment">
-        <summary>Read the full assessment</summary>
-        @if (stop().whyFit) {
-          <p class="full-assessment-block">{{ stop().whyFit }}</p>
-        }
-        @if (stop().whyIneligible) {
-          <p class="full-assessment-block">{{ stop().whyIneligible }}</p>
-        }
-      </details>
-    }
-
-    <p class="disclaimer fp-data">
-      An assessment, not an eligibility determination. Verify with the agency.
-    </p>
+    </details>
 
     <!-- 2. Proof -->
     @if (stop().historicalProof; as proof) {
@@ -92,26 +124,30 @@
 
     <!-- 3. Verify before you apply -->
     @if (verifyRows().length > 0) {
-      <section class="verify">
-        <h4 class="section-eyebrow fp-eyebrow">Verify before you apply</h4>
-        <ul class="verify-list" role="list">
-          @for (row of verifyRows(); track row) {
-            <li><span aria-hidden="true">○</span> {{ row }}</li>
-          }
-        </ul>
-      </section>
+      <details class="accordion">
+        <summary>Verify before you apply ({{ verifyRows().length }})</summary>
+        <div class="accordion-body">
+          <ul class="verify-list" role="list">
+            @for (row of verifyRows(); track row) {
+              <li><span aria-hidden="true">○</span> {{ row }}</li>
+            }
+          </ul>
+        </div>
+      </details>
     }
 
     <!-- 4. Do next -->
     @if (doNextRows().length > 0) {
-      <section class="do-next">
-        <h4 class="section-eyebrow fp-eyebrow">Do next</h4>
-        <ol class="do-next-list">
-          @for (row of doNextRows(); track row) {
-            <li>{{ row }}</li>
-          }
-        </ol>
-      </section>
+      <details class="accordion" open>
+        <summary>Do next ({{ doNextRows().length }})</summary>
+        <div class="accordion-body">
+          <ol class="do-next-list">
+            @for (row of doNextRows(); track row) {
+              <li>{{ row }}</li>
+            }
+          </ol>
+        </div>
+      </details>
     }
 
     <!-- 5. Checklist -->
@@ -152,26 +188,4 @@
     <!-- 6. Provenance -->
     <p class="provenance fp-data">{{ provenanceNote() }}</p>
   </div>
-
-  <footer class="detail-footer">
-    @if (canStartApplication()) {
-      <a
-        class="detail-footer-primary"
-        [routerLink]="['/route', routeId(), 'apply', stop().id]"
-      >
-        Start application →
-      </a>
-    }
-
-    @if (stop().programUrl) {
-      <a
-        class="detail-footer-secondary"
-        [href]="stop().programUrl"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Program page ↗
-      </a>
-    }
-  </footer>
 </div>

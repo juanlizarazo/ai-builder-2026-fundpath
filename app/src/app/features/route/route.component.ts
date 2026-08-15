@@ -11,26 +11,17 @@ import { NotificationsService } from '@app/core/services/notifications.service';
 import { LoadingService } from '@app/core/services/loading.service';
 import { AlertBannerComponent } from '@app/shared/components/alert-banner/alert-banner.component';
 import { SidePanelComponent } from '@app/shared/components/side-panel/side-panel.component';
-import { FundingStackComponent } from '@app/shared/components/funding-stack/funding-stack.component';
-import { formatDollars, formatRelativeTime, toDate } from '@app/shared/utils/format.utils';
-import { datePosition, monthTicks } from '@app/shared/utils/scale.utils';
+import { formatDollars, toDate } from '@app/shared/utils/format.utils';
+import { datePosition } from '@app/shared/utils/scale.utils';
 import { toSentences } from '@app/shared/utils/text.utils';
 import { StopComponent } from './stop/stop.component';
 import { StopDetailPanelComponent } from './stop-detail-panel/stop-detail-panel.component';
+import { IRoutePathStation, RoutePathComponent } from './route-path/route-path.component';
 import { FundPath } from '../../../types/firestore';
 
 type IStop = FundPath.Firestore.Routes.IStop;
 
-interface IDiagramTick {
-  label: string;
-  position: number;
-}
-
-interface IDiagramStation {
-  stop: IStop;
-  position: number;
-  kind: 'primary' | 'alongside';
-}
+type IDiagramStation = IRoutePathStation;
 
 interface IAwardRange {
   min: number;
@@ -55,7 +46,7 @@ const URGENT_DEADLINE_DAYS = 45;
     SidePanelComponent,
     StopComponent,
     StopDetailPanelComponent,
-    FundingStackComponent
+    RoutePathComponent
   ],
   templateUrl: './route.component.html',
   styleUrl: './route.component.scss'
@@ -67,12 +58,8 @@ export class RouteComponent {
   private readonly _notificationsService = inject(NotificationsService);
   private readonly _loadingService = inject(LoadingService);
 
-  protected readonly notifications = this._notificationsService.notifications;
-  protected readonly unreadCount = this._notificationsService.unreadCount;
-  protected readonly isInboxOpen = signal(false);
   protected readonly checkForNewMessage = signal('');
   protected readonly checkForNewError = signal('');
-  protected readonly formatRelativeTime = formatRelativeTime;
   protected readonly formatDollars = formatDollars;
 
   /** Fixed at construction so the diagram's time scale doesn't jitter re-render to re-render. */
@@ -145,10 +132,7 @@ export class RouteComponent {
   /** The founder's ask floor — used by the stop-detail panel's proof bar marker. */
   protected readonly askMin = computed<number | null>(() => this._liveProfile()?.askMin ?? null);
 
-  /** Primary + alongside stops passed to the funding-stack bar (same set the survey-line diagram renders). */
-  protected readonly fundingStackStops = computed<IStop[]>(() => this.route()?.stops ?? []);
-
-  /** Shared with `FundingStackComponent`: which stop, if any, is hovered/focused — read by the spine below to light up the matching station. */
+  /** Shared with `RoutePathComponent`: which stop, if any, is hovered/focused. */
   protected readonly hoveredStopId = signal<string | null>(null);
 
   protected readonly isDeepRunning = computed<boolean>(() =>
@@ -198,27 +182,12 @@ export class RouteComponent {
     return days !== null && days < URGENT_DEADLINE_DAYS;
   });
 
-  // --- Survey-line diagram ---------------------------------------------------
+  // --- Route path --------------------------------------------------------
 
   protected readonly diagramDomain = computed<[Date, Date]>(() => {
     const end = new Date(this._today);
     end.setMonth(end.getMonth() + DIAGRAM_HORIZON_MONTHS);
     return [this._today, end];
-  });
-
-  protected readonly diagramTicks = computed<IDiagramTick[]>(() => {
-    const [from, to] = this.diagramDomain();
-
-    return monthTicks(from, to).map(date => ({
-      label: date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
-      position: datePosition(date, from, to)
-    }));
-  });
-
-  /** Elapsed fraction of the domain up to "now" — the spine's traversed portion. */
-  protected readonly traversedFraction = computed<number>(() => {
-    const [from, to] = this.diagramDomain();
-    return datePosition(new Date(), from, to);
   });
 
   /**
@@ -318,40 +287,6 @@ export class RouteComponent {
       switchMap(() => this._fundpathService.watchRoute(routeId)),
       catchError(() => of(null))
     );
-  }
-
-  protected openInbox(): void {
-    this.isInboxOpen.set(true);
-  }
-
-  protected closeInbox(): void {
-    this.isInboxOpen.set(false);
-  }
-
-  protected async onNotificationClick(notification: FundPath.Firestore.Notifications.INotification): Promise<void> {
-    if (!notification.readAt && notification.id) {
-      await this._notificationsService.markRead(notification.id);
-    }
-
-    const stopId = notification.stopIds[0];
-
-    if (stopId) {
-      this.closeInbox();
-      requestAnimationFrame(() => {
-        document.getElementById(`stop-${stopId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      });
-    }
-  }
-
-  protected deliveryLabel(notification: FundPath.Firestore.Notifications.INotification): string {
-    switch (notification.deliveryStatus) {
-      case 'sent':
-        return notification.channel === 'email' ? 'Emailed to you' : `Sent via ${notification.channel}`;
-      case 'failed':
-        return 'Delivery failed — in-app only';
-      default:
-        return 'In-app only';
-    }
   }
 
   protected async checkForNewPrograms(): Promise<void> {

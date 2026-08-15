@@ -31,21 +31,6 @@ function makeStop(overrides: Partial<IStop> & Pick<IStop, 'id' | 'title'>): ISto
   };
 }
 
-function makeProfile(overrides: Partial<FundPath.Firestore.Profiles.IStartupProfile> = {}): FundPath.Firestore.Profiles.IStartupProfile {
-  return {
-    uid: 'uid-1',
-    rawDescription: '',
-    industry: '',
-    technologyKeywords: [],
-    location: { state: 'UT' },
-    employees: 5,
-    hasRdCore: true,
-    createdAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-    ...overrides
-  };
-}
-
 function daysFromNow(days: number): Timestamp {
   const date = new Date();
   date.setDate(date.getDate() + days);
@@ -127,7 +112,7 @@ function asTestSurface(fixture: ReturnType<typeof createFixture>): IRouteCompone
 }
 
 describe('RouteComponent', () => {
-  describe('survey-line diagram — scale correctness', () => {
+  describe('route path — scale correctness', () => {
     it('places a stop at month 12 of the 24-month domain at ~50% position', () => {
       const route = makeRoute({
         stops: [
@@ -187,7 +172,7 @@ describe('RouteComponent', () => {
       const fixture = createFixture(route);
       fixture.detectChanges();
 
-      const nodes = fixture.nativeElement.querySelectorAll('.survey-station');
+      const nodes = fixture.nativeElement.querySelectorAll('.route-fallback-row');
       expect(nodes.length).toBe(2);
     });
   });
@@ -278,50 +263,7 @@ describe('RouteComponent', () => {
     });
   });
 
-  describe('funding-stack mount', () => {
-    it('mounts app-funding-stack with the profile askMax once the profile loads', async () => {
-      const route = makeRoute({
-        stops: [makeStop({ id: 'a', title: 'A', placement: 'primary', sequenceMonth: 0, minAward: 100_000, maxAward: 300_000 })]
-      });
-      const fixture = createFixture(route, makeProfile({ askMin: 500_000, askMax: 2_000_000 }));
-      fixture.detectChanges();
-      await fixture.whenStable();
-      fixture.detectChanges();
-
-      const stack = fixture.nativeElement.querySelector('[data-seam="funding-stack"] app-funding-stack');
-      expect(stack).not.toBeNull();
-    });
-
-    it('does not mount the funding-stack while the profile (and its askMax) has not loaded', () => {
-      const route = makeRoute({
-        stops: [makeStop({ id: 'a', title: 'A', placement: 'primary', sequenceMonth: 0, minAward: 100_000, maxAward: 300_000 })]
-      });
-      const fixture = createFixture(route, null);
-      fixture.detectChanges();
-
-      expect(fixture.nativeElement.querySelector('[data-seam="funding-stack"] app-funding-stack')).toBeNull();
-    });
-
-    it('does not mount the funding-stack on the abstention path', async () => {
-      const route = makeRoute({
-        stops: [],
-        nonGrantAlternatives: [makeStop({ id: 'n', title: 'Non-grant', placement: 'non-grant' })]
-      });
-      const fixture = createFixture(route, makeProfile({ askMax: 2_000_000 }));
-      fixture.detectChanges();
-      await fixture.whenStable();
-      fixture.detectChanges();
-
-      expect(fixture.nativeElement.querySelector('[data-seam="funding-stack"] app-funding-stack')).toBeNull();
-    });
-  });
-
-  describe('Task 6/7 seams', () => {
-    it('leaves a marked spot under the summary rail for the funding-stack bar', () => {
-      const fixture = createFixture(makeRoute());
-      expect(fixture.nativeElement.querySelector('[data-seam="funding-stack"]')).not.toBeNull();
-    });
-
+  describe('stop-detail selection', () => {
     it('openStopDetail records the selected stop without any UI consuming it yet', () => {
       const fixture = createFixture(makeRoute());
       const component = asTestSurface(fixture);

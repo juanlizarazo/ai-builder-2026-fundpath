@@ -49,28 +49,6 @@
   justify-content: space-between;
 }
 
-.inbox-bell {
-  position: relative;
-  color: var(--app-theme--primary);
-}
-
-.unread-badge {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
-  border-radius: 8px;
-  background: var(--app-theme--error, #d32f2f);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .check-for-new-button {
   align-self: flex-start;
   font-size: 13px;
@@ -80,69 +58,6 @@
   font-size: 13px;
   color: #2e7d32;
   margin: 0;
-}
-
-.inbox-empty {
-  color: #777;
-  font-size: 14px;
-  text-align: center;
-  padding: 24px 0;
-}
-
-.inbox-list {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.inbox-entry {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  text-align: left;
-  padding: 12px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  cursor: pointer;
-  font: inherit;
-
-  &:hover {
-    background: rgba(21, 68, 91, 0.06);
-  }
-
-  &.unread {
-    background: rgba(21, 68, 91, 0.04);
-
-    .inbox-entry-title::before {
-      content: '';
-      display: inline-block;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--app-theme--primary);
-      margin-right: 6px;
-    }
-  }
-}
-
-.inbox-entry-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--app-theme--primary);
-}
-
-.inbox-entry-body {
-  font-size: 13px;
-  color: #444;
-  line-height: 1.4;
-}
-
-.inbox-entry-meta {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
-  color: #999;
 }
 
 .back-link {
@@ -183,10 +98,6 @@
 
 .summary-sep {
   color: var(--fp-sand);
-}
-
-.funding-stack-seam {
-  /* app-funding-stack (Task 6) mounts here, directly under the summary rail. */
 }
 
 .deep-pass-pill {
@@ -255,138 +166,10 @@
   gap: 12px;
 }
 
-// --- Survey-line diagram ----------------------------------------------------
-
-.survey-line {
+.ruled-out-block {
   display: flex;
   flex-direction: column;
   gap: 4px;
-}
-
-.survey-ruler {
-  position: relative;
-  height: 28px;
-  margin-left: 16px;
-}
-
-.survey-spine {
-  position: absolute;
-  top: 12px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--fp-sand);
-  border-radius: 1px;
-  overflow: hidden;
-}
-
-.survey-spine-traversed {
-  height: 100%;
-  background: var(--fp-basin);
-}
-
-.survey-tick {
-  position: absolute;
-  top: 18px;
-  transform: translateX(-50%);
-  font-family: var(--fp-font-data);
-  font-size: 10px;
-  letter-spacing: 0.04em;
-  color: #999;
-  white-space: nowrap;
-}
-
-.survey-marker {
-  position: absolute;
-  top: 8px;
-  transform: translate(-50%, -50%);
-  width: 8px;
-  height: 8px;
-  background: var(--fp-basin);
-
-  &--primary {
-    border-radius: 2px;
-    transform: translate(-50%, -50%) rotate(45deg);
-  }
-
-  &--alongside {
-    border-radius: 50%;
-    background: var(--fp-limestone);
-    border: 2px solid var(--fp-basin);
-  }
-
-  &--ruled-out {
-    border-radius: 50%;
-    background: var(--fp-limestone);
-    border: 2px solid var(--fp-sand);
-  }
-
-  &--highlighted {
-    background: var(--fp-signal);
-    box-shadow: 0 0 0 4px rgba(217, 80, 43, 0.18);
-  }
-}
-
-.survey-stations {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.survey-station {
-  position: relative;
-  padding-left: 32px;
-}
-
-.survey-node {
-  position: absolute;
-  left: 0;
-  top: 18px;
-  width: 14px;
-  height: 14px;
-  background: var(--fp-basin);
-  z-index: 1;
-
-  &--primary {
-    border-radius: 3px;
-    transform: rotate(45deg);
-  }
-
-  &--alongside {
-    width: 10px;
-    height: 10px;
-    top: 20px;
-    left: 2px;
-    border-radius: 50%;
-    background: var(--fp-limestone);
-    border: 2px solid var(--fp-basin);
-  }
-
-  &--ruled-out {
-    width: 10px;
-    height: 10px;
-    top: 6px;
-    left: 2px;
-    border-radius: 50%;
-    background: var(--fp-limestone);
-    border: 2px solid var(--fp-sand);
-  }
-
-  &--highlighted {
-    background: var(--fp-signal);
-    box-shadow: 0 0 0 5px rgba(217, 80, 43, 0.18);
-  }
-}
-
-.survey-stub {
-  position: absolute;
-  left: 6px;
-  top: 24px;
-  width: 24px;
-  height: 16px;
-  border-left: 2px solid var(--fp-sand);
-  border-bottom: 2px solid var(--fp-sand);
-  border-bottom-left-radius: 10px;
 }
 
 .ruled-out-toggle {
@@ -502,22 +285,5 @@
 
   .verdict-line {
     font-size: 20px;
-  }
-
-  .survey-ruler {
-    display: none;
-  }
-
-  .survey-station {
-    padding-left: 24px;
-  }
-
-  .survey-node {
-    top: 14px;
-  }
-
-  .survey-node--alongside,
-  .survey-node--ruled-out {
-    top: 16px;
   }
 }
