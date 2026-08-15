@@ -7,15 +7,30 @@ const PROJECT_ID = 'ai-builder-2026-fundpath';
 
 export class FirebaseHelper {
   private static _db: Firestore | null = null;
+  private static _credentialsChecked = false;
 
-  private static _clearForeignEmulatorCredentials(): void {
-    if (process.env['FUNCTIONS_EMULATOR'] !== 'true') {
+  private static _warnOnForeignCredentials(): void {
+    if (FirebaseHelper._credentialsChecked || process.env['FUNCTIONS_EMULATOR'] !== 'true') {
       return;
     }
 
+    FirebaseHelper._credentialsChecked = true;
+
     const credentialsPath = process.env['GOOGLE_APPLICATION_CREDENTIALS'];
 
-    if (!credentialsPath || !fs.existsSync(credentialsPath)) {
+    if (!credentialsPath) {
+      logger.warn(
+        `No GOOGLE_APPLICATION_CREDENTIALS set. Emulated functions cannot reach ${PROJECT_ID} Firestore. Point it at a service account key for this project.`
+      );
+
+      return;
+    }
+
+    if (!fs.existsSync(credentialsPath)) {
+      logger.warn('GOOGLE_APPLICATION_CREDENTIALS points at a file that does not exist', {
+        credentialsPath,
+      });
+
       return;
     }
 
@@ -25,21 +40,19 @@ export class FirebaseHelper {
       };
 
       if (credentials.project_id && credentials.project_id !== PROJECT_ID) {
-        logger.warn('Ignoring GOOGLE_APPLICATION_CREDENTIALS from a different project', {
-          credentialProject: credentials.project_id,
-          expectedProject: PROJECT_ID,
-        });
-        delete process.env['GOOGLE_APPLICATION_CREDENTIALS'];
+        logger.error(
+          `GOOGLE_APPLICATION_CREDENTIALS belongs to "${credentials.project_id}" but this codebase targets "${PROJECT_ID}". Every Firestore call will fail with PERMISSION_DENIED. Point it at a service account key for ${PROJECT_ID}.`
+        );
       }
     } catch (err) {
-      logger.warn('Could not read GOOGLE_APPLICATION_CREDENTIALS', {
+      logger.warn('Could not parse GOOGLE_APPLICATION_CREDENTIALS', {
         error: (err as Error).message,
       });
     }
   }
 
   public static getApp(): App {
-    FirebaseHelper._clearForeignEmulatorCredentials();
+    FirebaseHelper._warnOnForeignCredentials();
 
     return getApps().length ? getApps()[0] : initializeApp();
   }

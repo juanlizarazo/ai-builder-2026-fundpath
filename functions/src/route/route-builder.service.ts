@@ -345,6 +345,8 @@ export class RouteBuilderService {
 
     const utahResources = await ResourcesHelper.match(db, profile);
 
+    const deepPassWillRun = process.env['FUNCTIONS_EMULATOR'] !== 'true';
+
     const routeRef = db.collection('routes').doc();
     const route: IRoute = {
       id: routeRef.id,
@@ -356,7 +358,7 @@ export class RouteBuilderService {
       nonGrantAlternatives,
       stackingNote: stops.length > 0 ? stacking.note : undefined,
       utahResources,
-      deepPassStatus: 'running',
+      deepPassStatus: deepPassWillRun ? 'running' : 'complete',
       deepPassFoundNew: false,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
