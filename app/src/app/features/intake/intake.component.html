@@ -43,25 +43,372 @@
       />
     }
 
-    <mat-form-field appearance="outline" class="description-field">
-      <mat-label>Describe your company</mat-label>
-      <textarea
-        matInput
-        [value]="description()"
-        (input)="onDescriptionChange($event)"
-        rows="5"
-        class="description-textarea"
-        aria-label="Describe your company to find government funding opportunities"
-        placeholder="Tell us about your startup…"
+    <div class="mode-switch" role="tablist" aria-label="How would you like to tell us about your company?">
+      <button
+        type="button"
+        role="tab"
+        class="mode-tab"
+        [class.is-active]="mode() === 'guided'"
+        [attr.aria-selected]="mode() === 'guided'"
         [disabled]="isSubmitting()"
-      ></textarea>
-      <mat-hint>Industry, employees, revenue, what you need funding for, and how much</mat-hint>
-    </mat-form-field>
+        (click)="setMode('guided')"
+      >
+        Guided
+      </button>
+      <button
+        type="button"
+        role="tab"
+        class="mode-tab"
+        [class.is-active]="mode() === 'describe'"
+        [attr.aria-selected]="mode() === 'describe'"
+        [disabled]="isSubmitting()"
+        (click)="setMode('describe')"
+      >
+        Describe instead
+      </button>
+    </div>
+
+    <div class="mode-stage">
+      <!-- Guided mode -->
+      <div class="mode-panel guided-panel" [class.is-active]="mode() === 'guided'" [attr.aria-hidden]="mode() !== 'guided'">
+        <div class="company-name-row">
+          <label class="company-name-label fp-meta" for="company-name-input">Company name</label>
+          <input
+            id="company-name-input"
+            class="company-name-input"
+            type="text"
+            [ngModel]="companyName()"
+            (ngModelChange)="companyName.set($event)"
+            [disabled]="isSubmitting()"
+            placeholder="optional, we'll prefill your SF-424"
+            aria-describedby="company-name-hint"
+          />
+        </div>
+
+        <div class="progress-rail" aria-hidden="true">
+          <div class="progress-rail-fill" [style.width.%]="(completionCount() / 6) * 100"></div>
+        </div>
+        <p class="progress-label fp-meta">{{ completionCount() }} of 6</p>
+
+        <div class="sentence-builder">
+          <!-- 01 industry -->
+          <div class="sentence-line" [class.filled]="industry()" [class.is-open]="activePicker() === 'industry'" (keydown.escape)="closePicker()">
+            <div class="sentence-row">
+              <span class="sentence-step">
+                @if (industry()) {
+                  <mat-icon class="step-check">check_circle</mat-icon>
+                } @else {
+                  <span class="step-empty">01</span>
+                }
+              </span>
+              <div class="sentence-content">
+                <span class="sentence-text">We're a</span>
+                <button
+                  type="button"
+                  class="token-btn"
+                  [class.filled]="industry()"
+                  [attr.aria-expanded]="activePicker() === 'industry'"
+                  [disabled]="isSubmitting()"
+                  (click)="togglePicker('industry')"
+                >
+                  {{ industry() ? getIndustryLabel(industry()) : 'industry' }}
+                </button>
+                <span class="sentence-text">company in</span>
+              </div>
+            </div>
+            <div class="sentence-picker-outer">
+              <div class="sentence-picker">
+                <div class="picker-chips-inner">
+                  @for (option of industryOptions; track option.value) {
+                    <button
+                      type="button"
+                      class="picker-chip"
+                      [class.selected]="industry() === option.value"
+                      (click)="selectIndustry(option.value)"
+                    >
+                      {{ option.label }}
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 02 county -->
+          <div class="sentence-line" [class.filled]="county()" [class.is-open]="activePicker() === 'county'" (keydown.escape)="closePicker()">
+            <div class="sentence-row">
+              <span class="sentence-step">
+                @if (county()) {
+                  <mat-icon class="step-check">check_circle</mat-icon>
+                } @else {
+                  <span class="step-empty">02</span>
+                }
+              </span>
+              <div class="sentence-content">
+                <button
+                  type="button"
+                  class="token-btn"
+                  [class.filled]="county()"
+                  [attr.aria-expanded]="activePicker() === 'county'"
+                  [disabled]="isSubmitting()"
+                  (click)="togglePicker('county')"
+                >
+                  {{ county() ? county() + ' County' : 'county' }}
+                </button>
+                <span class="sentence-text">, with</span>
+              </div>
+            </div>
+            <div class="sentence-picker-outer">
+              <div class="sentence-picker">
+                <div class="picker-chips-inner">
+                  @for (option of countyOptions; track option) {
+                    <button
+                      type="button"
+                      class="picker-chip"
+                      [class.selected]="county() === option"
+                      (click)="selectCounty(option)"
+                    >
+                      {{ option }}
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 03 team -->
+          <div class="sentence-line" [class.filled]="team()" [class.is-open]="activePicker() === 'team'" (keydown.escape)="closePicker()">
+            <div class="sentence-row">
+              <span class="sentence-step">
+                @if (team()) {
+                  <mat-icon class="step-check">check_circle</mat-icon>
+                } @else {
+                  <span class="step-empty">03</span>
+                }
+              </span>
+              <div class="sentence-content">
+                <button
+                  type="button"
+                  class="token-btn"
+                  [class.filled]="team()"
+                  [attr.aria-expanded]="activePicker() === 'team'"
+                  [disabled]="isSubmitting()"
+                  (click)="togglePicker('team')"
+                >
+                  {{ team() ? team() + ' employees' : 'team size' }}
+                </button>
+                <span class="sentence-text">and</span>
+              </div>
+            </div>
+            <div class="sentence-picker-outer">
+              <div class="sentence-picker">
+                <div class="picker-chips-inner">
+                  @for (option of teamBands; track option) {
+                    <button
+                      type="button"
+                      class="picker-chip"
+                      [class.selected]="team() === option"
+                      (click)="selectTeam(option)"
+                    >
+                      {{ option }}
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 04 revenue (optional) -->
+          <div class="sentence-line" [class.filled]="revenue()" [class.is-open]="activePicker() === 'revenue'" (keydown.escape)="closePicker()">
+            <div class="sentence-row">
+              <span class="sentence-step">
+                @if (revenue()) {
+                  <mat-icon class="step-check">check_circle</mat-icon>
+                } @else {
+                  <span class="step-empty">04</span>
+                }
+              </span>
+              <div class="sentence-content">
+                <button
+                  type="button"
+                  class="token-btn"
+                  [class.filled]="revenue()"
+                  [attr.aria-expanded]="activePicker() === 'revenue'"
+                  [disabled]="isSubmitting()"
+                  (click)="togglePicker('revenue')"
+                >
+                  {{ revenue() || 'revenue (optional)' }}
+                </button>
+                <span class="sentence-text">. We've raised</span>
+              </div>
+            </div>
+            <div class="sentence-picker-outer">
+              <div class="sentence-picker">
+                <div class="picker-chips-inner">
+                  @for (option of revenueBands; track option) {
+                    <button
+                      type="button"
+                      class="picker-chip"
+                      [class.selected]="revenue() === option"
+                      (click)="selectRevenue(option)"
+                    >
+                      {{ option }}
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 05 raised (optional) -->
+          <div class="sentence-line" [class.filled]="raised()" [class.is-open]="activePicker() === 'raised'" (keydown.escape)="closePicker()">
+            <div class="sentence-row">
+              <span class="sentence-step">
+                @if (raised()) {
+                  <mat-icon class="step-check">check_circle</mat-icon>
+                } @else {
+                  <span class="step-empty">05</span>
+                }
+              </span>
+              <div class="sentence-content">
+                <button
+                  type="button"
+                  class="token-btn"
+                  [class.filled]="raised()"
+                  [attr.aria-expanded]="activePicker() === 'raised'"
+                  [disabled]="isSubmitting()"
+                  (click)="togglePicker('raised')"
+                >
+                  {{ raised() || 'capital raised (optional)' }}
+                </button>
+                <span class="sentence-text">. We need</span>
+              </div>
+            </div>
+            <div class="sentence-picker-outer">
+              <div class="sentence-picker">
+                <div class="picker-chips-inner">
+                  @for (option of raisedBands; track option) {
+                    <button
+                      type="button"
+                      class="picker-chip"
+                      [class.selected]="raised() === option"
+                      (click)="selectRaised(option)"
+                    >
+                      {{ option }}
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 06 amount -->
+          <div class="sentence-line" [class.filled]="amount()" [class.is-open]="activePicker() === 'amount'" (keydown.escape)="closePicker()">
+            <div class="sentence-row">
+              <span class="sentence-step">
+                @if (amount()) {
+                  <mat-icon class="step-check">check_circle</mat-icon>
+                } @else {
+                  <span class="step-empty">06</span>
+                }
+              </span>
+              <div class="sentence-content">
+                <button
+                  type="button"
+                  class="token-btn"
+                  [class.filled]="amount()"
+                  [attr.aria-expanded]="activePicker() === 'amount'"
+                  [disabled]="isSubmitting()"
+                  (click)="togglePicker('amount')"
+                >
+                  {{ amount() || 'amount' }}
+                </button>
+                <span class="sentence-text">for</span>
+              </div>
+            </div>
+            <div class="sentence-picker-outer">
+              <div class="sentence-picker">
+                <div class="picker-chips-inner">
+                  @for (option of needBands; track option) {
+                    <button
+                      type="button"
+                      class="picker-chip"
+                      [class.selected]="amount() === option"
+                      (click)="selectAmount(option)"
+                    >
+                      {{ option }}
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 07 use of funds (optional) -->
+          <div class="sentence-line" [class.filled]="useOfFunds()" [class.is-open]="activePicker() === 'useOfFunds'" (keydown.escape)="closePicker()">
+            <div class="sentence-row">
+              <span class="sentence-step">
+                @if (useOfFunds()) {
+                  <mat-icon class="step-check">check_circle</mat-icon>
+                } @else {
+                  <span class="step-empty">07</span>
+                }
+              </span>
+              <div class="sentence-content">
+                <button
+                  type="button"
+                  class="token-btn"
+                  [class.filled]="useOfFunds()"
+                  [attr.aria-expanded]="activePicker() === 'useOfFunds'"
+                  [disabled]="isSubmitting()"
+                  (click)="togglePicker('useOfFunds')"
+                >
+                  {{ useOfFunds() || 'use of funds (optional)' }}
+                </button>
+                <span class="sentence-text">.</span>
+              </div>
+            </div>
+            <div class="sentence-picker-outer">
+              <div class="sentence-picker">
+                <div class="picker-chips-inner">
+                  @for (option of useOfFundsOptions; track option) {
+                    <button
+                      type="button"
+                      class="picker-chip"
+                      [class.selected]="useOfFunds() === option"
+                      (click)="selectUseOfFunds(option)"
+                    >
+                      {{ option }}
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Describe mode -->
+      <div class="mode-panel describe-panel" [class.is-active]="mode() === 'describe'" [attr.aria-hidden]="mode() !== 'describe'">
+        <label class="describe-label fp-meta" for="describe-textarea">Describe your company</label>
+        <textarea
+          id="describe-textarea"
+          [value]="description()"
+          (input)="onDescriptionChange($event)"
+          rows="5"
+          class="describe-textarea"
+          aria-label="Describe your company to find government funding opportunities"
+          placeholder="Tell us about your startup…"
+          [disabled]="isSubmitting()"
+        ></textarea>
+        <p class="describe-hint fp-data">{{ description().length }} characters</p>
+      </div>
+    </div>
 
     <div class="examples-row">
       @for (label of exampleLabels; track label; let i = $index) {
         <button
-          mat-stroked-button
+          type="button"
           class="example-pill"
           (click)="fillExample(i)"
           [disabled]="isSubmitting()"
@@ -121,7 +468,7 @@
       mat-flat-button
       class="submit-button"
       (click)="submit()"
-      [disabled]="!description().trim() || isSubmitting() || !isEmailValid"
+      [disabled]="!canSubmit"
     >
       @if (isSubmitting()) {
         <mat-progress-spinner mode="indeterminate" diameter="18" class="submit-spinner" />
