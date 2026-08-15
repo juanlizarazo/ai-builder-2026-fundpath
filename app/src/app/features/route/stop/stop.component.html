@@ -5,22 +5,30 @@
     [attr.aria-expanded]="isExpanded()"
     [attr.aria-label]="'Toggle details for ' + stop().title"
   >
-    <div class="tier-badge tier-badge--{{ stop().fitTier }}">
-      <span class="tier-icon" aria-hidden="true">{{ tierIcons[stop().fitTier] }}</span>
-      <span class="tier-label">{{ tierLabels[stop().fitTier] }}</span>
-    </div>
-
     <div class="stop-info">
-      <div class="stop-title">{{ stop().title }}</div>
-      <div class="stop-agency">{{ stop().agency }}</div>
-      <div class="stop-meta">
-        @if (stop().minAward || stop().maxAward) {
-          <span class="meta-amount">{{ formatAmount() }}</span>
-        }
-        <span class="meta-date">{{ formatCloseDate(stop()) }}</span>
+      <div class="stop-identity">
+        <span class="tier-plate tier-plate--{{ stop().fitTier }}">
+          <span class="tier-icon" aria-hidden="true">{{ tierIcons[stop().fitTier] }}</span>
+          <span class="tier-label">{{ tierLabels[stop().fitTier] }}</span>
+        </span>
+        <span class="stop-agency fp-eyebrow">{{ stop().agency }}</span>
       </div>
-      @if (stop().whyFit) {
-        <p class="stop-summary">{{ firstSentence(stop().whyFit) }}</p>
+
+      <div class="stop-title">{{ stop().title }}</div>
+
+      @if (dataStrip()) {
+        <div class="stop-data-strip fp-data">{{ dataStrip() }}</div>
+      }
+
+      @if (fitChips().length > 0) {
+        <div class="fit-chips">
+          @for (chip of fitChips(); track chip.code) {
+            <span class="fit-chip fp-meta">
+              <span aria-hidden="true">{{ chip.icon }}</span>
+              {{ chip.label }}
+            </span>
+          }
+        </div>
       }
     </div>
 

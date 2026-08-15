@@ -48,7 +48,7 @@ export function formatRelativeTime(value: FormattableDate): string {
   return formatDate(value);
 }
 
-function toDate(value: FormattableDate): Date | null {
+export function toDate(value: FormattableDate): Date | null {
   if (value === null || value === undefined) { return null; }
 
   if (value instanceof Date) { return value; }

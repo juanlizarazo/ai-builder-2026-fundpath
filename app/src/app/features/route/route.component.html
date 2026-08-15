@@ -28,15 +28,33 @@
         </div>
         <h1 class="verdict-line">{{ route()!.verdictLine }}</h1>
 
+        @if (!isAbstention()) {
+          <div class="summary-rail fp-data">
+            <span class="summary-item">{{ stopCount() }} STOP{{ stopCount() === 1 ? '' : 'S' }}</span>
+            @if (awardRange(); as range) {
+              <span class="summary-sep" aria-hidden="true">·</span>
+              <span class="summary-item">{{ formatDollars(range.min) }}–{{ formatDollars(range.max) }} RANGE</span>
+            }
+            @if (nextDeadlineDays() !== null) {
+              <span class="summary-sep" aria-hidden="true">·</span>
+              <span class="summary-item" [class.summary-item--urgent]="isDeadlineUrgent()">
+                NEXT DEADLINE IN {{ nextDeadlineDays() }} DAYS
+              </span>
+            }
+            <span class="summary-sep" aria-hidden="true">·</span>
+            <span class="summary-item">{{ offRouteStops().length }} RULED OUT</span>
+          </div>
+        }
+
         @if (isDeepRunning()) {
-          <div class="deep-pass-indicator deep-pass-indicator--running">
-            <mat-progress-spinner mode="indeterminate" diameter="16" />
+          <div class="deep-pass-pill deep-pass-pill--running fp-motion">
+            <span class="pulse-dot" aria-hidden="true"></span>
             <span>Still searching deeper…</span>
           </div>
         }
 
         @if (deepPassFoundNew()) {
-          <div class="deep-pass-indicator deep-pass-indicator--found">
+          <div class="deep-pass-pill deep-pass-pill--found">
             <mat-icon>check_circle</mat-icon>
             <span>Found more opportunities</span>
           </div>
@@ -59,6 +77,9 @@
         </button>
       </header>
 
+      <!-- Task 6 seam: funding-stack bar renders here, directly under the summary rail. -->
+      <div class="funding-stack-seam" data-seam="funding-stack"></div>
+
       @if (isAbstention()) {
         <section class="abstention-section">
           <div class="abstention-badge">
@@ -73,36 +94,81 @@
           <h2 class="section-title section-title--amber">Alternative path</h2>
           <div class="stops-list">
             @for (stop of nonGrantStops(); track stop.id) {
-              <div class="timeline-node timeline-node--nongrant" [id]="'stop-' + stop.id">
-                <app-stop [stop]="stop" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" />
+              <div [id]="'stop-' + stop.id">
+                <app-stop [stop]="stop" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" (opened)="openStopDetail($event)" />
               </div>
             }
           </div>
         </section>
       } @else {
-        @if (primaryStops().length > 0) {
+        @if (diagramStations().length > 0 || offRouteStops().length > 0) {
           <section class="route-section">
             <h2 class="section-title">Your Route</h2>
-            <div class="timeline">
-              @for (stop of primaryStops(); track stop.id) {
-                <div class="timeline-node timeline-node--primary" [id]="'stop-' + stop.id">
-                  <app-stop [stop]="stop" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" />
+
+            <div class="survey-line">
+              <div class="survey-ruler" aria-hidden="true">
+                <div class="survey-spine">
+                  <div class="survey-spine-traversed" [style.width.%]="traversedFraction() * 100"></div>
                 </div>
+                @for (tick of diagramTicks(); track tick.label + tick.position) {
+                  <span class="survey-tick" [style.left.%]="tick.position * 100">{{ tick.label }}</span>
+                }
+                @for (station of diagramStations(); track station.stop.id) {
+                  <span
+                    class="survey-marker survey-marker--{{ station.kind }}"
+                    [style.left.%]="station.position * 100"
+                  ></span>
+                }
+                @if (offRouteStops().length > 0) {
+                  <span class="survey-marker survey-marker--ruled-out" [style.left.%]="100"></span>
+                }
+              </div>
 
-                @for (alongside of alongsideForPrimary(stop); track alongside.id) {
-                  <div class="timeline-node timeline-node--alongside" [id]="'stop-' + alongside.id">
-                    <app-stop [stop]="alongside" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" />
+              <div class="survey-stations" role="list">
+                @for (station of diagramStations(); track station.stop.id) {
+                  <div
+                    class="survey-station survey-station--{{ station.kind }}"
+                    [id]="'stop-' + station.stop.id"
+                    role="listitem"
+                  >
+                    <span class="survey-node survey-node--{{ station.kind }}" aria-hidden="true"></span>
+                    <span class="survey-stub" aria-hidden="true"></span>
+                    <app-stop
+                      [stop]="station.stop"
+                      [routeId]="routeId!"
+                      [taskState]="route()?.taskState ?? {}"
+                      (opened)="openStopDetail($event)"
+                    />
                   </div>
                 }
-              }
 
-              @for (stop of alongsideStops(); track stop.id) {
-                @if (stop.sequenceMonth === undefined) {
-                  <div class="timeline-node timeline-node--alongside" [id]="'stop-' + stop.id">
-                    <app-stop [stop]="stop" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" />
+                @if (offRouteStops().length > 0) {
+                  <div class="survey-station survey-station--ruled-out" role="listitem">
+                    <span class="survey-node survey-node--ruled-out" aria-hidden="true"></span>
+                    <span class="survey-stub" aria-hidden="true"></span>
+                    <button
+                      type="button"
+                      class="ruled-out-toggle fp-data"
+                      (click)="toggleRuledOut()"
+                      [attr.aria-expanded]="isRuledOutOpen()"
+                    >
+                      <span aria-hidden="true">○</span>
+                      {{ offRouteStops().length }} ruled out
+                    </button>
+
+                    @if (isRuledOutOpen()) {
+                      <div class="ruled-out-list">
+                        @for (stop of offRouteStops(); track stop.id) {
+                          <div class="ruled-out-row" [id]="'stop-' + stop.id">
+                            <span class="ruled-out-title">{{ stop.title }}</span>
+                            <span class="ruled-out-reason">{{ ruledOutReason(stop) }}</span>
+                          </div>
+                        }
+                      </div>
+                    }
                   </div>
                 }
-              }
+              </div>
             </div>
           </section>
         }
@@ -112,32 +178,30 @@
             <h2 class="section-title section-title--amber">Alternative path</h2>
             <div class="stops-list">
               @for (stop of nonGrantStops(); track stop.id) {
-                <div class="timeline-node timeline-node--nongrant" [id]="'stop-' + stop.id">
-                  <app-stop [stop]="stop" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" />
+                <div [id]="'stop-' + stop.id">
+                  <app-stop [stop]="stop" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" (opened)="openStopDetail($event)" />
                 </div>
               }
             </div>
           </section>
         }
 
-        @if (offRouteStops().length > 0) {
-          <section class="route-section">
-            <mat-expansion-panel class="off-route-panel">
-              <mat-expansion-panel-header>
-                <mat-panel-title>
-                  Programs we ruled out ({{ offRouteStops().length }})
-                </mat-panel-title>
-                <mat-panel-description>
-                  Not a fit right now — see why
-                </mat-panel-description>
-              </mat-expansion-panel-header>
-
-              <div class="stops-list">
-                @for (stop of offRouteStops(); track stop.id) {
-                  <app-stop [stop]="stop" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" />
-                }
-              </div>
-            </mat-expansion-panel>
+        @if (utahResources().length > 0) {
+          <section class="route-section utah-resources">
+            <h2 class="section-title">Utah resources</h2>
+            <div class="resource-chips">
+              @for (resource of utahResources(); track resource.id) {
+                <a
+                  class="resource-chip"
+                  [href]="resource.link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  [title]="resource.matchReason"
+                >
+                  {{ resource.title }}
+                </a>
+              }
+            </div>
           </section>
         }
       }
