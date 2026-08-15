@@ -1,0 +1,25 @@
+<nav class="public-nav">
+  <a routerLink="/" class="nav-brand">GovFit</a>
+  <div class="nav-actions">
+    @if (isAuthenticated) {
+      <button mat-button [matMenuTriggerFor]="userMenu" class="user-btn">
+        <div class="user-btn-inner">
+          <div class="user-avatar">{{ userInitials }}</div>
+          <span class="user-email">{{ userEmail }}</span>
+        </div>
+      </button>
+      <mat-menu #userMenu="matMenu">
+        <button mat-menu-item (click)="signOut()">
+          <mat-icon>logout</mat-icon>
+          Sign out
+        </button>
+      </mat-menu>
+    } @else {
+      <a mat-button class="sign-in-link" (click)="signIn()">Sign in</a>
+    }
+  </div>
+</nav>
+
+<div class="page-content">
+  <router-outlet></router-outlet>
+</div>
