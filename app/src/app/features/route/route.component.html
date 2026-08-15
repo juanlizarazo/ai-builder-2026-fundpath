@@ -1,0 +1,112 @@
+@if (!route()) {
+  <div class="not-found">
+    <p>Route not found.</p>
+    <a routerLink="/" mat-stroked-button>← Return to home</a>
+  </div>
+} @else {
+  <div class="route-page">
+    <div class="route-content animate-slide-up">
+      <header class="route-header">
+        <a routerLink="/" class="back-link">← New search</a>
+        <h1 class="verdict-line">{{ route()!.verdictLine }}</h1>
+
+        @if (isDeepRunning()) {
+          <div class="deep-pass-indicator deep-pass-indicator--running">
+            <mat-progress-spinner mode="indeterminate" diameter="16" />
+            <span>Still searching deeper…</span>
+          </div>
+        }
+
+        @if (deepPassFoundNew()) {
+          <div class="deep-pass-indicator deep-pass-indicator--found">
+            <mat-icon>check_circle</mat-icon>
+            <span>Found more opportunities</span>
+          </div>
+        }
+      </header>
+
+      @if (isAbstention()) {
+        <section class="abstention-section">
+          <div class="abstention-badge">
+            <mat-icon>info</mat-icon>
+            <span>No strong federal grant match</span>
+          </div>
+          <p class="abstention-explanation">
+            Your company profile does not align well with federal SBIR/STTR grant programs at this stage.
+            Federal research grants require an R&D core and a technology-development mandate.
+            The programs below are a stronger fit for your situation.
+          </p>
+          <h2 class="section-title section-title--amber">Alternative path</h2>
+          <div class="stops-list">
+            @for (stop of nonGrantStops(); track stop.id) {
+              <div class="timeline-node timeline-node--nongrant">
+                <app-stop [stop]="stop" />
+              </div>
+            }
+          </div>
+        </section>
+      } @else {
+        @if (primaryStops().length > 0) {
+          <section class="route-section">
+            <h2 class="section-title">Your Route</h2>
+            <div class="timeline">
+              @for (stop of primaryStops(); track stop.id) {
+                <div class="timeline-node timeline-node--primary">
+                  <app-stop [stop]="stop" />
+                </div>
+
+                @for (alongside of alongsideForPrimary(stop); track alongside.id) {
+                  <div class="timeline-node timeline-node--alongside">
+                    <app-stop [stop]="alongside" />
+                  </div>
+                }
+              }
+
+              @for (stop of alongsideStops(); track stop.id) {
+                @if (stop.sequenceMonth === undefined) {
+                  <div class="timeline-node timeline-node--alongside">
+                    <app-stop [stop]="stop" />
+                  </div>
+                }
+              }
+            </div>
+          </section>
+        }
+
+        @if (nonGrantStops().length > 0) {
+          <section class="route-section route-section--amber">
+            <h2 class="section-title section-title--amber">Alternative path</h2>
+            <div class="stops-list">
+              @for (stop of nonGrantStops(); track stop.id) {
+                <div class="timeline-node timeline-node--nongrant">
+                  <app-stop [stop]="stop" />
+                </div>
+              }
+            </div>
+          </section>
+        }
+
+        @if (offRouteStops().length > 0) {
+          <section class="route-section">
+            <mat-expansion-panel class="off-route-panel">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  Programs we ruled out ({{ offRouteStops().length }})
+                </mat-panel-title>
+                <mat-panel-description>
+                  Not a fit right now — see why
+                </mat-panel-description>
+              </mat-expansion-panel-header>
+
+              <div class="stops-list">
+                @for (stop of offRouteStops(); track stop.id) {
+                  <app-stop [stop]="stop" />
+                }
+              </div>
+            </mat-expansion-panel>
+          </section>
+        }
+      }
+    </div>
+  </div>
+}

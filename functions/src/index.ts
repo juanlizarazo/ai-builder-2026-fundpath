@@ -4,6 +4,8 @@ import * as logger from 'firebase-functions/logger';
 
 setGlobalOptions({ region: 'us-central1', maxInstances: 10, minInstances: 1 });
 
+export { syncCorpus, triggerSync } from './ingest/sync.function';
+
 export const hello = onRequest({ cors: true }, async (req, res) => {
   try {
     logger.info('hello called');
