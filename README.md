@@ -1,6 +1,4 @@
-# FundPath
-
-**Live site:** [fundpath.dev](https://fundpath.dev)
+# FundPath - Live site: [https://fundpath.dev](https://fundpath.dev)
 
 A government funding intelligence layer for startups. A founder describes their company in one box — FundPath translates that into government language, matches it against real federal and Utah state programs, ranks the fits, explains *why* in plain English, proves it with award history, and sequences it into an actual route with dates and tasks. When there's no honest federal match, it says so and hands back a real non-grant path instead of forcing a fake one.
 
