@@ -29,7 +29,7 @@ export const buildRoute = onCall(
     region: 'us-central1',
     timeoutSeconds: 300,
     memory: '1GiB',
-    secrets: ['ANTHROPIC_API_KEY', 'RESEND_API_KEY'],
+    secrets: ['ANTHROPIC_API_KEY', 'RESEND_API_KEY', 'TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_MESSAGING_SERVICE_SID'],
   },
   async (request): Promise<IBuildRouteResponse> => {
     const uid = CallableGuardHelper.requireAuth(request);
