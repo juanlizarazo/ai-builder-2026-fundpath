@@ -1,0 +1,307 @@
+.application-page {
+  background: var(--app-theme--surface);
+  min-height: 100vh;
+  padding: 24px 16px 48px;
+}
+
+.application-content {
+  max-width: 780px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.application-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.back-link {
+  color: var(--app-theme--primary);
+  font-size: 14px;
+  text-decoration: none;
+  align-self: flex-start;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.page-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--app-theme--primary);
+  margin: 0;
+  line-height: 1.3;
+
+  &:focus-visible {
+    outline: 2px solid var(--app-theme--primary);
+    outline-offset: 2px;
+  }
+}
+
+.header-meta {
+  font-size: 14px;
+  color: #555;
+  margin: 0;
+}
+
+.kit-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 30vh;
+  gap: 16px;
+}
+
+.kit-loading-text {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.application-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.timeline-headline {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--app-theme--primary);
+  margin: 0;
+}
+
+.timeline-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.timeline-step {
+  padding: 4px 0;
+}
+
+.timeline-step-label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.timeline-step-system {
+  font-size: 13px;
+  color: #666;
+}
+
+.timeline-step-dates {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: #333;
+  margin-top: 4px;
+
+  span {
+    white-space: nowrap;
+  }
+}
+
+.timeline-step-note {
+  font-size: 13px;
+  color: #666;
+  margin: 4px 0 0;
+}
+
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.task-item {
+  display: flex;
+}
+
+.task-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.task-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--app-theme--primary);
+}
+
+.task-label--done {
+  text-decoration: line-through;
+  color: #888;
+}
+
+.portal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+
+  a {
+    color: var(--app-theme--primary);
+  }
+}
+
+.mechanics-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+}
+
+.mechanics-item {
+  dt {
+    font-weight: 600;
+    font-size: 14px;
+    color: #0f172a;
+  }
+
+  dd {
+    margin: 2px 0 0;
+    font-size: 13px;
+    color: #555;
+  }
+}
+
+.narrative-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.narrative-card {
+  border: 1px solid var(--app-theme--border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.narrative-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.narrative-heading {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0;
+  color: #0f172a;
+}
+
+.copy-button {
+  font-size: 12px;
+  height: 30px;
+  line-height: 28px;
+  padding: 0 10px;
+}
+
+.narrative-draft {
+  font-size: 13px;
+  color: #444;
+  line-height: 1.5;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.privacy-note {
+  font-size: 13px;
+  color: #666;
+  background: #fffbf0;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 0;
+}
+
+.applicant-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+
+  mat-form-field {
+    flex: 1;
+  }
+}
+
+.application-section--download {
+  align-items: flex-start;
+}
+
+.download-button {
+  height: 48px;
+  padding: 0 24px;
+  font-size: 15px;
+  font-weight: 600;
+  background-color: var(--app-theme--primary);
+  color: #fff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  &[disabled] {
+    opacity: 0.55;
+  }
+}
+
+.download-spinner {
+  ::ng-deep circle {
+    stroke: #fff;
+  }
+}
+
+@media (max-width: 600px) {
+  .application-page {
+    padding: 16px 12px 32px;
+  }
+
+  .page-title {
+    font-size: 20px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+}

@@ -145,16 +145,28 @@
         </div>
       }
 
-      @if (stop().programUrl) {
+      @if (stop().programUrl || canStartApplication()) {
         <div class="details-section details-section--footer">
-          <a
-            [href]="stop().programUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="learn-more-link"
-          >
-            Learn more →
-          </a>
+          @if (stop().programUrl) {
+            <a
+              [href]="stop().programUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="learn-more-link"
+            >
+              Learn more →
+            </a>
+          }
+
+          @if (canStartApplication()) {
+            <a
+              mat-flat-button
+              class="start-application-button"
+              [routerLink]="['/route', routeId(), 'apply', stop().id]"
+            >
+              Start application →
+            </a>
+          }
         </div>
       }
     </div>

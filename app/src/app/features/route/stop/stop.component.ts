@@ -1,6 +1,8 @@
-import { Component, ElementRef, ViewChild, computed, input, signal } from '@angular/core';
+import { Component, ElementRef, ViewChild, computed, inject, input, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { ApplicationService } from '../../application/services/application.service';
 import { FundPath, FIT_TIER_LABELS, FIT_TIER_ICONS } from '../../../../types/firestore';
 import { formatDollars, formatDate } from '../../../shared/utils/format.utils';
 
@@ -8,6 +10,7 @@ import { formatDollars, formatDate } from '../../../shared/utils/format.utils';
   selector: 'app-stop',
   standalone: true,
   imports: [
+    RouterLink,
     MatButtonModule,
     MatIconModule
   ],
@@ -17,9 +20,16 @@ import { formatDollars, formatDate } from '../../../shared/utils/format.utils';
 export class StopComponent {
   @ViewChild('detailsRef') private readonly _detailsRef?: ElementRef<HTMLElement>;
 
+  private readonly _applicationService = inject(ApplicationService);
+
   public readonly stop = input.required<FundPath.Firestore.Routes.IStop>();
+  public readonly routeId = input.required<string>();
+  public readonly taskState = input<Record<string, boolean>>({});
 
   protected readonly isExpanded = signal(false);
+  protected readonly canStartApplication = computed<boolean>(() =>
+    this.stop().placement === 'primary' || this.stop().placement === 'alongside'
+  );
   protected readonly tierLabels = FIT_TIER_LABELS;
   protected readonly tierIcons = FIT_TIER_ICONS;
 
@@ -38,8 +48,6 @@ export class StopComponent {
   protected readonly provenanceNote = computed<string>(() =>
     this.stop().provenanceNote || 'Program details curated from agency source, Aug 2026'
   );
-
-  private readonly _taskOverrides = signal<Record<string, boolean>>({});
 
   protected formatAmount(): string {
     const s = this.stop();
@@ -86,13 +94,11 @@ export class StopComponent {
   }
 
   protected isTaskChecked(task: FundPath.Firestore.Routes.ITask): boolean {
-    const overrides = this._taskOverrides();
-
-    return task.id in overrides ? overrides[task.id] : task.completed;
+    return this._applicationService.isTaskChecked(this.taskState(), task);
   }
 
   protected toggleTask(taskId: string, currentState: boolean): void {
-    this._taskOverrides.update(o => ({ ...o, [taskId]: !currentState }));
+    this._applicationService.toggleTask(this.routeId(), taskId, currentState);
   }
 
   protected toggle(): void {

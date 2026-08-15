@@ -139,7 +139,19 @@
   &--footer {
     padding-top: 8px;
     border-top: 1px solid var(--app-theme--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
   }
+}
+
+.start-application-button {
+  background-color: var(--app-theme--primary);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .section-label {
