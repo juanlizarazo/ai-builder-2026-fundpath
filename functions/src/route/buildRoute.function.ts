@@ -29,7 +29,7 @@ export const buildRoute = onCall(
     region: 'us-central1',
     timeoutSeconds: 300,
     memory: '1GiB',
-    secrets: ['ANTHROPIC_API_KEY', 'RESEND_API_KEY'],
+    secrets: ['ANTHROPIC_API_KEY', 'RESEND_API_KEY', 'TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_MESSAGING_SERVICE_SID', 'TWILIO_WHATSAPP_FROM'],
   },
   async (request): Promise<IBuildRouteResponse> => {
     const uid = CallableGuardHelper.requireAuth(request);
@@ -45,7 +45,7 @@ export const buildRoute = onCall(
       );
     }
 
-    const notifyEmail = payload.notifyEmail?.trim();
+    const notifyEmail = payload.notifyEmail?.trim() || request.auth?.token.email;
     if (notifyEmail && !EMAIL_PATTERN.test(notifyEmail)) {
       throw new HttpsError('invalid-argument', 'That email address does not look valid.');
     }
