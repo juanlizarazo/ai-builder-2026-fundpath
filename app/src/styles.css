@@ -237,14 +237,19 @@ body.ss-panel-open {
 
 /*
  * Same missing-theme issue as the panel background above: mat-divider has
- * no `--mat-divider-color` token set, so it falls back to a heavy,
- * near-black, edge-to-edge line. Soften it to a hairline that matches the
- * app's own divider color and stops short of the panel edges.
+ * no `--mat-divider-color` token set, so it falls back to `currentColor`
+ * (near-black), edge-to-edge. Material also ships its own
+ * `.mat-mdc-menu-panel .mat-divider` rule with the same specificity as a
+ * plain `.fp-user-menu .mat-divider` override — whichever is injected last
+ * wins that tie, and Material's runtime-injected component styles land
+ * after this file, so an equal-specificity override isn't reliable. Add an
+ * extra class to out-specify it deterministically, plus !important as a
+ * belt-and-suspenders fallback.
  */
-.fp-user-menu .mat-divider {
-  margin: 4px 16px;
-  border-top-width: 1px;
-  border-top-color: rgba(20, 24, 29, 0.08);
+.fp-user-menu.mat-mdc-menu-panel .mat-divider {
+  margin: 4px 16px !important;
+  border-top-width: 1px !important;
+  border-top-color: rgba(20, 24, 29, 0.08) !important;
 }
 
 .fp-user-menu .mat-mdc-menu-item {
@@ -258,7 +263,7 @@ body.ss-panel-open {
 }
 
 .fp-user-menu .mat-mdc-menu-item:hover:not([disabled]) {
-  background: var(--fp-limestone);
+  background: var(--fp-limestone) !important;
 }
 
 .fp-user-menu .mat-mdc-menu-item .mat-icon {
