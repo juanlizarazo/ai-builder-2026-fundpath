@@ -1,0 +1,139 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --app-theme--primary: #15445b;
+  --app-theme--tertiary: #32a32f;
+  --app-theme--tertiary-bg: #e8f5e9;
+  --app-theme--accent: #d97706;
+  --app-theme--error: #d32f2f;
+  --app-theme--error-dark: #ba1a1a;
+  --app-theme--error-bg: #ffebee;
+  --app-theme--surface: #fafafa;
+  --app-theme--border: #e0e0e0;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--app-theme--surface);
+  color: #0f172a;
+  -webkit-font-smoothing: antialiased;
+}
+
+body.ss-panel-open {
+  overflow: hidden;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease both;
+}
+
+.ss-card-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 600px;
+}
+
+.ss-card {
+  border-radius: 12px !important;
+  background: #fff !important;
+  border: 1px solid var(--app-theme--border) !important;
+}
+
+.ss-card--clickable {
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+
+  &:hover {
+    border-color: var(--app-theme--primary) !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important;
+    transform: translateY(-1px);
+  }
+}
+
+.ss-card-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ss-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--app-theme--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  mat-icon {
+    color: #fff;
+  }
+}
+
+.ss-card-content {
+  flex: 1;
+
+  h4 {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0;
+    font-size: 13px;
+    color: #666;
+  }
+}
+
+.ss-card-arrow {
+  color: #aaa;
+}
+
+.ss-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.ss-page-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ss-page-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.ss-page-subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}

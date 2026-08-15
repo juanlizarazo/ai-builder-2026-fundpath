@@ -1,0 +1,22 @@
+<nav class="main-nav">
+  <a routerLink="/" class="nav-brand">
+    <span class="nav-brand-name">FundPath</span>
+  </a>
+
+  <div class="nav-links">
+    <!-- Add nav links here as features are built -->
+  </div>
+
+  <div class="nav-right">
+    <span class="nav-user">{{ userEmail }}</span>
+    <button mat-stroked-button class="signout-btn" (click)="signOut()">Sign out</button>
+  </div>
+</nav>
+
+@if (loadingService.isLoading()) {
+  <mat-progress-bar mode="indeterminate" class="global-progress-bar"></mat-progress-bar>
+}
+
+<div class="content-wrapper">
+  <router-outlet></router-outlet>
+</div>

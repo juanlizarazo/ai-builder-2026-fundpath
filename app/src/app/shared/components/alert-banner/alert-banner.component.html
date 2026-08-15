@@ -1,0 +1,9 @@
+<div class="alert-banner" [class]="type">
+  <mat-icon>{{ icon }}</mat-icon>
+  <span class="message">{{ message }}</span>
+  @if (dismissible) {
+    <button mat-icon-button (click)="dismiss()" class="dismiss-btn">
+      <mat-icon>close</mat-icon>
+    </button>
+  }
+</div>
