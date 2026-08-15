@@ -219,7 +219,7 @@ describe('RouteComponent', () => {
 
       fixture.detectChanges();
       const rail = fixture.nativeElement.querySelector('.summary-rail');
-      expect(rail.textContent).toContain('2 STOPS');
+      expect(rail.textContent).toContain('2 PROGRAMS');
       expect(rail.textContent).toContain('1 RULED OUT');
     });
 

@@ -45,6 +45,11 @@ const HERO_TYPED_PHRASES = [
   'chip testing for defense primes.'
 ];
 
+/** Describe-mode example chip: delete the current text, then type the new one, terminal-style. */
+const DESCRIBE_EXAMPLE_DELETE_SPEED_MS = 4;
+const DESCRIBE_EXAMPLE_TYPE_SPEED_MS = 10;
+const DESCRIBE_EXAMPLE_SWAP_PAUSE_MS = 120;
+
 /** Describe-mode fallback pastes — kept verbatim, this preserves the tested pipeline. */
 const EXAMPLE_DESCRIPTIONS = [
   'Utah AI healthcare SaaS — 15 employees, $1M ARR, $2.5M raised, reducing nurse administrative burden with AI, need $500K–$2M for R&D and commercialization',
@@ -86,12 +91,19 @@ export class IntakeComponent implements AfterViewChecked {
   public readonly heroTypedPhrases = HERO_TYPED_PHRASES;
 
   @ViewChild('phoneInput') private _phoneInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('describeTextarea') private _describeTextareaRef?: ElementRef<HTMLTextAreaElement>;
+  @ViewChild('caretMarker') private _caretMarkerRef?: ElementRef<HTMLSpanElement>;
 
   // ── Mode switch ──────────────────────────────────────────────────────────
   public readonly mode = signal<IntakeMode>('guided');
 
   // ── Describe mode ────────────────────────────────────────────────────────
   public readonly description = signal('');
+  /** True while an example chip's delete/type animation is running, driving the ghostwriting caret. */
+  public readonly isFillingDescription = signal(false);
+  /** Pixel position of the trailing edge of the typed-so-far text, read off a hidden mirror of the textarea — this is what makes the caret ride along with the text instead of sitting in a fixed corner. */
+  public readonly caretTop = signal(0);
+  public readonly caretLeft = signal(0);
 
   // ── Guided mode ───────────────────────────────────────────────────────────
   public readonly companyName = signal('');
@@ -194,18 +206,19 @@ export class IntakeComponent implements AfterViewChecked {
   }
 
   public onDescriptionChange(event: Event): void {
+    this._clearExampleFillTimers();
     const textarea = event.target as HTMLTextAreaElement;
     this.description.set(textarea.value);
   }
 
   public fillExample(index: number): void {
+    this._clearExampleFillTimers();
+
     if (this.mode() === 'describe') {
-      this.description.set(EXAMPLE_DESCRIPTIONS[index]);
+      this._typeDescription(EXAMPLE_DESCRIPTIONS[index]);
 
       return;
     }
-
-    this._clearExampleFillTimers();
 
     const tokens = EXAMPLE_GUIDED_TOKENS[index];
     const setters: Record<GuidedTokenKey, (value: string) => void> = {
@@ -229,6 +242,87 @@ export class IntakeComponent implements AfterViewChecked {
   private _clearExampleFillTimers(): void {
     this._exampleFillTimers.forEach((timer) => clearTimeout(timer));
     this._exampleFillTimers = [];
+    this.isFillingDescription.set(false);
+  }
+
+  /** Erases whatever's currently in the textarea, then types the example in, terminal-style. */
+  private _typeDescription(text: string): void {
+    if (this._prefersReducedMotion()) {
+      this.description.set(text);
+
+      return;
+    }
+
+    this.isFillingDescription.set(true);
+
+    const typeFrom = (start: number) => {
+      let i = start;
+      const step = () => {
+        i++;
+        this.description.set(text.substring(0, i));
+        this._scheduleCaretUpdate();
+
+        if (i < text.length) {
+          this._exampleFillTimers.push(setTimeout(step, DESCRIBE_EXAMPLE_TYPE_SPEED_MS));
+        } else {
+          this.isFillingDescription.set(false);
+        }
+      };
+      step();
+    };
+
+    const current = this.description();
+
+    if (!current) {
+      typeFrom(0);
+
+      return;
+    }
+
+    let j = current.length;
+    const deleteStep = () => {
+      j--;
+      this.description.set(current.substring(0, j));
+      this._scheduleCaretUpdate();
+
+      if (j > 0) {
+        this._exampleFillTimers.push(setTimeout(deleteStep, DESCRIBE_EXAMPLE_DELETE_SPEED_MS));
+      } else {
+        this._exampleFillTimers.push(setTimeout(() => typeFrom(0), DESCRIBE_EXAMPLE_SWAP_PAUSE_MS));
+      }
+    };
+    deleteStep();
+  }
+
+  private _prefersReducedMotion(): boolean {
+    return typeof window !== 'undefined' && (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false);
+  }
+
+  /**
+   * Reads the on-screen position of the trailing edge of the typed-so-far
+   * text off a hidden mirror of the textarea (a same-styled clone with a
+   * zero-width marker span at the end), deferred a frame so it reads the
+   * layout *after* Angular has painted the character we just set — this is
+   * what lets the caret ride along with the text as it types/deletes
+   * instead of sitting fixed in a corner.
+   */
+  private _scheduleCaretUpdate(): void {
+    if (typeof requestAnimationFrame === 'undefined') {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      const marker = this._caretMarkerRef?.nativeElement;
+      const textarea = this._describeTextareaRef?.nativeElement;
+
+      if (!marker || !textarea) {
+        return;
+      }
+
+      textarea.scrollTop = textarea.scrollHeight;
+      this.caretTop.set(marker.offsetTop - textarea.scrollTop);
+      this.caretLeft.set(marker.offsetLeft);
+    });
   }
 
   public clearError(): void {
@@ -267,7 +361,19 @@ export class IntakeComponent implements AfterViewChecked {
       return false;
     }
 
-    return this.mode() === 'guided' ? this.isGuidedComplete() : !!this.description().trim();
+    if (this.mode() === 'guided') {
+      return this.isGuidedComplete();
+    }
+
+    /*
+     * `|| this.isFillingDescription()` covers the ghostwriting animation's
+     * brief fully-erased instant between deleting the old example and
+     * typing the new one — without it, the submit button visibly
+     * disables and re-enables in that split second. The animation always
+     * ends with real content, so this doesn't let an actually-empty
+     * description through in practice.
+     */
+    return !!this.description().trim() || this.isFillingDescription();
   }
 
   public async submit(): Promise<void> {

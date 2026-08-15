@@ -390,16 +390,29 @@
       <!-- Describe mode -->
       <div class="mode-panel describe-panel" [class.is-active]="mode() === 'describe'" [attr.aria-hidden]="mode() !== 'describe'">
         <label class="describe-label fp-meta" for="describe-textarea">Describe your company</label>
-        <textarea
-          id="describe-textarea"
-          [value]="description()"
-          (input)="onDescriptionChange($event)"
-          rows="5"
-          class="describe-textarea"
-          aria-label="Describe your company to find government funding opportunities"
-          placeholder="Tell us about your startup…"
-          [disabled]="isSubmitting()"
-        ></textarea>
+        <div class="describe-textarea-wrap">
+          <textarea
+            #describeTextarea
+            id="describe-textarea"
+            [value]="description()"
+            (input)="onDescriptionChange($event)"
+            rows="5"
+            class="describe-textarea"
+            [class.is-filling]="isFillingDescription()"
+            aria-label="Describe your company to find government funding opportunities"
+            [placeholder]="isFillingDescription() ? '' : 'Tell us about your startup…'"
+            [disabled]="isSubmitting()"
+          ></textarea>
+          @if (isFillingDescription()) {
+            <div class="describe-caret-mirror" aria-hidden="true">{{ description() }}<span #caretMarker></span></div>
+            <span
+              class="describe-fill-caret"
+              [style.top.px]="caretTop()"
+              [style.left.px]="caretLeft()"
+              aria-hidden="true"
+            >|</span>
+          }
+        </div>
         <p class="describe-hint fp-data">{{ description().length }} characters</p>
       </div>
     </div>

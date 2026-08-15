@@ -30,7 +30,7 @@
 
         @if (!isAbstention()) {
           <div class="summary-rail fp-data">
-            <span class="summary-item">{{ stopCount() }} STOP{{ stopCount() === 1 ? '' : 'S' }}</span>
+            <span class="summary-item">{{ stopCount() }} PROGRAM{{ stopCount() === 1 ? '' : 'S' }}</span>
             @if (awardRange(); as range) {
               <span class="summary-sep" aria-hidden="true">·</span>
               <span class="summary-item">{{ formatDollars(range.min) }}–{{ formatDollars(range.max) }} RANGE</span>

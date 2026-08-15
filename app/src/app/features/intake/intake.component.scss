@@ -55,11 +55,16 @@
 }
 
 .intake-wrapper {
-  min-height: 100vh;
+  /*
+   * No min-height/vertical-centering here — that's a leftover from before
+   * the hero existed, when this wrapper was the whole page. With the hero
+   * now sitting above it, forcing this to fill another full viewport just
+   * pushes the form (and submit button) below the fold with a full screen
+   * of empty space. Let it size to its content instead.
+   */
   display: flex;
-  align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 48px 24px;
   background: var(--app-theme--surface);
 }
 
@@ -137,17 +142,26 @@
 // ─── Mode crossfade stage ───────────────────────────────────────────────────
 
 .mode-stage {
-  display: grid;
+  position: relative;
 }
 
+/*
+ * Only the active panel sits in normal flow (so the stage's height tracks
+ * it); the inactive one is taken out with `position: absolute` so it stops
+ * contributing height. Without this, both panels shared a CSS grid cell and
+ * the stage was always as tall as the taller Guided sentence-builder, even
+ * while Describe mode was showing — a large dead gap under the textarea.
+ */
 .mode-panel {
-  grid-area: 1 / 1;
+  position: absolute;
+  inset: 0;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
   transition: opacity var(--fp-duration-base) var(--fp-ease-standard);
 
   &.is-active {
+    position: relative;
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
@@ -412,6 +426,46 @@
   letter-spacing: 0.06em;
 }
 
+.describe-textarea-wrap {
+  position: relative;
+}
+
+/*
+ * Invisible clone of `.describe-textarea` — same box model, same font, same
+ * text-wrapping rules — used only to measure where the trailing edge of the
+ * typed-so-far text lands on screen (a zero-width marker span sits right
+ * after it). This is the standard trick for tracking a caret position
+ * inside a plain <textarea>, which has no native API for it.
+ */
+.describe-caret-mirror {
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: var(--fp-font-body);
+  font-size: var(--fp-h1-size);
+  line-height: var(--fp-body-line);
+  padding: 8px 2px 14px;
+  box-sizing: border-box;
+}
+
+/* The caret riding at the trailing edge of the ghostwriting animation's typed-so-far text. */
+.describe-fill-caret {
+  position: absolute;
+  font-size: var(--fp-h1-size);
+  line-height: var(--fp-body-line);
+  color: var(--fp-basin);
+  font-weight: 700;
+  pointer-events: none;
+  animation: cursorBlink 1s step-end infinite;
+}
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
 .describe-textarea {
   width: 100%;
   min-height: 160px;
@@ -425,6 +479,17 @@
   color: var(--fp-ink);
   padding: 8px 2px 14px;
   transition: border-color var(--fp-duration-fast) var(--fp-ease-standard);
+
+  /*
+   * No scrollbar while the ghostwriting animation drives the text — we
+   * already force-scroll it to the bottom in step with typing, and a
+   * scrollbar here would shrink the textarea's content width relative to
+   * `.describe-caret-mirror` (which never has one), throwing off the
+   * measured caret position.
+   */
+  &.is-filling {
+    overflow-y: hidden;
+  }
 
   &::placeholder {
     color: #a39d8f;

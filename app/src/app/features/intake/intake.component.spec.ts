@@ -146,13 +146,40 @@ describe('IntakeComponent', () => {
     );
   });
 
-  it('pastes the verbatim example description when a chip is clicked in Describe mode', () => {
+  it('types out the verbatim example description when a chip is clicked in Describe mode', () => {
+    // Bounded advances rather than `vi.runAllTimers()` — the hero mounts a
+    // deliberately-infinite terrain-field rAF loop, which trips vitest's
+    // "aborting after 10000 timers" runaway-loop guard if fully flushed.
+    vi.useFakeTimers();
     const component = createFixture().componentInstance;
     component.setMode('describe');
 
     component.fillExample(0);
+    expect(component.description()).not.toBe('');
+    expect(component.description().length).toBeLessThan(component.exampleDescriptions[0].length);
+
+    vi.advanceTimersByTime(2000);
 
     expect(component.description()).toBe(component.exampleDescriptions[0]);
+    vi.useRealTimers();
+  });
+
+  it('erases the current description before typing in a newly-picked example, in Describe mode', () => {
+    vi.useFakeTimers();
+    const component = createFixture().componentInstance;
+    component.setMode('describe');
+
+    component.fillExample(0);
+    vi.advanceTimersByTime(2000);
+    expect(component.description()).toBe(component.exampleDescriptions[0]);
+
+    component.fillExample(1);
+    vi.advanceTimersByTime(1);
+    expect(component.description().length).toBeLessThan(component.exampleDescriptions[0].length);
+
+    vi.advanceTimersByTime(3000);
+    expect(component.description()).toBe(component.exampleDescriptions[1]);
+    vi.useRealTimers();
   });
 
   it('collapses the notify/SMS block behind a one-line summary that expands on click', () => {
