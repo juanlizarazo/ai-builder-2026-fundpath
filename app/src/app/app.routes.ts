@@ -18,6 +18,16 @@ export const routes: Routes = [
     loadComponent: () => import('./features/application/application.component').then(m => m.ApplicationComponent)
   },
   {
+    path: 'privacy',
+    data: { layout: Layout.Public },
+    loadComponent: () => import('./features/legal/privacy/privacy.component').then(m => m.PrivacyComponent)
+  },
+  {
+    path: 'terms',
+    data: { layout: Layout.Public },
+    loadComponent: () => import('./features/legal/terms/terms.component').then(m => m.TermsComponent)
+  },
+  {
     path: '**',
     redirectTo: ''
   }

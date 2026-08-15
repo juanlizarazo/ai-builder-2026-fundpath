@@ -1,12 +1,15 @@
-import { Component, inject, signal } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, ViewChild, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AlertBannerComponent } from '@app/shared/components/alert-banner/alert-banner.component';
 import { FundpathService } from '@app/core/services/fundpath.service';
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const EXAMPLE_LABELS = [
   'Example 1: Healthcare AI',
@@ -33,19 +36,27 @@ const EXAMPLE_DESCRIPTIONS = [
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
+    MatCheckboxModule,
     MatProgressSpinnerModule,
     AlertBannerComponent
   ],
   templateUrl: './intake.component.html',
   styleUrl: './intake.component.scss'
 })
-export class IntakeComponent {
+export class IntakeComponent implements AfterViewChecked {
   private readonly _router = inject(Router);
   private readonly _fundpathService = inject(FundpathService);
+  private _shouldFocusPhone = false;
+
+  @ViewChild('phoneInput') private _phoneInput?: ElementRef<HTMLInputElement>;
 
   protected readonly description = signal('');
   protected readonly isSubmitting = signal(false);
   protected readonly errorMessage = signal('');
+
+  protected readonly notifyEmail = signal('');
+  protected readonly notifyPhone = signal('');
+  protected readonly smsOptIn = signal(false);
 
   protected readonly exampleLabels = EXAMPLE_LABELS;
   protected readonly exampleDescriptions = EXAMPLE_DESCRIPTIONS;
@@ -67,8 +78,35 @@ export class IntakeComponent {
     this.errorMessage.set('');
   }
 
+  protected onSmsOptInChange(checked: boolean): void {
+    this.smsOptIn.set(checked);
+
+    if (!checked) {
+      this.notifyPhone.set('');
+    } else {
+      this._shouldFocusPhone = true;
+    }
+  }
+
+  public ngAfterViewChecked(): void {
+    if (this._shouldFocusPhone && this._phoneInput) {
+      this._shouldFocusPhone = false;
+      this._phoneInput.nativeElement.focus();
+    }
+  }
+
+  protected get submitLabel(): string {
+    return this.smsOptIn() ? 'Yes, build my route' : 'Build my route';
+  }
+
+  protected get isEmailValid(): boolean {
+    const email = this.notifyEmail().trim();
+
+    return !email || EMAIL_PATTERN.test(email);
+  }
+
   protected async submit(): Promise<void> {
-    if (!this.description().trim() || this.isSubmitting()) {
+    if (!this.description().trim() || this.isSubmitting() || !this.isEmailValid) {
       return;
     }
 
@@ -76,7 +114,11 @@ export class IntakeComponent {
     this.errorMessage.set('');
 
     try {
-      const result = await this._fundpathService.buildRoute(this.description().trim());
+      const result = await this._fundpathService.buildRoute(this.description().trim(), {
+        notifyEmail: this.notifyEmail().trim() || undefined,
+        notifyPhone: this.smsOptIn() ? this.notifyPhone().trim() || undefined : undefined,
+        smsOptIn: this.smsOptIn()
+      });
       await this._router.navigate(['/route', result.routeId]);
     } catch {
       this.errorMessage.set('Something went wrong. Please try again.');

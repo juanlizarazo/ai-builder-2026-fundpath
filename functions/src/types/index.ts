@@ -2,6 +2,9 @@ import { IRoute, IStarterKit, IApplicantDetails } from '../firestore';
 
 export interface IBuildRouteRequest {
   description: string;
+  notifyEmail?: string;
+  notifyPhone?: string;
+  smsOptIn?: boolean;
 }
 
 export interface IBuildRouteResponse {
@@ -50,4 +53,14 @@ export interface IGenerateSf424Response {
   url?: string;
   base64?: string;
   expiresAt?: string;
+}
+
+export interface ICheckForNewRequest {
+  routeId: string;
+}
+
+export interface ICheckForNewResponse {
+  foundNew: boolean;
+  addedCount: number;
+  message: string;
 }

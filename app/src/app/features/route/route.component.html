@@ -12,7 +12,20 @@
   <div class="route-page">
     <div class="route-content animate-slide-up">
       <header class="route-header">
-        <a routerLink="/" class="back-link">← New search</a>
+        <div class="route-header-top">
+          <a routerLink="/" class="back-link">← New search</a>
+          <button
+            mat-icon-button
+            class="inbox-bell"
+            (click)="openInbox()"
+            aria-label="Notifications"
+          >
+            <mat-icon>notifications</mat-icon>
+            @if (unreadCount() > 0) {
+              <span class="unread-badge">{{ unreadCount() }}</span>
+            }
+          </button>
+        </div>
         <h1 class="verdict-line">{{ route()!.verdictLine }}</h1>
 
         @if (isDeepRunning()) {
@@ -28,6 +41,22 @@
             <span>Found more opportunities</span>
           </div>
         }
+
+        @if (checkForNewError()) {
+          <ss-alert-banner
+            [message]="checkForNewError()"
+            type="error"
+            (dismissed)="clearCheckForNewError()"
+          />
+        }
+
+        @if (checkForNewMessage()) {
+          <p class="check-for-new-message">{{ checkForNewMessage() }}</p>
+        }
+
+        <button mat-stroked-button class="check-for-new-button" (click)="checkForNewPrograms()">
+          Check for new programs
+        </button>
       </header>
 
       @if (isAbstention()) {
@@ -44,7 +73,7 @@
           <h2 class="section-title section-title--amber">Alternative path</h2>
           <div class="stops-list">
             @for (stop of nonGrantStops(); track stop.id) {
-              <div class="timeline-node timeline-node--nongrant">
+              <div class="timeline-node timeline-node--nongrant" [id]="'stop-' + stop.id">
                 <app-stop [stop]="stop" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" />
               </div>
             }
@@ -56,12 +85,12 @@
             <h2 class="section-title">Your Route</h2>
             <div class="timeline">
               @for (stop of primaryStops(); track stop.id) {
-                <div class="timeline-node timeline-node--primary">
+                <div class="timeline-node timeline-node--primary" [id]="'stop-' + stop.id">
                   <app-stop [stop]="stop" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" />
                 </div>
 
                 @for (alongside of alongsideForPrimary(stop); track alongside.id) {
-                  <div class="timeline-node timeline-node--alongside">
+                  <div class="timeline-node timeline-node--alongside" [id]="'stop-' + alongside.id">
                     <app-stop [stop]="alongside" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" />
                   </div>
                 }
@@ -69,7 +98,7 @@
 
               @for (stop of alongsideStops(); track stop.id) {
                 @if (stop.sequenceMonth === undefined) {
-                  <div class="timeline-node timeline-node--alongside">
+                  <div class="timeline-node timeline-node--alongside" [id]="'stop-' + stop.id">
                     <app-stop [stop]="stop" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" />
                   </div>
                 }
@@ -83,7 +112,7 @@
             <h2 class="section-title section-title--amber">Alternative path</h2>
             <div class="stops-list">
               @for (stop of nonGrantStops(); track stop.id) {
-                <div class="timeline-node timeline-node--nongrant">
+                <div class="timeline-node timeline-node--nongrant" [id]="'stop-' + stop.id">
                   <app-stop [stop]="stop" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" />
                 </div>
               }
@@ -114,4 +143,28 @@
       }
     </div>
   </div>
+
+  <ss-side-panel title="Notifications" [isOpen]="isInboxOpen()" (closed)="closeInbox()">
+    @if (notifications().length === 0) {
+      <p class="inbox-empty">Nothing here yet — you'll see updates when your route is ready or new programs match.</p>
+    } @else {
+      <div class="inbox-list">
+        @for (notification of notifications(); track notification.id) {
+          <button
+            type="button"
+            class="inbox-entry"
+            [class.unread]="!notification.readAt"
+            (click)="onNotificationClick(notification)"
+          >
+            <span class="inbox-entry-title">{{ notification.title }}</span>
+            <span class="inbox-entry-body">{{ notification.body }}</span>
+            <span class="inbox-entry-meta">
+              <span>{{ formatRelativeTime(notification.createdAt) }}</span>
+              <span class="inbox-entry-delivery">{{ deliveryLabel(notification) }}</span>
+            </span>
+          </button>
+        }
+      </div>
+    }
+  </ss-side-panel>
 }

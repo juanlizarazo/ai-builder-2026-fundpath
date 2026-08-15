@@ -43,20 +43,33 @@ export class SecretsHelper {
     return json.access_token;
   }
 
+  private static async _loadSecret(name: string): Promise<string> {
+    const token = await SecretsHelper._accessToken();
+    const url = `https://secretmanager.googleapis.com/v1/projects/${AdminHelper.getProjectId()}/secrets/${name}/versions/latest:access`;
+    const response = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+
+    if (!response.ok) {
+      throw new Error(`Secret Manager read failed for ${name}: ${response.status}`);
+    }
+
+    const json = (await response.json()) as { payload: { data: string } };
+
+    return Buffer.from(json.payload.data, 'base64').toString('utf8');
+  }
+
   public static async loadAnthropicKey(): Promise<void> {
     if (process.env['ANTHROPIC_API_KEY']) {
       return;
     }
 
-    const token = await SecretsHelper._accessToken();
-    const url = `https://secretmanager.googleapis.com/v1/projects/${AdminHelper.getProjectId()}/secrets/ANTHROPIC_API_KEY/versions/latest:access`;
-    const response = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+    process.env['ANTHROPIC_API_KEY'] = await SecretsHelper._loadSecret('ANTHROPIC_API_KEY');
+  }
 
-    if (!response.ok) {
-      throw new Error(`Secret Manager read failed: ${response.status}`);
+  public static async loadResendKey(): Promise<void> {
+    if (process.env['RESEND_API_KEY']) {
+      return;
     }
 
-    const json = (await response.json()) as { payload: { data: string } };
-    process.env['ANTHROPIC_API_KEY'] = Buffer.from(json.payload.data, 'base64').toString('utf8');
+    process.env['RESEND_API_KEY'] = await SecretsHelper._loadSecret('RESEND_API_KEY');
   }
 }

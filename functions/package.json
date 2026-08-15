@@ -15,6 +15,7 @@
     "dev:cases": "tsx src/dev/run-cases.ts",
     "dev:kit": "tsx src/dev/run-kit.ts",
     "dev:sf424-fields": "tsx src/dev/map-sf424-fields.ts",
+    "dev:notify": "tsx src/dev/send-test-notification.ts",
     "seed:export": "tsx src/dev/export-corpus.ts",
     "seed:restore": "tsx src/dev/restore-corpus.ts"
   },

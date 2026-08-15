@@ -39,6 +39,10 @@ export namespace FundPath {
         productMaturity?: string;
         ownershipSignals?: string[];
         applicantDetails?: Applications.IApplicantDetails;
+        notifyEmail?: string;
+        notifyPhone?: string;
+        smsOptIn?: boolean;
+        smsOptInAt?: Timestamp;
         createdAt: Timestamp;
         updatedAt: Timestamp;
       }
@@ -206,6 +210,28 @@ export namespace FundPath {
         sf424?: { storagePath: string; generatedAt: Timestamp };
         createdAt: Timestamp;
         updatedAt: Timestamp;
+      }
+    }
+
+    export namespace Notifications {
+      export type NotificationKind = 'route-ready' | 'new-stops';
+      export type NotifyChannel = 'inbox' | 'email' | 'telegram' | 'whatsapp' | 'sms';
+      export type DeliveryStatus = 'inbox-only' | 'sent' | 'failed';
+
+      export interface INotification {
+        id?: string;
+        uid: string;
+        routeId: string;
+        kind: NotificationKind;
+        title: string;
+        body: string;
+        stopIds: string[];
+        channel: NotifyChannel;
+        deliveryStatus: DeliveryStatus;
+        providerMessageId?: string;
+        errorMessage?: string;
+        createdAt: Timestamp;
+        readAt?: Timestamp;
       }
     }
   }

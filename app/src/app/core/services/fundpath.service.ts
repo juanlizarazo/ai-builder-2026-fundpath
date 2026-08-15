@@ -15,13 +15,19 @@ export class FundpathService {
   public readonly currentRouteId = signal<string | null>(null);
   public readonly currentProfileId = signal<string | null>(null);
 
-  public async buildRoute(description: string): Promise<{ profileId: string; routeId: string; route: FundPath.Firestore.Routes.IRoute }> {
-    const fn = httpsCallable<{ description: string }, { profileId: string; routeId: string; route: FundPath.Firestore.Routes.IRoute }>(
+  public async buildRoute(
+    description: string,
+    notify?: { notifyEmail?: string; notifyPhone?: string; smsOptIn?: boolean }
+  ): Promise<{ profileId: string; routeId: string; route: FundPath.Firestore.Routes.IRoute }> {
+    type BuildRouteRequest = { description: string; notifyEmail?: string; notifyPhone?: string; smsOptIn?: boolean };
+    type BuildRouteResponse = { profileId: string; routeId: string; route: FundPath.Firestore.Routes.IRoute };
+
+    const fn = httpsCallable<BuildRouteRequest, BuildRouteResponse>(
       this._functions,
       'buildRoute',
       { timeout: BUILD_ROUTE_TIMEOUT_MS }
     );
-    const result = await fn({ description });
+    const result = await fn({ description, ...notify });
 
     this.currentRoute.set(result.data.route);
     this.currentRouteId.set(result.data.routeId);

@@ -9,6 +9,8 @@ export { buildRoute } from './route/buildRoute.function';
 export { deepPass } from './route/deepPass.function';
 export { generateStarterKit } from './application/generateStarterKit.function';
 export { generateSf424 } from './application/generateSf424.function';
+export { checkForNew } from './watch/checkForNew.function';
+export { markNotificationRead } from './watch/markNotificationRead.function';
 
 export const hello = onRequest({ cors: true }, async (req, res) => {
   try {

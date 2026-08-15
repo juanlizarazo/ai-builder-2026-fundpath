@@ -80,3 +80,18 @@
 
   @media (max-width: 599.98px) { display: none; }
 }
+
+.public-footer {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 24px;
+
+  a {
+    color: #888;
+    font-size: 12px;
+    text-decoration: none;
+
+    &:hover { text-decoration: underline; }
+  }
+}
