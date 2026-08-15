@@ -1,7 +1,7 @@
 {
   "hosting": {
     "public": "public/browser",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**", "firestore.rules", "firestore.indexes.json"],
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**", "firestore.rules", "firestore.indexes.json", "storage.rules"],
     "rewrites": [
       { "source": "**", "destination": "/index.html" }
     ]
@@ -9,6 +9,9 @@
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
   },
   "functions": [
     { "source": "functions", "codebase": "default", "runtime": "nodejs22" }

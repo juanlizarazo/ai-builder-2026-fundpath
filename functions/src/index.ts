@@ -7,6 +7,8 @@ setGlobalOptions({ region: 'us-central1', maxInstances: 10, minInstances: 1 });
 export { triggerSync } from './ingest/sync.function';
 export { buildRoute } from './route/buildRoute.function';
 export { deepPass } from './route/deepPass.function';
+export { generateStarterKit } from './application/generateStarterKit.function';
+export { generateSf424 } from './application/generateSf424.function';
 
 export const hello = onRequest({ cors: true }, async (req, res) => {
   try {
