@@ -13,7 +13,7 @@ export const checkForNew = onCall(
     region: 'us-central1',
     timeoutSeconds: 300,
     memory: '1GiB',
-    secrets: ['ANTHROPIC_API_KEY', 'RESEND_API_KEY', 'TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_MESSAGING_SERVICE_SID'],
+    secrets: ['ANTHROPIC_API_KEY', 'RESEND_API_KEY', 'TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_MESSAGING_SERVICE_SID', 'TWILIO_WHATSAPP_FROM'],
   },
   async (request): Promise<ICheckForNewResponse> => {
     const uid = CallableGuardHelper.requireAuth(request);
