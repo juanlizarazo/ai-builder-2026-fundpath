@@ -14,6 +14,11 @@ export interface ICheckForNewResult {
   message: string;
 }
 
+export interface ISimulateNotificationResult {
+  sentTo: string;
+  message: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class NotificationsService {
   private readonly _firestore = inject(Firestore);
@@ -48,6 +53,13 @@ export class NotificationsService {
   public async checkForNew(routeId: string): Promise<ICheckForNewResult> {
     const fn = httpsCallable<{ routeId: string }, ICheckForNewResult>(this._functions, 'checkForNew');
     const result = await fn({ routeId });
+
+    return result.data;
+  }
+
+  public async simulateNotification(): Promise<ISimulateNotificationResult> {
+    const fn = httpsCallable<void, ISimulateNotificationResult>(this._functions, 'simulateNotification');
+    const result = await fn();
 
     return result.data;
   }

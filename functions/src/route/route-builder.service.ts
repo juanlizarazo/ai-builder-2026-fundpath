@@ -24,6 +24,7 @@ import {
   IStackingPlan,
 } from './route.interfaces';
 import { ROUTE_LIMITS } from './retrieval.constants';
+import { TIER_CEILINGS } from './eligibility.constants';
 
 interface IAssembledRoute {
   stops: IStop[];
@@ -129,6 +130,31 @@ export class RouteBuilderService {
     };
   }
 
+  /**
+   * Procurement-vehicle programs (GSA MAS, DIU CSO, SBIR Phase III sole-source
+   * authority, OTA prototypes) have no close date and no USAspending-linked
+   * history, so they legitimately score lower on deadlineProximity and
+   * historicalDensity than a live grant with real deadlines — even when they
+   * are a genuine fit. Rather than inflate their score to compete for a
+   * general-purpose alongside slot, guarantee the single best-fit one a seat,
+   * the same way Utah resources are guaranteed rather than score-ranked.
+   */
+  private static _bestProcurementEntry(
+    sequenced: ISequencedCandidate[],
+    alreadyIncluded: ISequencedCandidate[]
+  ): ISequencedCandidate | undefined {
+    const includedSourceIds = new Set(alreadyIncluded.map(entry => entry.candidate.opportunity.sourceId));
+
+    return sequenced
+      .filter(
+        entry =>
+          entry.candidate.opportunity.fundingInstrument === 'procurement' &&
+          (entry.candidate.tier === TIER_CEILINGS.LIKELY || entry.candidate.tier === TIER_CEILINGS.POTENTIAL) &&
+          !includedSourceIds.has(entry.candidate.opportunity.sourceId)
+      )
+      .sort((a, b) => b.candidate.score - a.candidate.score)[0];
+  }
+
   private static _dedupeStopIds(stops: IStop[]): IStop[] {
     const seen = new Set<string>();
 
@@ -192,6 +218,16 @@ export class RouteBuilderService {
           (entry.sequenceMonth === undefined || primaryMonths.has(entry.sequenceMonth))
       )
       .slice(0, deep ? ROUTE_LIMITS.deepMaxAlongside : ROUTE_LIMITS.maxAlongside);
+
+    const guaranteedProcurementEntry = RouteBuilderService._bestProcurementEntry(sequenced, [
+      ...primaryEntries,
+      ...alongsideEntries,
+    ]);
+
+    if (guaranteedProcurementEntry) {
+      alongsideEntries.push(guaranteedProcurementEntry);
+    }
+
     const stopEntries = [...primaryEntries, ...alongsideEntries];
     const offRouteEntries = sequenced
       .filter(entry => entry.placement === 'off-route')

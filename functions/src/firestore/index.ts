@@ -244,7 +244,7 @@ export interface IStarterKit {
   updatedAt: Timestamp;
 }
 
-export type NotificationKind = 'route-ready' | 'new-stops';
+export type NotificationKind = 'route-ready' | 'new-stops' | 'demo-test';
 export type NotifyChannel = 'inbox' | 'email' | 'telegram' | 'whatsapp' | 'sms';
 export type DeliveryStatus = 'inbox-only' | 'sent' | 'failed';
 

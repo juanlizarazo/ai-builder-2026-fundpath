@@ -227,6 +227,16 @@ export class EmailTemplateHelper {
     });
   }
 
+  public static demoTest(route: IRoute, stop: IStop): string {
+    return renderShell({
+      eyebrow: 'Test alert',
+      headline: "Here's what a real notification looks like.",
+      contentHtml: renderStopCard(stop),
+      ctaLabel: 'Open your route',
+      ctaLink: routeLink(route.id ?? ''),
+    });
+  }
+
   public static newStops(route: IRoute, freshStops: IStop[]): string {
     const [topStop, ...rest] = freshStops;
     const headline = freshStops.length > 1 ? `We found ${freshStops.length} new opportunities.` : 'We found a new opportunity.';
