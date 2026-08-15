@@ -13,6 +13,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/route/route.component').then(m => m.RouteComponent)
   },
   {
+    path: 'route/:routeId/apply/:stopId',
+    data: { layout: Layout.Public },
+    loadComponent: () => import('./features/application/application.component').then(m => m.ApplicationComponent)
+  },
+  {
     path: '**',
     redirectTo: ''
   }

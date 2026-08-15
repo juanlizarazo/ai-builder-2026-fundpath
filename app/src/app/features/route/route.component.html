@@ -45,7 +45,7 @@
           <div class="stops-list">
             @for (stop of nonGrantStops(); track stop.id) {
               <div class="timeline-node timeline-node--nongrant">
-                <app-stop [stop]="stop" />
+                <app-stop [stop]="stop" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" />
               </div>
             }
           </div>
@@ -57,12 +57,12 @@
             <div class="timeline">
               @for (stop of primaryStops(); track stop.id) {
                 <div class="timeline-node timeline-node--primary">
-                  <app-stop [stop]="stop" />
+                  <app-stop [stop]="stop" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" />
                 </div>
 
                 @for (alongside of alongsideForPrimary(stop); track alongside.id) {
                   <div class="timeline-node timeline-node--alongside">
-                    <app-stop [stop]="alongside" />
+                    <app-stop [stop]="alongside" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" />
                   </div>
                 }
               }
@@ -70,7 +70,7 @@
               @for (stop of alongsideStops(); track stop.id) {
                 @if (stop.sequenceMonth === undefined) {
                   <div class="timeline-node timeline-node--alongside">
-                    <app-stop [stop]="stop" />
+                    <app-stop [stop]="stop" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" />
                   </div>
                 }
               }
@@ -84,7 +84,7 @@
             <div class="stops-list">
               @for (stop of nonGrantStops(); track stop.id) {
                 <div class="timeline-node timeline-node--nongrant">
-                  <app-stop [stop]="stop" />
+                  <app-stop [stop]="stop" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" />
                 </div>
               }
             </div>
@@ -105,7 +105,7 @@
 
               <div class="stops-list">
                 @for (stop of offRouteStops(); track stop.id) {
-                  <app-stop [stop]="stop" />
+                  <app-stop [stop]="stop" [routeId]="routeId!" [taskState]="route()?.taskState ?? {}" />
                 }
               </div>
             </mat-expansion-panel>

@@ -39,5 +39,10 @@ service cloud.firestore {
       allow read: if request.auth != null && resource.data.uid == request.auth.uid;
       allow write: if false;
     }
+
+    match /starterKits/{kitId} {
+      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow write: if false;
+    }
   }
 }

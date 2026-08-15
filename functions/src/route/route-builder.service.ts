@@ -1,6 +1,7 @@
 import { Firestore, Timestamp } from 'firebase-admin/firestore';
 import * as logger from 'firebase-functions/logger';
 import { IHistoricalProof, IOpportunity, IRoute, IStartupProfile, IStop, ITask } from '../firestore';
+import { RegistrationTimelineHelper } from '../application/registration-timeline.helper';
 import { ExpansionHelper } from './expansion.helper';
 import { RetrievalService } from './retrieval.service';
 import { EligibilityRulesHelper } from './eligibility.rules';
@@ -21,7 +22,7 @@ import {
   ISequencedCandidate,
   IStackingPlan,
 } from './route.interfaces';
-import { REGISTRATION_LEAD_BUSINESS_DAYS, ROUTE_LIMITS } from './retrieval.constants';
+import { ROUTE_LIMITS } from './retrieval.constants';
 
 interface IAssembledRoute {
   stops: IStop[];
@@ -43,21 +44,15 @@ export class RouteBuilderService {
   private readonly _extraction = new ExtractionService();
   private readonly _explanation = new ExplanationService();
 
-  private static _registrationDeadline(now: Date = new Date()): Timestamp {
-    const deadline = new Date(now.getTime());
-    let remaining = REGISTRATION_LEAD_BUSINESS_DAYS;
+  private static _registrationDeadline(opportunity: IOpportunity): Timestamp | undefined {
+    const timeline = RegistrationTimelineHelper.build({
+      closeDate: opportunity.closeDate,
+      isSbir: opportunity.isSbir,
+      isSttr: opportunity.isSttr,
+      aln: opportunity.aln,
+    });
 
-    while (remaining > 0) {
-      deadline.setDate(deadline.getDate() + 1);
-
-      const day = deadline.getDay();
-
-      if (day !== 0 && day !== 6) {
-        remaining--;
-      }
-    }
-
-    return Timestamp.fromDate(deadline);
+    return timeline.steps[0]?.startBy;
   }
 
   private static _tasksFor(opportunity: IOpportunity, index: number): ITask[] {
@@ -112,7 +107,7 @@ export class RouteBuilderService {
       maxAward: opportunity.maxAward,
       openDate: opportunity.openDate,
       closeDate: opportunity.closeDate,
-      registrationDeadline: RouteBuilderService._registrationDeadline(),
+      registrationDeadline: RouteBuilderService._registrationDeadline(opportunity),
       placement: entry.placement,
       sequenceMonth: entry.sequenceMonth,
       eligibilityFlags: entry.candidate.flags,
