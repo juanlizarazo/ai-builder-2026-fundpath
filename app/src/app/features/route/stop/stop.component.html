@@ -1,0 +1,153 @@
+<article class="stop-card ss-card" [class.stop-card--expanded]="isExpanded()" role="article">
+  <button
+    class="stop-header"
+    (click)="toggle()"
+    [attr.aria-expanded]="isExpanded()"
+    [attr.aria-label]="'Toggle details for ' + stop().title"
+  >
+    <div class="tier-badge tier-badge--{{ stop().fitTier }}">
+      <span class="tier-icon" aria-hidden="true">{{ tierIcons[stop().fitTier] }}</span>
+      <span class="tier-label">{{ tierLabels[stop().fitTier] }}</span>
+    </div>
+
+    <div class="stop-info">
+      <div class="stop-title">{{ stop().title }}</div>
+      <div class="stop-agency">{{ stop().agency }}</div>
+      <div class="stop-meta">
+        @if (stop().minAward || stop().maxAward) {
+          <span class="meta-amount">{{ formatAmount() }}</span>
+        }
+        <span class="meta-date">{{ formatCloseDate(stop()) }}</span>
+      </div>
+      @if (stop().whyFit) {
+        <p class="stop-summary">{{ firstSentence(stop().whyFit) }}</p>
+      }
+    </div>
+
+    <mat-icon class="expand-icon">{{ isExpanded() ? 'expand_less' : 'expand_more' }}</mat-icon>
+  </button>
+
+  @if (isExpanded()) {
+    <div class="stop-details" #detailsRef>
+      <div class="details-section">
+        <h4 class="section-label">Award Range</h4>
+        <p class="section-value">{{ formatAmount() || 'See program for details' }}</p>
+      </div>
+
+      @if (stop().closeDate || stop().registrationDeadline) {
+        <div class="details-section">
+          <h4 class="section-label">Dates</h4>
+          @if (stop().closeDate) {
+            <p class="section-value">{{ formatCloseDate(stop()) }}</p>
+          }
+          @if (stop().registrationDeadline) {
+            <p class="section-value registration-note">{{ formatRegistrationDate(stop()) }}</p>
+          }
+        </div>
+      }
+
+      @if (stop().whyFit) {
+        <div class="details-section">
+          <h4 class="section-label">Why you fit</h4>
+          <p class="section-value">{{ stop().whyFit }}</p>
+        </div>
+      }
+
+      @if (stop().whyIneligible) {
+        <div class="details-section">
+          <h4 class="section-label">What could make you ineligible</h4>
+          <p class="section-value warn-text">{{ stop().whyIneligible }}</p>
+        </div>
+      }
+
+      @if (stop().whatToVerify) {
+        <div class="details-section">
+          <h4 class="section-label">What to verify</h4>
+          <p class="section-value">{{ stop().whatToVerify }}</p>
+        </div>
+      }
+
+      @if (stop().whatToDoNext) {
+        <div class="details-section">
+          <h4 class="section-label">What to do next</h4>
+          <p class="section-value">{{ stop().whatToDoNext }}</p>
+        </div>
+      }
+
+      @if (stop().eligibilityFlags.length > 0) {
+        <div class="details-section">
+          <h4 class="section-label">Eligibility flags</h4>
+          @for (flag of stop().eligibilityFlags; track flag.code) {
+            <div class="eligibility-flag flag--{{ flag.severity }}">
+              <span class="flag-code">{{ flag.code }}</span>
+              <span class="flag-message">{{ flag.message }}</span>
+            </div>
+          }
+        </div>
+      }
+
+      @if (stop().historicalProof) {
+        <div class="details-section">
+          <h4 class="section-label">Historical proof</h4>
+          <div class="historical-grid">
+            <div class="historical-stat">
+              <span class="stat-value">{{ formatHistoricalDollars(stop().historicalProof!.medianAward) }}</span>
+              <span class="stat-label">Median award</span>
+            </div>
+            <div class="historical-stat">
+              <span class="stat-value">{{ stop().historicalProof!.countUtah }}</span>
+              <span class="stat-label">Awards in Utah</span>
+            </div>
+            <div class="historical-stat">
+              <span class="stat-value">{{ stop().historicalProof!.countVertical }}</span>
+              <span class="stat-label">In your vertical</span>
+            </div>
+            <div class="historical-stat">
+              <span class="stat-value">{{ stop().historicalProof!.countTotal }}</span>
+              <span class="stat-label">Total awards</span>
+            </div>
+          </div>
+          @if (stop().historicalProof!.namedWinners.length > 0) {
+            <p class="named-winners">
+              Recent winners: {{ stop().historicalProof!.namedWinners.join(', ') }}
+            </p>
+          }
+        </div>
+      }
+
+      @if (stop().tasks.length > 0) {
+        <div class="details-section">
+          <h4 class="section-label">Checklist</h4>
+          <ul class="task-list" role="list">
+            @for (task of stop().tasks; track task.id) {
+              <li class="task-item" role="listitem">
+                <label class="task-label">
+                  <input
+                    type="checkbox"
+                    class="task-checkbox"
+                    [checked]="isTaskChecked(task)"
+                    (change)="toggleTask(task.id, isTaskChecked(task))"
+                  />
+                  <span [class.task-label--done]="isTaskChecked(task)">{{ task.label }}</span>
+                </label>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+
+      @if (stop().programUrl) {
+        <div class="details-section details-section--footer">
+          <a
+            [href]="stop().programUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="learn-more-link"
+          >
+            Learn more →
+          </a>
+        </div>
+      }
+    </div>
+  }
+</article>

@@ -5,7 +5,12 @@ export const routes: Routes = [
   {
     path: '',
     data: { layout: Layout.Public },
-    loadComponent: () => import('./features/home/home.component').then((m) => m.HomeComponent)
+    loadComponent: () => import('./features/intake/intake.component').then(m => m.IntakeComponent)
+  },
+  {
+    path: 'route/:routeId',
+    data: { layout: Layout.Public },
+    loadComponent: () => import('./features/route/route.component').then(m => m.RouteComponent)
   },
   {
     path: '**',

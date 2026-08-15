@@ -1,0 +1,66 @@
+<div class="intake-wrapper">
+  <div class="intake-container animate-slide-up">
+    <div class="intake-header">
+      <h1 class="wordmark">FundPath</h1>
+      <p class="tagline">Government funding intelligence for Utah startups</p>
+    </div>
+
+    @if (existingRouteId) {
+      <div class="existing-route">
+        <a [routerLink]="['/route', existingRouteId]" class="existing-route-link">
+          ← View your existing route
+        </a>
+      </div>
+    }
+
+    @if (errorMessage()) {
+      <ss-alert-banner
+        [message]="errorMessage()"
+        type="error"
+        (dismissed)="clearError()"
+      />
+    }
+
+    <mat-form-field appearance="outline" class="description-field">
+      <mat-label>Describe your company</mat-label>
+      <textarea
+        matInput
+        [value]="description()"
+        (input)="onDescriptionChange($event)"
+        rows="5"
+        class="description-textarea"
+        aria-label="Describe your company to find government funding opportunities"
+        placeholder="Tell us about your startup…"
+        [disabled]="isSubmitting()"
+      ></textarea>
+      <mat-hint>Industry, employees, revenue, what you need funding for, and how much</mat-hint>
+    </mat-form-field>
+
+    <div class="examples-row">
+      @for (label of exampleLabels; track label; let i = $index) {
+        <button
+          mat-stroked-button
+          class="example-pill"
+          (click)="fillExample(i)"
+          [disabled]="isSubmitting()"
+        >
+          {{ label }}
+        </button>
+      }
+    </div>
+
+    <button
+      mat-flat-button
+      class="submit-button"
+      (click)="submit()"
+      [disabled]="!description().trim() || isSubmitting()"
+    >
+      @if (isSubmitting()) {
+        <mat-progress-spinner mode="indeterminate" diameter="18" class="submit-spinner" />
+        <span>Building your funding plan…</span>
+      } @else {
+        <span>Get My Funding Plan →</span>
+      }
+    </button>
+  </div>
+</div>
