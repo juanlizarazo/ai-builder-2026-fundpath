@@ -254,10 +254,12 @@
           [disabled]="!isFormComplete() || isDownloading()"
         >
           @if (isDownloading()) {
-            <mat-progress-spinner mode="indeterminate" diameter="18" class="download-spinner" />
-            <span>Generating your SF-424…</span>
+            <span class="fp-btn-content">
+              <mat-progress-spinner mode="indeterminate" diameter="18" class="download-spinner" />
+              <span>Generating your SF-424…</span>
+            </span>
           } @else {
-            <span>Download filled SF-424</span>
+            <span class="fp-btn-content"><span>Download filled SF-424</span></span>
           }
         </button>
       </section>

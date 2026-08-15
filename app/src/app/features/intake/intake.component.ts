@@ -6,8 +6,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AlertBannerComponent } from '@app/shared/components/alert-banner/alert-banner.component';
+import { SurveyingInterstitialComponent } from '@app/shared/components/surveying-interstitial/surveying-interstitial.component';
 import { TerrainFieldComponent } from '@app/shared/components/terrain-field/terrain-field.component';
 import { TypedLineComponent } from '@app/shared/components/typed-line/typed-line.component';
 import { StatStripComponent } from '@app/shared/components/stat-strip/stat-strip.component';
@@ -66,8 +66,8 @@ export type GuidedTokenKey = keyof GuidedExampleTokens;
     MatButtonModule,
     MatCheckboxModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     AlertBannerComponent,
+    SurveyingInterstitialComponent,
     TerrainFieldComponent,
     TypedLineComponent,
     StatStripComponent
@@ -128,6 +128,9 @@ export class IntakeComponent implements AfterViewChecked {
   public readonly notifyEmail = signal('');
   public readonly notifyPhone = signal('');
   public readonly smsOptIn = signal(false);
+
+  /** Purely visual collapse state for the notify/SMS block — the underlying email/phone/consent logic is untouched. */
+  public readonly notifyExpanded = signal(false);
 
   public readonly exampleLabels = EXAMPLE_LABELS;
   public readonly exampleDescriptions = EXAMPLE_DESCRIPTIONS;

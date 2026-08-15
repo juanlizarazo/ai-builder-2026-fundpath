@@ -9,9 +9,19 @@ vi.mock('@angular/fire/firestore', () => ({
   docData: vi.fn(() => of(null))
 }));
 
+function mockMatchMedia(reducedMotion = false) {
+  window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+    matches: query.includes('prefers-reduced-motion') && reducedMotion,
+    media: query,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn()
+  })) as unknown as typeof window.matchMedia;
+}
+
 import { Firestore } from '@angular/fire/firestore';
 
 import { FundpathService } from '@app/core/services/fundpath.service';
+import { FundPath } from '../../../types/firestore';
 
 import { IntakeComponent } from './intake.component';
 
@@ -143,6 +153,61 @@ describe('IntakeComponent', () => {
     component.fillExample(0);
 
     expect(component.description()).toBe(component.exampleDescriptions[0]);
+  });
+
+  it('collapses the notify/SMS block behind a one-line summary that expands on click', () => {
+    mockMatchMedia();
+    const fixture = createFixture();
+
+    expect(fixture.componentInstance.notifyExpanded()).toBe(false);
+    expect(fixture.nativeElement.querySelector('.notify-collapse').classList).not.toContain('is-open');
+
+    const toggle = fixture.nativeElement.querySelector('.notify-toggle') as HTMLButtonElement;
+    toggle.click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.notifyExpanded()).toBe(true);
+    expect(fixture.nativeElement.querySelector('.notify-collapse').classList).toContain('is-open');
+  });
+
+  it('wraps the submit button label in .fp-btn-content (spinner-under-text fix)', () => {
+    mockMatchMedia();
+    const fixture = createFixture();
+
+    const label = fixture.nativeElement.querySelector('.submit-button .fp-btn-content');
+    expect(label).not.toBeNull();
+    expect(label.textContent.trim()).toBe('Build my route');
+  });
+
+  it('shows the full-screen surveying interstitial while buildRoute is in flight, and hides it once resolved', async () => {
+    mockMatchMedia();
+    let resolveBuildRoute!: (value: Awaited<ReturnType<FundpathService['buildRoute']>>) => void;
+    const buildRoute = vi.fn(
+      () =>
+        new Promise<Awaited<ReturnType<FundpathService['buildRoute']>>>((resolve) => {
+          resolveBuildRoute = resolve;
+        })
+    );
+    const fixture = createFixture({ buildRoute });
+    const component = fixture.componentInstance;
+
+    component.selectIndustry('health-it');
+    component.selectCounty('Salt Lake');
+    component.selectTeam('11–50');
+    component.selectAmount('$500K–$2M');
+
+    const submitPromise = component.submit();
+    fixture.detectChanges();
+
+    expect(component.isSubmitting()).toBe(true);
+    expect(fixture.nativeElement.querySelector('ss-surveying-interstitial')).not.toBeNull();
+
+    resolveBuildRoute({ profileId: 'p1', routeId: 'r1', route: {} as FundPath.Firestore.Routes.IRoute });
+    await submitPromise;
+    fixture.detectChanges();
+
+    expect(component.isSubmitting()).toBe(false);
+    expect(fixture.nativeElement.querySelector('ss-surveying-interstitial')).toBeNull();
   });
 
   it('animate-fills Guided tokens sequentially, ~140ms apart, when a chip is clicked in Guided mode', () => {

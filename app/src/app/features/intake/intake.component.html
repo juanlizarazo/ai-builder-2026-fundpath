@@ -418,64 +418,81 @@
       }
     </div>
 
-    <div class="notify-section">
-      <mat-form-field appearance="outline" class="notify-field">
-        <mat-label>Email (optional)</mat-label>
-        <input
-          matInput
-          type="email"
-          [ngModel]="notifyEmail()"
-          (ngModelChange)="notifyEmail.set($event)"
-          [disabled]="isSubmitting()"
-          aria-describedby="notify-email-hint"
-        />
-        <mat-hint id="notify-email-hint">We'll send your route and alert you when new programs match.</mat-hint>
-      </mat-form-field>
-
-      <mat-checkbox
-        class="sms-checkbox"
-        [checked]="smsOptIn()"
-        (change)="onSmsOptInChange($event.checked)"
-        [disabled]="isSubmitting()"
-        aria-describedby="sms-consent-copy"
-      >
-        Yes, text me my funding route and alerts when new programs match.
-      </mat-checkbox>
-
-      @if (smsOptIn()) {
-        <mat-form-field appearance="outline" class="notify-field">
-          <mat-label>Phone number</mat-label>
-          <input
-            #phoneInput
-            matInput
-            type="tel"
-            [ngModel]="notifyPhone()"
-            (ngModelChange)="notifyPhone.set($event)"
-            [disabled]="isSubmitting()"
-            aria-describedby="sms-consent-copy"
-          />
-        </mat-form-field>
-      }
-
-      <p id="sms-consent-copy" class="consent-copy">
-        You'll receive your funding route summary and alerts when newly published programs match your profile.
-        Message frequency varies. Message and data rates may apply. Reply STOP to opt out, HELP for help.
-        See our <a routerLink="/terms">Terms</a> and <a routerLink="/privacy">Privacy Policy</a>.
-      </p>
-    </div>
-
     <button
       mat-flat-button
       class="submit-button"
       (click)="submit()"
       [disabled]="!canSubmit"
     >
-      @if (isSubmitting()) {
-        <mat-progress-spinner mode="indeterminate" diameter="18" class="submit-spinner" />
-        <span>Building your funding plan…</span>
-      } @else {
-        <span>{{ submitLabel }}</span>
-      }
+      <span class="fp-btn-content">{{ submitLabel }}</span>
     </button>
+
+    <div class="notify-summary">
+      <button
+        type="button"
+        class="notify-toggle"
+        [attr.aria-expanded]="notifyExpanded()"
+        aria-controls="notify-collapse"
+        [disabled]="isSubmitting()"
+        (click)="notifyExpanded.set(!notifyExpanded())"
+      >
+        <span class="notify-toggle-text">Text or email me when new programs match</span>
+        <mat-icon class="notify-toggle-icon" [class.is-open]="notifyExpanded()">expand_more</mat-icon>
+      </button>
+
+      <div class="notify-collapse" id="notify-collapse" [class.is-open]="notifyExpanded()">
+        <div class="notify-collapse-inner">
+          <div class="notify-section">
+            <mat-form-field appearance="outline" class="notify-field">
+              <mat-label>Email (optional)</mat-label>
+              <input
+                matInput
+                type="email"
+                [ngModel]="notifyEmail()"
+                (ngModelChange)="notifyEmail.set($event)"
+                [disabled]="isSubmitting()"
+                aria-describedby="notify-email-hint"
+              />
+              <mat-hint id="notify-email-hint">We'll send your route and alert you when new programs match.</mat-hint>
+            </mat-form-field>
+
+            <mat-checkbox
+              class="sms-checkbox"
+              [checked]="smsOptIn()"
+              (change)="onSmsOptInChange($event.checked)"
+              [disabled]="isSubmitting()"
+              aria-describedby="sms-consent-copy"
+            >
+              Yes, text me my funding route and alerts when new programs match.
+            </mat-checkbox>
+
+            @if (smsOptIn()) {
+              <mat-form-field appearance="outline" class="notify-field">
+                <mat-label>Phone number</mat-label>
+                <input
+                  #phoneInput
+                  matInput
+                  type="tel"
+                  [ngModel]="notifyPhone()"
+                  (ngModelChange)="notifyPhone.set($event)"
+                  [disabled]="isSubmitting()"
+                  aria-describedby="sms-consent-copy"
+                />
+              </mat-form-field>
+            }
+
+            <p id="sms-consent-copy" class="consent-copy">
+              You'll receive your funding route summary and alerts when newly published programs match your profile.
+              Message frequency varies. Message and data rates may apply. Reply STOP to opt out, HELP for help.
+              See our <a routerLink="/terms">Terms</a> and <a routerLink="/privacy">Privacy Policy</a>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
+
+@if (isSubmitting()) {
+  <ss-surveying-interstitial />
+}

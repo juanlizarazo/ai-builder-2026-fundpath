@@ -468,10 +468,71 @@
   }
 }
 
+// ─── Notify/SMS collapse ────────────────────────────────────────────────────
+
+.notify-summary {
+  display: flex;
+  flex-direction: column;
+}
+
+.notify-toggle {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  font-family: var(--fp-font-body);
+  font-size: var(--fp-meta-size);
+  font-weight: var(--fp-weight-medium);
+  color: var(--fp-basin);
+  cursor: pointer;
+  padding: 4px;
+  align-self: center;
+
+  &:hover:not([disabled]) {
+    text-decoration: underline;
+  }
+
+  &[disabled] {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.notify-toggle-icon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  transition: transform var(--fp-duration-fast) var(--fp-ease-standard);
+
+  &.is-open {
+    transform: rotate(180deg);
+  }
+}
+
+// Same JS-free auto-height technique as the Guided-mode picker expansion.
+.notify-collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--fp-duration-base) var(--fp-ease-standard);
+
+  &.is-open {
+    grid-template-rows: 1fr;
+  }
+}
+
+.notify-collapse-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
 .notify-section {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  padding-top: 12px;
 }
 
 .notify-field {
@@ -508,12 +569,6 @@
 
   &[disabled] {
     opacity: 0.55;
-  }
-}
-
-.submit-spinner {
-  ::ng-deep circle {
-    stroke: #fff;
   }
 }
 
