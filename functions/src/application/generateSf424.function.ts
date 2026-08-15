@@ -4,10 +4,40 @@ import { Firestore, Timestamp } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 import { CallableGuardHelper } from '../shared/callable-guard.helper';
 import { FirebaseHelper } from '../shared/firebase.helper';
-import { IGenerateSf424Request, IGenerateSf424Response } from '../types';
+import { IGenerateSf424ApplicantDetails, IGenerateSf424Request, IGenerateSf424Response } from '../types';
 import { IApplicantDetails, IOpportunity, IRoute, IStop } from '../firestore';
 import { ISf424FillValues } from './application.interfaces';
 import { SF424Helper } from './sf424.helper';
+
+/**
+ * Converts the wire-format applicant details (project dates as ISO strings,
+ * since a callable payload is plain JSON) into `IApplicantDetails` (project
+ * dates as real Firestore `Timestamp`s) for persistence and for
+ * `buildSf424FillValues`. An invalid or unparsable date string is dropped
+ * rather than thrown on, so a malformed value degrades to "field left blank"
+ * instead of failing the whole call.
+ */
+export function toApplicantDetails(wire: IGenerateSf424ApplicantDetails): IApplicantDetails {
+  return {
+    ...wire,
+    projectStartDate: parseIsoDateToTimestamp(wire.projectStartDate),
+    projectEndDate: parseIsoDateToTimestamp(wire.projectEndDate),
+  };
+}
+
+function parseIsoDateToTimestamp(value?: string): Timestamp | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return undefined;
+  }
+
+  return Timestamp.fromDate(date);
+}
 
 /** Per-uid cap: no Claude call here (pure PDF fill + one Storage round-trip),
  * so this can afford to be looser than `generateStarterKit`'s cap — 20/hour
@@ -66,9 +96,14 @@ async function loadOpportunity(db: Firestore, stop: IStop): Promise<IOpportunity
     return undefined;
   }
 
-  const snapshot = await db.collection('opportunities').doc(stop.opportunityId).get();
+  const snapshot = await db.collection('corpus').doc(stop.opportunityId).get();
+  const opportunity = snapshot.data() as IOpportunity | undefined;
 
-  return snapshot.data() as IOpportunity | undefined;
+  if (!opportunity) {
+    logger.warn('Opportunity doc unexpectedly missing for SF-424 fill', { opportunityId: stop.opportunityId });
+  }
+
+  return opportunity;
 }
 
 /**
@@ -108,11 +143,13 @@ export const generateSf424 = onCall(
     await CallableGuardHelper.checkRateLimit(uid, 'generateSf424', RATE_LIMIT_PER_HOUR, db);
 
     try {
-      await db.collection('profiles').doc(uid).set({ applicantDetails: payload.applicantDetails }, { merge: true });
+      const applicantDetails = toApplicantDetails(payload.applicantDetails);
+
+      await db.collection('profiles').doc(uid).set({ applicantDetails }, { merge: true });
 
       const { stop } = await loadRouteAndStop(db, uid, payload.routeId, payload.stopId);
       const opportunity = await loadOpportunity(db, stop);
-      const values = buildSf424FillValues(payload.applicantDetails, stop, opportunity);
+      const values = buildSf424FillValues(applicantDetails, stop, opportunity);
       const pdfBytes = await SF424Helper.fill(SF424Helper.loadBasePdf(), values);
       const storagePath = `applications/${uid}/${payload.routeId}/${payload.stopId}/sf424.pdf`;
 

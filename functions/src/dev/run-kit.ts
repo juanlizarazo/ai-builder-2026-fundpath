@@ -37,8 +37,13 @@ async function writeSf424(db: Firestore, stop: IStop, caseNumber: number): Promi
   // not on the stop. The ALN *title* is not stored anywhere yet, so field 11's
   // title box stays blank here rather than being filled with invented text.
   const opportunity = stop.opportunityId
-    ? ((await db.collection('opportunities').doc(stop.opportunityId).get()).data() as IOpportunity | undefined)
+    ? ((await db.collection('corpus').doc(stop.opportunityId).get()).data() as IOpportunity | undefined)
     : undefined;
+
+  if (stop.opportunityId && !opportunity) {
+    console.warn(`  opportunity doc unexpectedly missing for opportunityId ${stop.opportunityId}`);
+  }
+
   const values: ISf424FillValues = {
     ...SAMPLE_APPLICANT,
     alnNumber: stop.aln,

@@ -11,7 +11,7 @@ import { Observable, catchError, filter, of, switchMap } from 'rxjs';
 import { FundpathService } from '@app/core/services/fundpath.service';
 import { AuthService } from '@app/core/services/auth.service';
 import { AlertBannerComponent } from '@app/shared/components/alert-banner/alert-banner.component';
-import { ApplicationService } from './services/application.service';
+import { ApplicationService, IApplicantDetailsWire } from './services/application.service';
 import { FundPath } from '../../../types/firestore';
 import { formatDate } from '../../shared/utils/format.utils';
 
@@ -29,6 +29,10 @@ interface IApplicantFormState {
   contactEmail: string;
   contactPhone: string;
   projectTitle: string;
+  /** `<input type="date">` value — `YYYY-MM-DD`, or '' when left blank. Optional per IApplicantDetails. */
+  projectStartDate: string;
+  /** Same shape/optionality as projectStartDate. */
+  projectEndDate: string;
   fundingRequested: string;
 }
 
@@ -46,8 +50,26 @@ const EMPTY_FORM: IApplicantFormState = {
   contactEmail: '',
   contactPhone: '',
   projectTitle: '',
+  projectStartDate: '',
+  projectEndDate: '',
   fundingRequested: ''
 };
+
+/** Formats a Firestore Timestamp (or already-a-Date) as `YYYY-MM-DD` for an `<input type="date">`. */
+function toDateInputValue(value: unknown): string {
+  if (!value) { return ''; }
+
+  const candidate = value as { toDate?: () => Date };
+  const date = typeof candidate.toDate === 'function' ? candidate.toDate() : (value as Date);
+
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) { return ''; }
+
+  const year = date.getUTCFullYear();
+  const month = `${date.getUTCMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getUTCDate()}`.padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
 
 @Component({
   selector: 'app-application',
@@ -151,6 +173,8 @@ export class ApplicationComponent {
           contactEmail: profile.contactEmail ?? '',
           contactPhone: profile.contactPhone ?? '',
           projectTitle: profile.projectTitle ?? '',
+          projectStartDate: toDateInputValue(profile.projectStartDate),
+          projectEndDate: toDateInputValue(profile.projectEndDate),
           fundingRequested: profile.fundingRequested !== undefined ? String(profile.fundingRequested) : ''
         });
         this._hasPrefilled.set(true);
@@ -235,7 +259,7 @@ export class ApplicationComponent {
     }
   }
 
-  private _buildApplicantDetails(): FundPath.Firestore.Applications.IApplicantDetails {
+  private _buildApplicantDetails(): IApplicantDetailsWire {
     const f = this.applicantForm();
     const fundingRequested = f.fundingRequested.trim() ? Number(f.fundingRequested) : undefined;
 
@@ -253,6 +277,9 @@ export class ApplicationComponent {
       contactEmail: f.contactEmail.trim(),
       contactPhone: f.contactPhone.trim(),
       projectTitle: f.projectTitle.trim(),
+      // Optional per IApplicantDetails — leave unset rather than sending '' so 17a/17b just stay blank.
+      projectStartDate: f.projectStartDate.trim() || undefined,
+      projectEndDate: f.projectEndDate.trim() || undefined,
       fundingRequested: fundingRequested !== undefined && !Number.isNaN(fundingRequested) ? fundingRequested : undefined
     };
   }

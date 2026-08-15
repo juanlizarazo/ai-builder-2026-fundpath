@@ -92,13 +92,29 @@ export class SF424Helper {
     return doc.save();
   }
 
-  /** `MM/DD/YYYY` in UTC, matching how the form is filled by hand. */
-  public static formatDate(value?: Timestamp): string | undefined {
+  /**
+   * `MM/DD/YYYY` in UTC, matching how the form is filled by hand.
+   *
+   * Accepts a real `Timestamp` (has a `.toDate()` method) or an ISO-8601
+   * string. The latter matters because a callable's request payload travels
+   * as plain JSON: a client that builds a `Timestamp`-shaped object and sends
+   * it through `generateSf424` will have it arrive server-side as a plain
+   * object, not a real `Timestamp` instance, so this must not assume
+   * `value.toDate` exists without checking. `IGenerateSf424Request` sends
+   * these two fields as ISO strings for exactly this reason — this tolerance
+   * is a defense-in-depth backstop for any other caller.
+   */
+  public static formatDate(value?: Timestamp | string): string | undefined {
     if (!value) {
       return undefined;
     }
 
-    const date = value.toDate();
+    const date = typeof value === 'string' ? new Date(value) : value.toDate();
+
+    if (Number.isNaN(date.getTime())) {
+      return undefined;
+    }
+
     const month = `${date.getUTCMonth() + 1}`.padStart(2, '0');
     const day = `${date.getUTCDate()}`.padStart(2, '0');
 

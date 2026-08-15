@@ -212,8 +212,14 @@ export class StarterKitService {
     }
 
     try {
-      const snapshot = await db.collection('opportunities').doc(stop.opportunityId).get();
+      const snapshot = await db.collection('corpus').doc(stop.opportunityId).get();
       const opportunity = snapshot.data() as IOpportunity | undefined;
+
+      if (!opportunity) {
+        logger.warn('Opportunity doc unexpectedly missing for narrative grounding', {
+          opportunityId: stop.opportunityId,
+        });
+      }
 
       return opportunity?.description;
     } catch (error) {
@@ -365,25 +371,61 @@ export class StarterKitService {
   }
 
   /**
+   * `RouteBuilderService._tasksFor` already emits a legacy task for these two
+   * registration-timeline steps (`${stop.id}-uei` for SAM.gov, and — for
+   * SBIR/STTR stops — `${stop.id}-registry` for the SBA Company Registry).
+   * `stop.id` is always the opportunity's `sourceId` (see
+   * `RouteBuilderService._toStop`), which is the same id those legacy tasks are
+   * built from, so a plain string comparison against `stop.tasks` is enough to
+   * detect the overlap without needing a separate sourceId lookup.
+   */
+  private static readonly _LEGACY_TASK_ID_SUFFIX_BY_STEP_KEY: Record<string, string> = {
+    'sam-gov-registration': 'uei',
+    'sba-company-registry': 'registry',
+  };
+
+  /**
    * Builds the kit-derived tasks for a stop: one per registration-timeline step
    * (category 'registration', due on that step's own completeBy) and one per
    * required document (category 'document', due on the timeline's submitBy —
    * documents should be ready by submission). Ids are `${stopId}-kit-<key>` so
    * they are deterministic and safe to dedupe against on kit regeneration.
+   *
+   * Two of the registration steps (SAM.gov UEI and, for SBIR/STTR, the SBA
+   * Company Registry) duplicate a task `RouteBuilderService` already put on the
+   * stop when the route was built (see `_LEGACY_TASK_ID_SUFFIX_BY_STEP_KEY`
+   * above). Rather than removing/rewriting that legacy task in place (which
+   * would risk losing its `completed` state or its id if some other part of
+   * the app already references it), we simply skip emitting the kit-side
+   * duplicate whenever the legacy task is present — the founder still sees
+   * exactly one entry for that obligation, and if they'd already checked off
+   * the legacy task its `completed: true` is untouched.
    */
   public static buildKitTasks(
     stop: IStop,
     timeline: ReturnType<typeof RegistrationTimelineHelper.build>,
     documents: ReturnType<typeof resolveDocuments>,
   ): ITask[] {
-    const tasks: ITask[] = timeline.steps.map(step => ({
-      id: `${stop.id}-kit-${step.key}`,
-      label: step.label,
-      completed: false,
-      category: 'registration',
-      source: 'kit',
-      dueDate: step.completeBy,
-    }));
+    const existingTaskIds = new Set((stop.tasks ?? []).map(task => task.id));
+    const tasks: ITask[] = [];
+
+    for (const step of timeline.steps) {
+      const legacySuffix = StarterKitService._LEGACY_TASK_ID_SUFFIX_BY_STEP_KEY[step.key];
+      const legacyId = legacySuffix ? `${stop.id}-${legacySuffix}` : undefined;
+
+      if (legacyId && existingTaskIds.has(legacyId)) {
+        continue;
+      }
+
+      tasks.push({
+        id: `${stop.id}-kit-${step.key}`,
+        label: step.label,
+        completed: false,
+        category: 'registration',
+        source: 'kit',
+        dueDate: step.completeBy,
+      });
+    }
 
     for (const document of documents) {
       tasks.push({

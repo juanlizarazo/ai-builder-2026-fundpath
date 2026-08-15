@@ -139,4 +139,63 @@ describe('StarterKitService.buildKitTasks', () => {
     expect(tasks[1].dueDate).toBe(timeline.submitBy);
     expect(tasks.every(task => task.source === 'kit')).toBe(true);
   });
+
+  it('skips the SAM.gov and SBA Company Registry kit tasks when RouteBuilderService already put the legacy task on the stop', () => {
+    const timeline = {
+      mode: 'earliest-ready' as const,
+      submitBy: Timestamp.now(),
+      steps: [
+        {
+          key: 'sam-gov-registration',
+          label: 'SAM.gov UEI + entity registration',
+          system: 'SAM.gov',
+          durationBusinessDays: 15,
+          startBy: Timestamp.now(),
+          completeBy: Timestamp.now(),
+        },
+        {
+          key: 'sba-company-registry',
+          label: 'SBA Company Registry (SBC control ID)',
+          system: 'SBA Company Registry',
+          durationBusinessDays: 5,
+          startBy: Timestamp.now(),
+          completeBy: Timestamp.now(),
+        },
+      ],
+      feasible: true,
+      slackBusinessDays: 0,
+      headline: 'headline',
+    };
+    const documents = resolveDocuments({});
+    const stop = {
+      id: 'stop-1',
+      title: 'Program',
+      agency: 'Agency',
+      fitTier: 'likely' as const,
+      fitTierLabel: 'Likely fit',
+      placement: 'primary' as const,
+      eligibilityFlags: [],
+      isSbir: true,
+      tasks: [
+        {
+          id: 'stop-1-uei',
+          label: 'Confirm an active SAM.gov UEI registration (allow 10–15 business days)',
+          completed: true,
+          category: 'registration' as const,
+        },
+        {
+          id: 'stop-1-registry',
+          label: 'Register in the SBA Company Registry and obtain your SBC control ID',
+          completed: false,
+          category: 'registration' as const,
+        },
+      ],
+    };
+
+    const tasks = StarterKitService.buildKitTasks(stop, timeline, documents);
+
+    expect(tasks.map(task => task.id)).not.toContain('stop-1-kit-sam-gov-registration');
+    expect(tasks.map(task => task.id)).not.toContain('stop-1-kit-sba-company-registry');
+    expect(tasks).toHaveLength(documents.length);
+  });
 });

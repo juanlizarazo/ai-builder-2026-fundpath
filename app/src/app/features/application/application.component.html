@@ -218,6 +218,18 @@
             <input matInput [value]="applicantForm().projectTitle" (input)="updateField('projectTitle', $event)" required />
           </mat-form-field>
 
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Proposed project start date</mat-label>
+              <input matInput type="date" [value]="applicantForm().projectStartDate" (input)="updateField('projectStartDate', $event)" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Proposed project end date</mat-label>
+              <input matInput type="date" [value]="applicantForm().projectEndDate" (input)="updateField('projectEndDate', $event)" />
+            </mat-form-field>
+          </div>
+
           <mat-form-field appearance="outline">
             <mat-label>Funding requested</mat-label>
             <input matInput type="number" [value]="applicantForm().fundingRequested" (input)="updateField('fundingRequested', $event)" />

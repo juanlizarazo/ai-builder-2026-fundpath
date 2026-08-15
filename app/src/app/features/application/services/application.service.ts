@@ -21,10 +21,25 @@ interface IGenerateStarterKitResponse {
   kit: FundPath.Firestore.Applications.IStarterKit;
 }
 
+/**
+ * `applicantDetails` travels as plain JSON over the callable wire, so
+ * `projectStartDate`/`projectEndDate` can't be sent as
+ * `IApplicantDetails`'s Firestore `Timestamp` type — a client-constructed
+ * `Timestamp`-shaped object would arrive server-side as a plain object, not
+ * a real `Timestamp` instance (see `functions/src/types/index.ts`'s
+ * `IGenerateSf424ApplicantDetails`, which this mirrors). We send these two
+ * fields as `YYYY-MM-DD` strings straight from the `<input type="date">`
+ * elements; `generateSf424` converts them to real `Timestamp`s server-side.
+ */
+export type IApplicantDetailsWire = Omit<FundPath.Firestore.Applications.IApplicantDetails, 'projectStartDate' | 'projectEndDate'> & {
+  projectStartDate?: string;
+  projectEndDate?: string;
+};
+
 interface IGenerateSf424Request {
   routeId: string;
   stopId: string;
-  applicantDetails: FundPath.Firestore.Applications.IApplicantDetails;
+  applicantDetails: IApplicantDetailsWire;
 }
 
 export interface IGenerateSf424Response {
@@ -52,7 +67,7 @@ export class ApplicationService {
   public async generateSf424(
     routeId: string,
     stopId: string,
-    applicantDetails: FundPath.Firestore.Applications.IApplicantDetails
+    applicantDetails: IApplicantDetailsWire
   ): Promise<IGenerateSf424Response> {
     const fn = httpsCallable<IGenerateSf424Request, IGenerateSf424Response>(
       this._functions,
