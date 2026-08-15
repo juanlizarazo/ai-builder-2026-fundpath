@@ -39,6 +39,8 @@ export namespace FundPath {
         productMaturity?: string;
         ownershipSignals?: string[];
         applicantDetails?: Applications.IApplicantDetails;
+        /** Client-only autosave target for the Sherpa's Leg 2 narrative editors — keyed by section, persists across visits. */
+        narrativeDrafts?: Partial<Record<Applications.INarrativeStarter['section'], string>>;
         notifyEmail?: string;
         notifyPhone?: string;
         smsOptIn?: boolean;

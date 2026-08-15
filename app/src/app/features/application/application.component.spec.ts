@@ -41,21 +41,43 @@ function makeTimeline(overrides: Partial<IRegistrationTimeline> = {}): IRegistra
   };
 }
 
-function createFixture(timeline: IRegistrationTimeline | null) {
+type INarrativeStarter = FundPath.Firestore.Applications.INarrativeStarter;
+type NarrativeDrafts = Partial<Record<INarrativeStarter['section'], string>>;
+
+function makeNarratives(): INarrativeStarter[] {
+  return [
+    { section: 'innovation', heading: 'Innovation', draft: 'Fresh innovation draft.' },
+    { section: 'commercialization', heading: 'Commercialization', draft: 'Fresh commercialization draft.' },
+    { section: 'team', heading: 'Team', draft: 'Fresh team draft.' },
+    { section: 'alignment', heading: 'Alignment', draft: 'Fresh alignment draft.' }
+  ];
+}
+
+interface ICreateFixtureOptions {
+  timeline?: IRegistrationTimeline | null;
+  narratives?: INarrativeStarter[];
+  persistedNarrativeDrafts?: NarrativeDrafts;
+  uid?: string;
+  saveNarrativeDrafts?: ReturnType<typeof vi.fn>;
+}
+
+function createFixture(options: ICreateFixtureOptions = {}) {
   const kit: FundPath.Firestore.Applications.IStarterKit = {
     uid: 'uid-1',
     routeId: 'route-1',
     stopId: 'stop-1',
     opportunityTitle: 'Test opportunity',
     agency: 'Test Agency',
-    timeline: timeline ?? makeTimeline(),
+    timeline: options.timeline ?? makeTimeline(),
     documents: [],
     portals: [],
     submissionMechanics: [],
-    narratives: [],
+    narratives: options.narratives ?? [],
     createdAt: Timestamp.now(),
     updatedAt: Timestamp.now()
   };
+
+  const user = options.uid ? { uid: options.uid } : null;
 
   TestBed.configureTestingModule({
     imports: [ApplicationComponent],
@@ -68,12 +90,14 @@ function createFixture(timeline: IRegistrationTimeline | null) {
         useValue: { snapshot: { paramMap: { get: (key: string) => (key === 'routeId' ? 'route-1' : 'stop-1') } } }
       },
       { provide: FundpathService, useValue: { watchRoute: vi.fn().mockReturnValue(of(null)) } },
-      { provide: AuthService, useValue: { user$: of(null) } },
+      { provide: AuthService, useValue: { user$: of(user) } },
       {
         provide: ApplicationService,
         useValue: {
           generateStarterKit: vi.fn().mockResolvedValue(kit),
           watchApplicantDetails: vi.fn().mockReturnValue(of(undefined)),
+          watchNarrativeDrafts: vi.fn().mockReturnValue(of(options.persistedNarrativeDrafts)),
+          saveNarrativeDrafts: options.saveNarrativeDrafts ?? vi.fn().mockResolvedValue(undefined),
           isTaskChecked: vi.fn(() => false),
           toggleTask: vi.fn()
         }
@@ -95,6 +119,13 @@ interface IApplicationComponentTestSurface {
   daysAvailable(): number | null;
   daysNeeded(): number | null;
   slackDays(): number | null;
+  currentStep(): IRegistrationTimeline['steps'][number] | null;
+  doneStepsCount(): number;
+  checkedStepKeys(): string[];
+  toggleRunwayStep(key: string): void;
+  narrativeDraftsState(): NarrativeDrafts;
+  updateNarrativeDraft(section: INarrativeStarter['section'], value: string): void;
+  draftedNarrativeCount(): number;
 }
 
 function asTestSurface(fixture: ReturnType<typeof createFixture>): IApplicationComponentTestSurface {
@@ -103,7 +134,7 @@ function asTestSurface(fixture: ReturnType<typeof createFixture>): IApplicationC
 
 describe('ApplicationComponent — Sherpa leg shell', () => {
   it('starts on Leg 0 and advances/retreats via nextLeg/previousLeg/goToLeg', async () => {
-    const fixture = createFixture(makeTimeline());
+    const fixture = createFixture({ timeline: makeTimeline() });
     await Promise.resolve();
     await Promise.resolve();
     fixture.detectChanges();
@@ -122,7 +153,7 @@ describe('ApplicationComponent — Sherpa leg shell', () => {
   });
 
   it('does not advance past Leg 4 or retreat past Leg 0', async () => {
-    const fixture = createFixture(makeTimeline());
+    const fixture = createFixture({ timeline: makeTimeline() });
     await Promise.resolve();
     await Promise.resolve();
     fixture.detectChanges();
@@ -146,7 +177,7 @@ describe('ApplicationComponent — Sherpa leg shell', () => {
       slackBusinessDays: 5
     });
 
-    const fixture = createFixture(timeline);
+    const fixture = createFixture({ timeline });
     await Promise.resolve();
     await Promise.resolve();
     fixture.detectChanges();
@@ -159,7 +190,7 @@ describe('ApplicationComponent — Sherpa leg shell', () => {
 
   it('renders "This one\'s tight." in the infeasible path using the backend headline verbatim', async () => {
     const timeline = makeTimeline({ feasible: false, headline: 'You need 3 more days than you have.' });
-    const fixture = createFixture(timeline);
+    const fixture = createFixture({ timeline });
     await Promise.resolve();
     await Promise.resolve();
     fixture.detectChanges();

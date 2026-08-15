@@ -81,13 +81,105 @@
               </section>
             }
             @case (1) {
-              <section class="leg leg-stub">
-                <p>Leg 1 content — Task 9</p>
+              <section class="leg leg-1">
+                @if (timeline(); as t) {
+                  <app-runway
+                    [timeline]="t"
+                    [checkedStepKeys]="checkedStepKeys()"
+                    (stepToggled)="toggleRunwayStep($event)"
+                  />
+
+                  @if (doneStepsCount() > 0) {
+                    <p class="leg-1-done-count fp-data">✓ {{ doneStepsCount() }} done</p>
+                  }
+
+                  @if (currentStep(); as step) {
+                    <div class="step-card">
+                      <h3 class="step-card-title">{{ step.label }}</h3>
+                      <p class="step-card-duration fp-data">Takes about {{ step.durationBusinessDays }} business days</p>
+                      @if (step.note) {
+                        <p class="step-card-note">{{ step.note }}</p>
+                      }
+                      <div class="step-card-actions">
+                        @if (step.url) {
+                          <a class="step-card-open" [href]="step.url" target="_blank" rel="noopener noreferrer">
+                            Open {{ step.system }} ↗
+                          </a>
+                        }
+                        <button type="button" class="step-card-done" (click)="toggleRunwayStep(step.key)">
+                          Mark done
+                        </button>
+                      </div>
+                    </div>
+                  } @else {
+                    <p class="step-card-complete">All registration steps are done.</p>
+                  }
+                }
+
+                <button type="button" class="leg-primary-action" (click)="nextLeg()">
+                  Next section →
+                </button>
               </section>
             }
             @case (2) {
-              <section class="leg leg-stub">
-                <p>Leg 2 content — Task 9</p>
+              <section class="leg leg-2">
+                @if (narratives().length > 0) {
+                  <p class="leg-2-progress fp-data">{{ draftedNarrativeCount() }} of {{ narratives().length }} drafted</p>
+
+                  <div class="narrative-tabs" role="tablist">
+                    @for (narrative of narratives(); track narrative.section; let i = $index) {
+                      <button
+                        type="button"
+                        role="tab"
+                        class="narrative-tab"
+                        [class.narrative-tab--current]="currentNarrativeIndex() === i"
+                        [attr.aria-selected]="currentNarrativeIndex() === i"
+                        (click)="goToNarrativeTab(i)"
+                      >
+                        @if (isNarrativeDrafted(narrative.section)) {
+                          <span aria-hidden="true">✓</span>
+                        }
+                        {{ narrative.heading }}
+                      </button>
+                    }
+                  </div>
+
+                  @if (narratives()[currentNarrativeIndex()]; as narrative) {
+                    <div class="narrative-editor">
+                      <div class="narrative-editor-header">
+                        <h3 class="narrative-editor-heading">{{ narrative.heading }}</h3>
+                        <button
+                          type="button"
+                          class="narrative-copy-button"
+                          (click)="copyNarrative(narrative)"
+                          [attr.aria-label]="'Copy ' + narrative.heading + ' draft to clipboard'"
+                        >
+                          {{ copiedSection() === narrative.section ? 'Copied' : 'Copy' }}
+                        </button>
+                      </div>
+
+                      <textarea
+                        cdkTextareaAutosize
+                        class="narrative-textarea"
+                        [value]="narrativeDraftsState()[narrative.section] ?? narrative.draft"
+                        (input)="updateNarrativeDraft(narrative.section, $any($event.target).value)"
+                      ></textarea>
+
+                      <p class="narrative-word-count fp-data">
+                        {{ wordCount(narrativeDraftsState()[narrative.section]) }} words
+                      </p>
+                    </div>
+                  }
+
+                  <button
+                    type="button"
+                    class="leg-primary-action"
+                    (click)="nextNarrativeSection()"
+                    [disabled]="currentNarrativeIndex() >= narratives().length - 1"
+                  >
+                    Next section →
+                  </button>
+                }
               </section>
             }
             @case (3) {

@@ -433,3 +433,151 @@
     }
   }
 }
+
+// --- Leg 1: registration ---------------------------------------------------
+
+.leg-1-done-count {
+  color: var(--fp-sage);
+  font-weight: 600;
+}
+
+.step-card {
+  border: 1px solid var(--fp-sand);
+  border-radius: var(--fp-radius-sm);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.step-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--fp-ink);
+  margin: 0;
+}
+
+.step-card-duration {
+  color: #888;
+  margin: 0;
+}
+
+.step-card-note {
+  font-size: 13px;
+  color: #555;
+  margin: 0;
+}
+
+.step-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 4px;
+}
+
+.step-card-open {
+  color: var(--fp-basin);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.step-card-done {
+  padding: 6px 14px;
+  background: var(--fp-basin);
+  color: #fff;
+  border: none;
+  border-radius: var(--fp-radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.step-card-complete {
+  color: var(--fp-sage);
+  font-weight: 600;
+}
+
+// --- Leg 2: narratives -------------------------------------------------------
+
+.leg-2-progress {
+  color: #888;
+}
+
+.narrative-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.narrative-tab {
+  padding: 6px 12px;
+  border: 1px solid var(--fp-sand);
+  border-radius: var(--fp-radius-full);
+  background: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: #666;
+
+  &--current {
+    border-color: var(--fp-basin);
+    color: var(--fp-ink);
+    font-weight: 600;
+  }
+}
+
+.narrative-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.narrative-editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.narrative-editor-heading {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--fp-ink);
+}
+
+.narrative-copy-button {
+  font-size: 12px;
+  padding: 4px 10px;
+  border: 1px solid var(--fp-sand);
+  border-radius: var(--fp-radius-sm);
+  background: none;
+  cursor: pointer;
+  color: #666;
+}
+
+.narrative-textarea {
+  width: 100%;
+  min-height: 140px;
+  padding: 12px;
+  border: 1px solid var(--fp-sand);
+  border-radius: var(--fp-radius-sm);
+  font-family: var(--fp-font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--fp-ink);
+  resize: vertical;
+
+  &:focus-visible {
+    outline: 2px solid var(--fp-basin);
+    outline-offset: 1px;
+  }
+}
+
+.narrative-word-count {
+  color: #999;
+  align-self: flex-end;
+}

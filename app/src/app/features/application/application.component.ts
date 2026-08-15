@@ -7,8 +7,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { TextFieldModule } from '@angular/cdk/text-field';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { differenceInBusinessDays } from 'date-fns';
-import { Observable, catchError, filter, of, switchMap } from 'rxjs';
+import { Observable, Subject, catchError, debounceTime, filter, map, of, switchMap } from 'rxjs';
 import { FundpathService } from '@app/core/services/fundpath.service';
 import { AuthService } from '@app/core/services/auth.service';
 import { AlertBannerComponent } from '@app/shared/components/alert-banner/alert-banner.component';
@@ -16,6 +18,19 @@ import { RunwayComponent } from '@app/shared/components/runway/runway.component'
 import { ApplicationService, IApplicantDetailsWire } from './services/application.service';
 import { FundPath } from '../../../types/firestore';
 import { formatDate, toDate } from '../../shared/utils/format.utils';
+
+type INarrativeSection = FundPath.Firestore.Applications.INarrativeStarter['section'];
+type NarrativeDraftsRecord = Partial<Record<INarrativeSection, string>>;
+type IRegistrationStep = FundPath.Firestore.Applications.IRegistrationStep;
+
+/** Distinguishes "not yet loaded" from "loaded, no saved drafts" so the init effect never fires early and clobbers real data with defaults. */
+interface INarrativeDraftsLoadState {
+  loaded: boolean;
+  drafts: NarrativeDraftsRecord | undefined;
+}
+
+/** Autosave debounce for Leg 2's narrative editors — matches the brief's 800ms. */
+const NARRATIVE_AUTOSAVE_DEBOUNCE_MS = 800;
 
 /** Which leg of the Sherpa wizard is showing. Leg 0 is the feasibility pre-check; Legs 1-4 are the numbered legs. */
 type Leg = 0 | 1 | 2 | 3 | 4;
@@ -96,7 +111,8 @@ function toDateInputValue(value: unknown): string {
     MatIconModule,
     MatProgressSpinnerModule,
     AlertBannerComponent,
-    RunwayComponent
+    RunwayComponent,
+    TextFieldModule
   ],
   templateUrl: './application.component.html',
   styleUrl: './application.component.scss'
@@ -174,6 +190,60 @@ export class ApplicationComponent {
   /** The backend's own `slackBusinessDays`, rendered as-is — never recomputed client-side. */
   protected readonly slackDays = computed<number | null>(() => this.timeline()?.slackBusinessDays ?? null);
 
+  // --- Leg 1: "Get registered" ---------------------------------------------
+
+  /** The one step the runway marks "lit" — the earliest not yet in `checkedStepKeys`. Same rule as `RunwayComponent`. */
+  protected readonly currentStep = computed<IRegistrationStep | null>(() => {
+    const t = this.timeline();
+    if (!t) { return null; }
+
+    const checked = new Set(this.checkedStepKeys());
+    const ordered = [...t.steps].sort((a, b) => {
+      const aTime = toDate(a.startBy)?.getTime() ?? 0;
+      const bTime = toDate(b.startBy)?.getTime() ?? 0;
+      return aTime - bTime;
+    });
+
+    return ordered.find(step => !checked.has(step.key)) ?? null;
+  });
+
+  protected readonly doneStepsCount = computed<number>(() => {
+    const t = this.timeline();
+    if (!t) { return 0; }
+
+    const checked = new Set(this.checkedStepKeys());
+    return t.steps.filter(step => checked.has(step.key)).length;
+  });
+
+  // --- Leg 2: "Tell your story" --------------------------------------------
+
+  protected readonly currentNarrativeIndex = signal(0);
+
+  /** Per-section draft text, editable — initialized once from persisted `narrativeDrafts` (winning) or the kit's fresh `draft`. */
+  protected readonly narrativeDraftsState = signal<NarrativeDraftsRecord>({});
+
+  protected readonly draftedNarrativeCount = computed<number>(() =>
+    Object.values(this.narrativeDraftsState()).filter(text => !!text?.trim()).length
+  );
+
+  private readonly _uid = toSignal(
+    this._authService.user$.pipe(map(user => user?.uid ?? null)),
+    { initialValue: null }
+  );
+
+  private readonly _narrativeDraftsLoaded = toSignal(
+    this._authService.user$.pipe(
+      filter((user) => !!user),
+      switchMap((user) => this._applicationService.watchNarrativeDrafts(user!.uid)),
+      map((drafts) => ({ loaded: true, drafts })),
+      catchError(() => of({ loaded: true, drafts: undefined }))
+    ),
+    { initialValue: { loaded: false, drafts: undefined } as INarrativeDraftsLoadState }
+  );
+
+  private readonly _hasInitializedNarratives = signal(false);
+  private readonly _narrativeSave$ = new Subject<NarrativeDraftsRecord>();
+
   private readonly _profile = toSignal(this._buildProfile$(), { initialValue: undefined });
   private readonly _hasPrefilled = signal(false);
 
@@ -228,6 +298,33 @@ export class ApplicationComponent {
         this._hasPrefilled.set(true);
       }
     });
+
+    effect(() => {
+      const kit = this.kit();
+      const draftsState = this._narrativeDraftsLoaded();
+
+      if (kit && draftsState.loaded && !this._hasInitializedNarratives()) {
+        const initial: NarrativeDraftsRecord = {};
+
+        for (const narrative of kit.narratives) {
+          initial[narrative.section] = draftsState.drafts?.[narrative.section] ?? narrative.draft;
+        }
+
+        this.narrativeDraftsState.set(initial);
+        this._hasInitializedNarratives.set(true);
+      }
+    });
+
+    this._narrativeSave$
+      .pipe(
+        debounceTime(NARRATIVE_AUTOSAVE_DEBOUNCE_MS),
+        switchMap((drafts) => {
+          const uid = this._uid();
+          return uid ? this._applicationService.saveNarrativeDrafts(uid, drafts) : of(undefined);
+        }),
+        takeUntilDestroyed()
+      )
+      .subscribe();
   }
 
   public ngAfterViewInit(): void {
@@ -252,6 +349,36 @@ export class ApplicationComponent {
     );
   }
 
+  protected updateNarrativeDraft(section: INarrativeSection, value: string): void {
+    this.narrativeDraftsState.update((state) => {
+      const next = { ...state, [section]: value };
+      this._narrativeSave$.next(next);
+
+      return next;
+    });
+  }
+
+  protected wordCount(text: string | undefined): number {
+    const trimmed = (text ?? '').trim();
+    return trimmed ? trimmed.split(/\s+/).length : 0;
+  }
+
+  protected isNarrativeDrafted(section: INarrativeSection): boolean {
+    return !!this.narrativeDraftsState()[section]?.trim();
+  }
+
+  protected goToNarrativeTab(index: number): void {
+    if (index >= 0 && index < this.narratives().length) {
+      this.currentNarrativeIndex.set(index);
+    }
+  }
+
+  protected nextNarrativeSection(): void {
+    this.currentNarrativeIndex.update((index) =>
+      index < this.narratives().length - 1 ? index + 1 : index
+    );
+  }
+
   protected updateField<K extends keyof IApplicantFormState>(field: K, event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.applicantForm.update(f => ({ ...f, [field]: value }));
@@ -267,7 +394,9 @@ export class ApplicationComponent {
 
   protected async copyNarrative(narrative: FundPath.Firestore.Applications.INarrativeStarter): Promise<void> {
     try {
-      await navigator.clipboard.writeText(narrative.draft);
+      // Copies the currently edited draft, not the original starter text — the textarea is the source of truth once Leg 2 loads.
+      const text = this.narrativeDraftsState()[narrative.section] ?? narrative.draft;
+      await navigator.clipboard.writeText(text);
       this.copiedSection.set(narrative.section);
       setTimeout(() => this.copiedSection.set(null), 2000);
     } catch {

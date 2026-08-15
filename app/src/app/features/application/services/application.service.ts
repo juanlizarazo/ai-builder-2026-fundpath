@@ -1,8 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { Functions, httpsCallable } from '@angular/fire/functions';
-import { DocumentReference, Firestore, doc, docData, updateDoc } from '@angular/fire/firestore';
+import { DocumentReference, Firestore, doc, docData, setDoc, updateDoc } from '@angular/fire/firestore';
 import { Observable, catchError, map, of } from 'rxjs';
 import { FundPath } from '../../../../types/firestore';
+
+type NarrativeDrafts = FundPath.Firestore.Profiles.IStartupProfile['narrativeDrafts'];
 
 // Backend callables (Task 5) run in 120s or less; give the client some
 // headroom above that without going all the way to buildRoute's 300s
@@ -104,5 +106,22 @@ export class ApplicationService {
       map((profile) => profile?.applicantDetails),
       catchError(() => of(undefined))
     );
+  }
+
+  /** Leg 2's per-visit initial value — persisted drafts win over the freshly-generated starter text. */
+  public watchNarrativeDrafts(uid: string): Observable<NarrativeDrafts> {
+    const profileRef = doc(this._firestore, 'profiles', uid) as DocumentReference<FundPath.Firestore.Profiles.IStartupProfile>;
+
+    return docData(profileRef).pipe(
+      map((profile) => profile?.narrativeDrafts),
+      catchError(() => of(undefined))
+    );
+  }
+
+  /** Debounced 800ms autosave target for Leg 2's editable narrative textareas — client-only, additive field. */
+  public async saveNarrativeDrafts(uid: string, drafts: NarrativeDrafts): Promise<void> {
+    const profileRef = doc(this._firestore, 'profiles', uid);
+
+    await setDoc(profileRef, { narrativeDrafts: drafts }, { merge: true });
   }
 }
