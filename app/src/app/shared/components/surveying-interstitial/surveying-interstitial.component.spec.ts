@@ -63,7 +63,7 @@ describe('SurveyingInterstitialComponent', () => {
     expect(component.currentMessage).toBe("Checking who's won before…");
 
     vi.advanceTimersByTime(SURVEYING_MESSAGE_INTERVAL_MS);
-    expect(component.currentMessage).toBe('Sequencing your route…');
+    expect(component.currentMessage).toBe('Sequencing your path…');
 
     vi.advanceTimersByTime(SURVEYING_MESSAGE_INTERVAL_MS);
     expect(component.currentMessage).toBe('Writing your explanations…');

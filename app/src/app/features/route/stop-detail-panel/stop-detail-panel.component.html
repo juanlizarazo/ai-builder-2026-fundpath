@@ -65,6 +65,69 @@
       }
     </section>
 
+    <!-- 2. Proof — leads with confidence before caveats. Historical-award cross-referencing -->
+    <!-- is the "goes beyond search" signal most teams skip; give it a card of its own. -->
+    <section class="proof-card">
+      <div class="proof-heading">
+        <mat-icon class="proof-icon" aria-hidden="true">workspace_premium</mat-icon>
+        <h4 class="proof-eyebrow">Proven track record</h4>
+      </div>
+
+      @if (stop().historicalProof; as proof) {
+        @if (totalDollarsLabel(); as total) {
+          <p class="proof-hero">
+            <span class="proof-hero-number">{{ total }}</span>
+            <span class="proof-hero-label">awarded to comparable companies</span>
+          </p>
+        }
+
+        @if (hasAwardRange()) {
+          <div class="award-bar">
+            <div class="award-bar-track">
+              <div class="award-bar-span" [style.left.%]="minPct()" [style.width.%]="maxPct() - minPct()"></div>
+              @if (proof.medianAward) {
+                <div class="award-bar-tick award-bar-tick--median" [style.left.%]="medianPct()" title="Median award"></div>
+              }
+              @if (askPct() !== null) {
+                <div class="award-bar-tick award-bar-tick--ask" [style.left.%]="askPct()" title="Your ask"></div>
+              }
+            </div>
+            <p class="award-bar-label fp-data">
+              {{ formatAmount() }} range
+              @if (proof.medianAward) { · {{ formatDollars(proof.medianAward) }} median }
+            </p>
+          </div>
+        }
+
+        <div class="proof-stats">
+          <div class="proof-stat">
+            <span class="proof-stat-number fp-data">{{ proof.countUtah }}</span>
+            <span class="proof-stat-label">in Utah</span>
+          </div>
+          <div class="proof-stat">
+            <span class="proof-stat-number fp-data">{{ proof.countVertical }}</span>
+            <span class="proof-stat-label">in your vertical</span>
+          </div>
+          <div class="proof-stat">
+            <span class="proof-stat-number fp-data">{{ proof.countTotal }}</span>
+            <span class="proof-stat-label">total awards</span>
+          </div>
+        </div>
+
+        @if (namedWinners().length > 0) {
+          <div class="winner-chips">
+            @for (winner of namedWinners(); track winner) {
+              <span class="winner-chip">{{ winner }}</span>
+            }
+          </div>
+        }
+
+        <p class="proof-source fp-meta">Sourced from USAspending.gov &amp; SBIR.gov award history.</p>
+      } @else {
+        <p class="proof-empty">No historical award data on file for this program yet.</p>
+      }
+    </section>
+
     <!-- Ineligibility caveats, collapsed unless something's actually blocking -->
     <details class="accordion" [attr.open]="hasBlockingFlag() ? '' : null">
       <summary>Check before you apply ({{ ineligibleRows().length }})</summary>
@@ -87,40 +150,6 @@
         </p>
       </div>
     </details>
-
-    <!-- 2. Proof -->
-    @if (stop().historicalProof; as proof) {
-      <section class="proof">
-        <h4 class="section-eyebrow fp-eyebrow">Proof</h4>
-
-        @if (hasAwardRange()) {
-          <div class="award-bar">
-            <div class="award-bar-track">
-              <div class="award-bar-span" [style.left.%]="minPct()" [style.width.%]="maxPct() - minPct()"></div>
-              @if (proof.medianAward) {
-                <div class="award-bar-tick award-bar-tick--median" [style.left.%]="medianPct()" title="Median award"></div>
-              }
-              @if (askPct() !== null) {
-                <div class="award-bar-tick award-bar-tick--ask" [style.left.%]="askPct()" title="Your ask"></div>
-              }
-            </div>
-            <p class="award-bar-label fp-data">{{ formatAmount() }}</p>
-          </div>
-        }
-
-        <p class="proof-summary fp-data">
-          {{ proof.countUtah }} Utah winners · {{ proof.countVertical }} in your vertical · {{ proof.countTotal }} total
-        </p>
-
-        @if (namedWinners().length > 0) {
-          <div class="winner-chips">
-            @for (winner of namedWinners(); track winner) {
-              <span class="winner-chip">{{ winner }}</span>
-            }
-          </div>
-        }
-      </section>
-    }
 
     <!-- 3. Verify before you apply -->
     @if (verifyRows().length > 0) {

@@ -203,7 +203,7 @@ describe('IntakeComponent', () => {
 
     const label = fixture.nativeElement.querySelector('.submit-button .fp-btn-content');
     expect(label).not.toBeNull();
-    expect(label.textContent.trim()).toBe('Build my route');
+    expect(label.textContent.trim()).toBe('Build my path');
   });
 
   it('shows the full-screen surveying interstitial while buildRoute is in flight, and hides it once resolved', async () => {

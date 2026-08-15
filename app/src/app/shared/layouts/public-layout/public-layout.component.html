@@ -14,16 +14,27 @@
     </button>
 
     @if (isAuthenticated) {
-      <button mat-button [matMenuTriggerFor]="userMenu" class="user-btn">
+      <div class="nav-divider" aria-hidden="true"></div>
+      <button mat-button [matMenuTriggerFor]="userMenu" class="user-btn" [attr.aria-label]="'Account menu for ' + userEmail">
         <div class="user-btn-inner">
           <div class="user-avatar">{{ userInitials }}</div>
-          <span class="user-email">{{ userEmail }}</span>
+          <mat-icon class="user-caret">expand_more</mat-icon>
         </div>
       </button>
-      <mat-menu #userMenu="matMenu">
+      <mat-menu #userMenu="matMenu" panelClass="fp-user-menu" xPosition="before">
+        <div class="fp-user-menu-header">
+          <div class="user-avatar user-avatar--lg">{{ userInitials }}</div>
+          <span class="fp-user-menu-email">{{ userEmail }}</span>
+        </div>
+        <mat-divider></mat-divider>
+        <a mat-menu-item routerLink="/paths">
+          <mat-icon>route</mat-icon>
+          <span>My paths</span>
+        </a>
+        <mat-divider></mat-divider>
         <button mat-menu-item (click)="signOut()">
           <mat-icon>logout</mat-icon>
-          Sign out
+          <span>Sign out</span>
         </button>
       </mat-menu>
     } @else {
@@ -43,7 +54,7 @@
 
 <ss-side-panel title="Notifications" [isOpen]="isInboxOpen()" (closed)="closeInbox()">
   @if (notifications().length === 0) {
-    <p class="inbox-empty">Nothing here yet — you'll see updates when your route is ready or new opportunities match.</p>
+    <p class="inbox-empty">Nothing here yet — you'll see updates when your path is ready or new opportunities match.</p>
   } @else {
     <div class="inbox-list">
       @for (notification of notifications(); track notification.id) {

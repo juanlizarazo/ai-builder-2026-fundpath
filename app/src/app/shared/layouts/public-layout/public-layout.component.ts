@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 
@@ -16,7 +17,7 @@ type INotification = FundPath.Firestore.Notifications.INotification;
 @Component({
   selector: 'ss-public-layout',
   standalone: true,
-  imports: [RouterModule, MatButtonModule, MatIconModule, MatMenuModule, SidePanelComponent],
+  imports: [RouterModule, MatButtonModule, MatDividerModule, MatIconModule, MatMenuModule, SidePanelComponent],
   templateUrl: './public-layout.component.html',
   styleUrl: './public-layout.component.scss'
 })

@@ -16,6 +16,7 @@
     @for (station of orderedStations(); track station.stop.id; let i = $index) {
       <div
         class="route-node route-node--{{ status(station.stop) }}"
+        [class.route-node--active]="isOpen(station.stop)"
         [style.left.%]="leftPct(i)"
         [style.top.px]="topPx(i)"
         [style.--tier-color]="tierColor(station.stop)"
@@ -39,6 +40,7 @@
         @if (isOpen(station.stop)) {
           <div class="route-preview" role="dialog" [attr.aria-label]="station.stop.title">
             <span class="route-preview-tier" [style.color]="tierColor(station.stop)">
+              <mat-icon class="route-preview-tier-icon">{{ tierIcon(station.stop) }}</mat-icon>
               {{ tierLabels[station.stop.fitTier] }}
             </span>
             <span class="route-preview-title">{{ station.stop.title }}</span>
@@ -63,6 +65,7 @@
       <span class="route-finish-flag" aria-hidden="true">
         <mat-icon>flag</mat-icon>
       </span>
+      <span class="route-finish-caption fp-data">That's your route — for now</span>
     </div>
   </div>
 

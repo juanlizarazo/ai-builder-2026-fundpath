@@ -135,6 +135,35 @@ describe('StopDetailPanelComponent', () => {
     expect(chip.classList.contains('deadline-chip--urgent')).toBe(true);
   });
 
+  it('shows the total-dollars hero stat and win counts in the proof card', () => {
+    const stop = makeStop({
+      historicalProof: {
+        totalDollars: 14_200_000,
+        medianAward: 180_000,
+        countTotal: 96,
+        countUtah: 23,
+        countVertical: 41,
+        namedWinners: ['Acme Robotics', 'Basin Biotech']
+      }
+    });
+
+    const fixture = createFixture(stop);
+    const card = fixture.nativeElement.querySelector('.proof-card') as HTMLElement;
+
+    expect(card.querySelector('.proof-hero-number')?.textContent).toContain('14.2M');
+    expect(card.querySelectorAll('.proof-stat-number')[0].textContent).toContain('23');
+    expect(card.querySelectorAll('.proof-stat-number')[1].textContent).toContain('41');
+    expect(card.querySelectorAll('.proof-stat-number')[2].textContent).toContain('96');
+    expect(card.textContent).toContain('Acme Robotics');
+  });
+
+  it('shows a fallback message in the proof card when there is no historical award data', () => {
+    const fixture = createFixture(makeStop({ historicalProof: undefined }));
+    const card = fixture.nativeElement.querySelector('.proof-card') as HTMLElement;
+
+    expect(card.querySelector('.proof-empty')?.textContent).toContain('No historical award data');
+  });
+
   it('positions the award-range bar and the founder ask marker proportionally within the domain', () => {
     const stop = makeStop({ minAward: 250_000, maxAward: 750_000 });
     const fixture = createFixture(stop);

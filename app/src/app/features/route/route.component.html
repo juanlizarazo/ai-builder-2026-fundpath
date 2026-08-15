@@ -1,11 +1,11 @@
 @if (isLoading()) {
   <div class="route-loading">
     <mat-progress-spinner mode="indeterminate" diameter="48" />
-    <p class="route-loading-text">Loading your route…</p>
+    <p class="route-loading-text">Loading your path…</p>
   </div>
 } @else if (!route()) {
   <div class="not-found">
-    <p>Route not found.</p>
+    <p>Path not found.</p>
     <a routerLink="/" mat-stroked-button>← Return to home</a>
   </div>
 } @else {
@@ -15,6 +15,7 @@
         <div class="route-header-top">
           <a routerLink="/" class="back-link">← New search</a>
         </div>
+        <div class="verdict-rule" aria-hidden="true"></div>
         <h1 class="verdict-line">{{ route()!.verdictLine }}</h1>
 
         @if (!isAbstention()) {
@@ -35,19 +36,25 @@
           </div>
         }
 
-        @if (isDeepRunning()) {
-          <div class="deep-pass-pill deep-pass-pill--running fp-motion">
-            <span class="pulse-dot" aria-hidden="true"></span>
-            <span>Still searching deeper…</span>
+        <div class="discovery-bar">
+          <div class="discovery-status" [class.discovery-status--running]="isDeepRunning()">
+            @if (isDeepRunning()) {
+              <span class="pulse-dot" aria-hidden="true"></span>
+              <span>Still searching deeper for more matches…</span>
+            } @else if (deepPassFoundNew()) {
+              <mat-icon class="discovery-status-icon">check_circle</mat-icon>
+              <span>We found new opportunities since your last visit</span>
+            } @else {
+              <mat-icon class="discovery-status-icon">search</mat-icon>
+              <span>You're seeing the current pool of matches</span>
+            }
           </div>
-        }
 
-        @if (deepPassFoundNew()) {
-          <div class="deep-pass-pill deep-pass-pill--found">
-            <mat-icon>check_circle</mat-icon>
-            <span>Found more opportunities</span>
-          </div>
-        }
+          <button mat-stroked-button class="check-for-new-button" (click)="checkForNewPrograms()">
+            <mat-icon>refresh</mat-icon>
+            Check for new
+          </button>
+        </div>
 
         @if (checkForNewError()) {
           <ss-alert-banner
@@ -60,10 +67,6 @@
         @if (checkForNewMessage()) {
           <p class="check-for-new-message">{{ checkForNewMessage() }}</p>
         }
-
-        <button mat-stroked-button class="check-for-new-button" (click)="checkForNewPrograms()">
-          Check for new opportunities
-        </button>
       </header>
 
       @if (isAbstention()) {
@@ -84,10 +87,15 @@
             }
           </div>
         </section>
+      } @else if (!hasAnyContent()) {
+        <div class="empty-route">
+          <mat-icon>search</mat-icon>
+          <p>No matches yet. Try "Check for new opportunities" above, or check back after your next search.</p>
+        </div>
       } @else {
         @if (diagramStations().length > 0 || offRouteStops().length > 0) {
           <section class="route-section">
-            <h2 class="section-title">Your Route</h2>
+            <h2 class="section-title">Your Path</h2>
 
             @if (diagramStations().length > 0) {
               <app-route-path
@@ -127,6 +135,7 @@
         @if (nonGrantStops().length > 0) {
           <section class="route-section route-section--amber">
             <h2 class="section-title section-title--amber">Alternative path</h2>
+            <p class="section-subtitle">Grants aren't the right fit here, but these programs are worth a look.</p>
             <div class="stops-list">
               @for (stop of nonGrantStops(); track stop.id) {
                 <div [id]="'stop-' + stop.id">
@@ -149,6 +158,7 @@
                   rel="noopener noreferrer"
                   [title]="resource.matchReason"
                 >
+                  <mat-icon>place</mat-icon>
                   {{ resource.title }}
                 </a>
               }

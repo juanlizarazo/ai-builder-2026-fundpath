@@ -188,6 +188,82 @@ body.ss-panel-open {
   gap: 8px;
 }
 
+/*
+ * No @angular/material theme is loaded in this app (structural CSS only), so
+ * CDK overlay content — mat-menu, mat-dialog, mat-tooltip, etc. — reads
+ * unset `--mat-*`/`--mdc-*` tokens and renders with a transparent panel by
+ * default. Material's own component stylesheet is injected after this file,
+ * so a plain `.mat-mdc-menu-panel` rule loses the cascade — set the tokens
+ * it actually reads instead, plus an !important fallback for safety.
+ */
+:root {
+  --mat-menu-container-color: #fff;
+  --mat-menu-item-label-text-color: #0f172a;
+  --mat-menu-item-icon-color: #0f172a;
+}
+
+.mat-mdc-menu-panel {
+  background-color: #fff !important;
+  color: #0f172a;
+}
+
+.fp-user-menu.mat-mdc-menu-panel {
+  min-width: 240px;
+  border-radius: var(--fp-radius-md);
+  border: 1px solid var(--fp-sand);
+  box-shadow: 0 12px 32px rgba(20, 24, 29, 0.16), 0 2px 8px rgba(20, 24, 29, 0.08);
+  overflow: hidden;
+}
+
+.fp-user-menu .mat-mdc-menu-content {
+  padding: 0;
+}
+
+.fp-user-menu-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.fp-user-menu-email {
+  font-size: var(--fp-meta-size);
+  font-weight: var(--fp-weight-medium);
+  color: var(--fp-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+ * Same missing-theme issue as the panel background above: mat-divider has
+ * no `--mat-divider-color` token set, so it falls back to a heavy,
+ * near-black, edge-to-edge line. Soften it to a hairline that matches the
+ * app's own divider color and stops short of the panel edges.
+ */
+.fp-user-menu .mat-divider {
+  margin: 0 16px;
+  border-top-color: var(--fp-sand);
+}
+
+.fp-user-menu .mat-mdc-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-family: var(--fp-font-body);
+  font-size: var(--fp-body-size);
+  color: var(--fp-ink);
+}
+
+.fp-user-menu .mat-mdc-menu-item:hover:not([disabled]) {
+  background: var(--fp-limestone);
+}
+
+.fp-user-menu .mat-mdc-menu-item .mat-icon {
+  color: #7a7166;
+}
+
 /* --- Type scale utility classes --- */
 .fp-display-xl {
   font-family: var(--fp-font-display);

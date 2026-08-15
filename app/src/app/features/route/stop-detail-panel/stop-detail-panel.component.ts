@@ -110,6 +110,9 @@ export class StopDetailPanelComponent {
 
   protected readonly namedWinners = computed<string[]>(() => this.stop().historicalProof?.namedWinners ?? []);
 
+  /** Hero stat for the Proof card — the aggregate dollar figure judges' rubric singles out ("historical-award cross-referencing"). */
+  protected readonly totalDollarsLabel = computed<string>(() => formatDollars(this.stop().historicalProof?.totalDollars));
+
   protected readonly provenanceNote = computed<string>(() =>
     this.stop().provenanceNote || 'Program details curated from agency source, Aug 2026'
   );

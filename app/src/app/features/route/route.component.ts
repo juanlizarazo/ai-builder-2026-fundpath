@@ -111,6 +111,14 @@ export class RouteComponent {
     return !!currentRoute && (currentRoute.stops?.length ?? 0) === 0 && (currentRoute.nonGrantAlternatives?.length ?? 0) > 0;
   });
 
+  /** Whether there's anything at all to show below the header — false only in a genuinely empty (non-abstention) route. */
+  protected readonly hasAnyContent = computed<boolean>(() =>
+    this.diagramStations().length > 0 ||
+    this.offRouteStops().length > 0 ||
+    this.nonGrantStops().length > 0 ||
+    this.utahResources().length > 0
+  );
+
   /**
    * The founder's profile (for `askMin`/`askMax`), re-fetched whenever the
    * route's `profileId` changes. Nothing else on this page needed the

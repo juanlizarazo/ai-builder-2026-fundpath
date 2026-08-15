@@ -1,0 +1,36 @@
+<div class="my-paths-page">
+  <div class="my-paths-content animate-slide-up">
+    <header class="my-paths-header">
+      <a routerLink="/" class="back-link">← New search</a>
+      <p class="fp-eyebrow">FUNDPATH</p>
+      <h1 class="fp-h1">Your paths</h1>
+      <p class="fp-body my-paths-subtitle">Every funding path you've built, newest first.</p>
+    </header>
+
+    @if (paths().length === 0) {
+      <div class="my-paths-empty">
+        <mat-icon class="my-paths-empty-icon">route</mat-icon>
+        <p class="fp-body">You haven't built a path yet.</p>
+        <a routerLink="/" class="my-paths-empty-cta">Build my path →</a>
+      </div>
+    } @else {
+      <ul class="my-paths-list">
+        @for (path of paths(); track path.id) {
+          <li>
+            <a [routerLink]="['/route', path.id]" class="my-paths-row">
+              <div class="my-paths-row-main">
+                <span class="my-paths-row-title">{{ path.verdictLine }}</span>
+                <span class="my-paths-row-meta fp-data">
+                  {{ stopCount(path) }} PROGRAM{{ stopCount(path) === 1 ? '' : 'S' }}
+                  <span aria-hidden="true">·</span>
+                  {{ formatRelativeTime(path.createdAt) }}
+                </span>
+              </div>
+              <mat-icon class="my-paths-row-arrow" aria-hidden="true">chevron_right</mat-icon>
+            </a>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</div>

@@ -19,19 +19,24 @@
 .route-path-connector-line {
   fill: none;
   stroke: var(--fp-sand);
-  stroke-width: 3;
+  stroke-width: 6;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-dasharray: 2 10;
+  stroke-dasharray: 1 16;
   vector-effect: non-scaling-stroke;
 }
 
 .route-node {
   position: absolute;
+  z-index: 1;
   transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  &--active {
+    z-index: 50;
+  }
 }
 
 .route-node-button {
@@ -155,6 +160,15 @@
   color: var(--fp-basin);
 }
 
+.route-finish-caption {
+  margin-top: 8px;
+  max-width: 140px;
+  color: #888;
+  font-size: 11px;
+  text-align: center;
+  white-space: normal;
+}
+
 .route-preview {
   position: absolute;
   top: calc(100% + 14px);
@@ -164,7 +178,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  width: 236px;
+  width: min(236px, calc(100vw - 64px));
   padding: var(--fp-space-4);
   border-radius: var(--fp-radius-lg);
   background: #fff;
@@ -184,10 +198,19 @@
 }
 
 .route-preview-tier {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: var(--fp-eyebrow-size);
   letter-spacing: var(--fp-eyebrow-tracking);
   text-transform: uppercase;
   font-weight: var(--fp-weight-semibold);
+}
+
+.route-preview-tier-icon {
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
 }
 
 .route-preview-title {
@@ -278,4 +301,42 @@
 .route-fallback-deadline {
   color: #666;
   white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .route-node-button {
+    width: 52px;
+    height: 52px;
+    box-shadow:
+      0 4px 0 color-mix(in srgb, var(--tier-color) 65%, black),
+      0 8px 14px rgba(20, 24, 29, 0.2);
+
+    &:active {
+      box-shadow:
+        0 1px 0 color-mix(in srgb, var(--tier-color) 65%, black),
+        0 3px 8px rgba(20, 24, 29, 0.18);
+    }
+  }
+
+  .route-node--closed .route-node-button {
+    box-shadow:
+      0 3px 0 color-mix(in srgb, var(--tier-color) 65%, black),
+      0 5px 10px rgba(20, 24, 29, 0.12);
+  }
+
+  @keyframes routeNodePulse {
+    0%, 100% { box-shadow: 0 4px 0 color-mix(in srgb, var(--tier-color) 65%, black), 0 8px 14px rgba(20, 24, 29, 0.2), 0 0 0 0 color-mix(in srgb, var(--tier-color) 45%, transparent); }
+    50% { box-shadow: 0 4px 0 color-mix(in srgb, var(--tier-color) 65%, black), 0 8px 14px rgba(20, 24, 29, 0.2), 0 0 0 8px transparent; }
+  }
+
+  .route-node-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+  }
+
+  .route-finish-flag {
+    width: 40px;
+    height: 40px;
+  }
 }

@@ -1,11 +1,17 @@
 import { Routes } from '@angular/router';
-import { Layout } from '@app/core';
+import { Layout, authGuard } from '@app/core';
 
 export const routes: Routes = [
   {
     path: '',
     data: { layout: Layout.Public },
     loadComponent: () => import('./features/intake/intake.component').then(m => m.IntakeComponent)
+  },
+  {
+    path: 'paths',
+    data: { layout: Layout.Public },
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/my-paths/my-paths.component').then(m => m.MyPathsComponent)
   },
   {
     path: 'route/:routeId',

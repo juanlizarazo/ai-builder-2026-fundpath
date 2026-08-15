@@ -28,6 +28,14 @@ const KIND_ICON: Record<IRoutePathStation['kind'], string> = {
   alongside: 'paid'
 };
 
+/** Fit-tier icons — a checkmark for a likely fit, softer signals for the rest. */
+const TIER_ICON: Record<FitTier, string> = {
+  'likely': 'check_circle',
+  'potential': 'help',
+  'adjacent': 'info',
+  'probably-not': 'cancel'
+};
+
 /** Vertical space between waypoints in the zigzag lane. */
 const ROW_HEIGHT = 116;
 const TOP_PADDING = 72;
@@ -36,6 +44,35 @@ const BOTTOM_PADDING = 64;
 /** Deterministic left/right wander (0..100 scale) — a level-map rhythm, not a data encoding. */
 function laneX(index: number): number {
   return 50 + 18 * Math.sin(index * 1.7);
+}
+
+interface IPoint {
+  x: number;
+  y: number;
+}
+
+/** Catmull-Rom-to-Bezier smoothing — a flowing curve through every point, rather than straight zigzag segments. */
+function buildSmoothPathD(points: IPoint[]): string {
+  if (points.length < 2) { return ''; }
+  if (points.length === 2) { return `M${points[0].x},${points[0].y} L${points[1].x},${points[1].y}`; }
+
+  let d = `M${points[0].x},${points[0].y}`;
+
+  for (let i = 0; i < points.length - 1; i++) {
+    const p0 = points[i - 1] ?? points[i];
+    const p1 = points[i];
+    const p2 = points[i + 1];
+    const p3 = points[i + 2] ?? p2;
+
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+
+    d += ` C${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`;
+  }
+
+  return d;
 }
 
 /**
@@ -74,14 +111,13 @@ export class RoutePathComponent {
     TOP_PADDING + this.orderedStations().length * ROW_HEIGHT + BOTTOM_PADDING
   );
 
-  /** The connector's `d` string, threaded straight through every waypoint in order. */
+  /** The connector's `d` string — a smooth curve threaded through every waypoint in order. */
   protected readonly connectorD = computed<string>(() => {
     const ordered = this.orderedStations();
     if (ordered.length < 2) { return ''; }
 
-    return ordered
-      .map((_, index) => `${index === 0 ? 'M' : 'L'}${this.leftPct(index)},${this.topPx(index)}`)
-      .join(' ');
+    const points = ordered.map((_, index) => ({ x: this.leftPct(index), y: this.topPx(index) }));
+    return buildSmoothPathD(points);
   });
 
   /** The soonest station whose deadline hasn't passed (or the first station, if none/all have passed). */
@@ -109,6 +145,10 @@ export class RoutePathComponent {
 
   protected tierColor(stop: IStop): string {
     return TIER_COLOR_VAR[stop.fitTier];
+  }
+
+  protected tierIcon(stop: IStop): string {
+    return TIER_ICON[stop.fitTier];
   }
 
   protected status(stop: IStop): StationStatus {

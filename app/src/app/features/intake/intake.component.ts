@@ -347,7 +347,7 @@ export class IntakeComponent implements AfterViewChecked {
   }
 
   public get submitLabel(): string {
-    return this.smsOptIn() ? 'Yes, build my route' : 'Build my route';
+    return this.smsOptIn() ? 'Yes, build my path' : 'Build my path';
   }
 
   public get isEmailValid(): boolean {

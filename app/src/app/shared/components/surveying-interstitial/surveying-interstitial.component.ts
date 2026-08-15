@@ -62,7 +62,7 @@ export class SurveyingInterstitialComponent implements OnInit, OnDestroy {
       `Screening ${programsLabel} programs…`,
       'Applying eligibility rules…',
       "Checking who's won before…",
-      'Sequencing your route…',
+      'Sequencing your path…',
       'Writing your explanations…'
     ];
   });

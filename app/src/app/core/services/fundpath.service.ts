@@ -1,7 +1,20 @@
 import { Injectable, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { Auth, authState } from '@angular/fire/auth';
 import { Functions, httpsCallable } from '@angular/fire/functions';
-import { DocumentReference, Firestore, doc, docData, setDoc } from '@angular/fire/firestore';
-import { Observable, catchError, map, of } from 'rxjs';
+import {
+  DocumentReference,
+  Firestore,
+  collection,
+  collectionData,
+  doc,
+  docData,
+  orderBy,
+  query,
+  setDoc,
+  where
+} from '@angular/fire/firestore';
+import { Observable, catchError, map, of, switchMap } from 'rxjs';
 import { FundPath } from '../../../types/firestore';
 
 const COMPANY_NAME_SESSION_KEY = 'fundpath.companyName';
@@ -12,10 +25,31 @@ const BUILD_ROUTE_TIMEOUT_MS = 300000;
 export class FundpathService {
   private readonly _functions = inject(Functions);
   private readonly _firestore = inject(Firestore);
+  private readonly _auth = inject(Auth);
 
   public readonly currentRoute = signal<FundPath.Firestore.Routes.IRoute | null>(null);
   public readonly currentRouteId = signal<string | null>(null);
   public readonly currentProfileId = signal<string | null>(null);
+
+  private readonly _myRoutes$: Observable<FundPath.Firestore.Routes.IRoute[]> = authState(this._auth).pipe(
+    switchMap(user => {
+      if (!user || user.isAnonymous) {
+        return of<FundPath.Firestore.Routes.IRoute[]>([]);
+      }
+
+      const myRoutesQuery = query(
+        collection(this._firestore, 'routes'),
+        where('uid', '==', user.uid),
+        orderBy('createdAt', 'desc')
+      );
+
+      return collectionData(myRoutesQuery, { idField: 'id' }) as Observable<FundPath.Firestore.Routes.IRoute[]>;
+    }),
+    catchError(() => of<FundPath.Firestore.Routes.IRoute[]>([]))
+  );
+
+  /** Every path (route) the signed-in founder has built, newest first — powers the "My paths" menu. */
+  public readonly myRoutes = toSignal(this._myRoutes$, { initialValue: [] });
 
   public async buildRoute(
     description: string,
