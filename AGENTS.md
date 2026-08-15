@@ -231,35 +231,7 @@ namespace FundPath.Firestore.Opportunities {
 
 ## Testing Conventions
 
-### Framework
-
-- `[TEST-01]` Use Jasmine (Angular default) for all tests
-- `[TEST-02]` Test files: `[name].spec.ts` matching source file location
-
-### Test Structure
-
-```typescript
-describe('ClassName', () => {
-  describe('methodName()', () => {
-    it('does expected behavior when given input', () => {
-      // test implementation
-    });
-  });
-});
-```
-
-- `[TEST-03]` Root `describe` block: Class or component name (e.g., `'ResourceHelper'`)
-- `[TEST-04]` Nested `describe` blocks: Public method names with `()` suffix
-- `[TEST-05]` `it` blocks: Start with verb describing behavior
-- `[TEST-06]` Skip boilerplate tests like `'should create'` — focus on real logic
-
-### Testing Rules
-
-- `[TEST-07]` **No `any` types** in test files — use proper typing
-- `[TEST-08]` **Only test public interfaces** — don't test private methods directly
-- `[TEST-09]` **Don't mock helpers** — helpers are pure functions, use real calls for better coverage
-- `[TEST-10]` **Component testing**: Test template bindings and rendered output, not just class logic
-- `[TEST-11]` **Services**: Test all public methods with various inputs including edge cases
+**No unit tests for now.** We are in hackathon mode — do not write or maintain test files. This will be revisited after the build day.
 
 ---
 
