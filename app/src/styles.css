@@ -242,8 +242,9 @@ body.ss-panel-open {
  * app's own divider color and stops short of the panel edges.
  */
 .fp-user-menu .mat-divider {
-  margin: 0 16px;
-  border-top-color: var(--fp-sand);
+  margin: 4px 16px;
+  border-top-width: 1px;
+  border-top-color: rgba(20, 24, 29, 0.08);
 }
 
 .fp-user-menu .mat-mdc-menu-item {
