@@ -2,6 +2,7 @@
   <div class="application-content animate-slide-up">
     <header class="application-header">
       <a [routerLink]="['/route', routeId]" class="back-link">← Back to path</a>
+      <span class="header-eyebrow">Application builder</span>
       <h1 #pageHeading class="page-title" tabindex="-1">
         {{ stop()?.title ?? 'Start your application' }}
       </h1>
@@ -25,10 +26,53 @@
 
     @if (isLoadingKit()) {
       <div class="kit-loading">
-        <mat-progress-spinner mode="indeterminate" diameter="40" />
-        <p class="kit-loading-text">Building your application starter kit…</p>
+        <div class="kit-loading-icon" aria-hidden="true">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <rect class="kit-icon-page" x="10" y="6" width="28" height="36" rx="3" stroke="var(--fp-basin)" stroke-width="2" fill="none"/>
+            <line class="kit-icon-line kit-icon-line--1" x1="16" y1="16" x2="32" y2="16" stroke="var(--fp-basin)" stroke-width="2" stroke-linecap="round"/>
+            <line class="kit-icon-line kit-icon-line--2" x1="16" y1="22" x2="28" y2="22" stroke="var(--fp-basin)" stroke-width="2" stroke-linecap="round"/>
+            <line class="kit-icon-line kit-icon-line--3" x1="16" y1="28" x2="30" y2="28" stroke="var(--fp-basin)" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <p class="kit-loading-title">Building your starter kit</p>
+        <div class="kit-loading-steps">
+          <span class="kit-step kit-step--1">Reading the solicitation</span>
+          <span class="kit-step kit-step--2">Mapping your timeline</span>
+          <span class="kit-step kit-step--3">Drafting your narratives</span>
+          <span class="kit-step kit-step--4">Prefilling your form</span>
+        </div>
+        <div class="kit-loading-bar" aria-hidden="true">
+          <div class="kit-loading-bar-fill"></div>
+        </div>
       </div>
     } @else if (kit()) {
+      @if (sf424Result() || hasSavedSf424()) {
+        <div class="kit-quick-actions">
+          <span class="kit-quick-label">
+            <mat-icon>check_circle</mat-icon>
+            Your starter kit is ready
+          </span>
+          <div class="kit-quick-buttons">
+            <button type="button" class="kit-quick-btn" (click)="downloadNarratives()">
+              <mat-icon>article</mat-icon>
+              Download drafts
+            </button>
+            @if (sf424Result()) {
+              <button type="button" class="kit-quick-btn" (click)="openSf424InNewTab()">
+                <mat-icon>description</mat-icon>
+                View SF-424
+              </button>
+            }
+            @if (sf424Result()) {
+              <button type="button" class="kit-quick-btn" (click)="downloadSf424()" [disabled]="isDownloading()">
+                <mat-icon>download</mat-icon>
+                Download SF-424
+              </button>
+            }
+          </div>
+        </div>
+      }
+
       <div class="sherpa">
         <!-- Desktop: thin left rail, echoing the route page's spine language. -->
         <nav class="sherpa-rail fp-data" aria-label="Application steps">
@@ -61,7 +105,11 @@
                     <h2 class="leg-headline">Yes — you can make this deadline.</h2>
                     <p class="leg-subline fp-data">
                       You have {{ daysAvailable() }} days. You need {{ daysNeeded() }} days.
-                      That leaves {{ slackDays() }} days of slack.
+                      @if (daysAvailable()! - daysNeeded()! <= 0) {
+                        No buffer — start now.
+                      } @else {
+                        That leaves {{ daysAvailable()! - daysNeeded()! }} days of buffer.
+                      }
                     </p>
                   } @else {
                     <h2 class="leg-headline leg-headline--signal">This one's tight.</h2>
@@ -124,7 +172,13 @@
             @case (2) {
               <section class="leg leg-2">
                 @if (narratives().length > 0) {
-                  <p class="leg-2-progress fp-data">{{ draftedNarrativeCount() }} of {{ narratives().length }} drafted</p>
+                  <p class="leg-2-hint">These are drafts for your proposal — edit them here, then download or copy into your submission.</p>
+                  <div class="leg-2-toolbar">
+                    <p class="leg-2-progress fp-data">{{ draftedNarrativeCount() }} of {{ narratives().length }} drafted</p>
+                    <button type="button" class="leg-2-download" (click)="downloadNarratives()">
+                      Download all drafts
+                    </button>
+                  </div>
 
                   <div class="narrative-tabs" role="tablist">
                     @for (narrative of narratives(); track narrative.section; let i = $index) {
@@ -171,14 +225,15 @@
                     </div>
                   }
 
-                  <button
-                    type="button"
-                    class="leg-primary-action"
-                    (click)="nextNarrativeSection()"
-                    [disabled]="currentNarrativeIndex() >= narratives().length - 1"
-                  >
-                    Next section →
-                  </button>
+                  @if (currentNarrativeIndex() >= narratives().length - 1) {
+                    <button type="button" class="leg-primary-action" (click)="nextLeg()">
+                      Continue to form →
+                    </button>
+                  } @else {
+                    <button type="button" class="leg-primary-action" (click)="nextNarrativeSection()">
+                      Next section →
+                    </button>
+                  }
                 }
               </section>
             }
@@ -334,8 +389,17 @@
                   Boxes 8b and 8c are blank — those are your EIN and UEI, and we never ask for them.
                 </p>
 
-                @if (portalsFootnote()) {
-                  <p class="sf424-portals-footnote fp-data">{{ portalsFootnote() }}</p>
+                @if (portals().length > 0) {
+                  <div class="sf424-submit-info">
+                    <span class="sf424-submit-label">Submit at</span>
+                    @for (portal of portals(); track portal.name) {
+                      @if (portal.url) {
+                        <a class="sf424-submit-link" [href]="portal.url" target="_blank" rel="noopener noreferrer">{{ portal.name }} ↗</a>
+                      } @else {
+                        <span>{{ portal.name }}</span>
+                      }
+                    }
+                  </div>
                 }
 
                 <button type="button" class="leg-secondary-action" (click)="previousFormScreen()">← Back</button>

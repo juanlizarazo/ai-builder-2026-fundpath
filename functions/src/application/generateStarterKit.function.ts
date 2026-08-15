@@ -11,7 +11,7 @@ const starterKitService = new StarterKitService();
  * same order of magnitude as `buildRoute`-style narrative work — 10/hour is
  * generous for a demo/founder workflow (a handful of stops per session) while
  * still bounding worst-case Claude spend if a client retries in a loop. */
-const RATE_LIMIT_PER_HOUR = 10;
+const RATE_LIMIT_PER_HOUR = 100;
 
 export const generateStarterKit = onCall(
   {

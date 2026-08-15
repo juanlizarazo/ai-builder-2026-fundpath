@@ -101,6 +101,49 @@
   margin: 6px 0 0;
 }
 
+.detail-app-status {
+  margin-top: 12px;
+}
+
+.detail-app-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--fp-radius-sm);
+  background: rgba(46, 107, 79, 0.08);
+  border: 1px solid rgba(46, 107, 79, 0.2);
+  color: var(--fp-sage);
+  font-size: 13px;
+  font-weight: 600;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.detail-app-sf424-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fp-basin);
+  text-decoration: none;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 .detail-cta-row {
   display: flex;
   align-items: center;

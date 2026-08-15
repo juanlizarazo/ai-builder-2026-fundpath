@@ -82,7 +82,7 @@
           <div class="stops-list">
             @for (stop of nonGrantStops(); track stop.id) {
               <div [id]="'stop-' + stop.id">
-                <app-stop [stop]="stop" (opened)="openStopDetail($event)" />
+                <app-stop [stop]="stop" [routeId]="routeId!" (opened)="openStopDetail($event)" />
               </div>
             }
           </div>
@@ -139,7 +139,7 @@
             <div class="stops-list">
               @for (stop of nonGrantStops(); track stop.id) {
                 <div [id]="'stop-' + stop.id">
-                  <app-stop [stop]="stop" (opened)="openStopDetail($event)" />
+                  <app-stop [stop]="stop" [routeId]="routeId!" (opened)="openStopDetail($event)" />
                 </div>
               }
             </div>

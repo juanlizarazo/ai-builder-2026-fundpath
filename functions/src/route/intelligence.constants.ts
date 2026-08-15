@@ -412,12 +412,6 @@ export const RESOURCE_RELEVANCE_KEYWORDS: Record<
     reason: 'Manufacturing Extension Partnership: subsidized engineering, quality and process help for Utah manufacturers',
     verticalSlugs: ['manufacturing', 'aerospace', 'water', 'climate', 'environmental', 'other'],
   },
-  'impact utah': {
-    weight: 10,
-    category: 'technical-assistance',
-    reason: 'Utah MEP affiliate offering subsidized manufacturing and operations consulting',
-    verticalSlugs: ['manufacturing', 'aerospace', 'water', 'climate', 'environmental', 'other'],
-  },
   'small business credit initiative': {
     weight: 10,
     category: 'capital',

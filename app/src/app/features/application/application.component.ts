@@ -127,18 +127,6 @@ function toDateInputValue(value: unknown): string {
 export class ApplicationComponent {
   @ViewChild('pageHeading') private readonly _headingRef?: ElementRef<HTMLElement>;
 
-  protected readonly legTitles = LEG_TITLES;
-  protected readonly legs: Leg[] = [0, 1, 2, 3, 4];
-  protected readonly numberedLegs: Leg[] = [1, 2, 3, 4];
-  protected readonly currentLeg = signal<Leg>(0);
-
-  /**
-   * Keys of registration steps marked done, for the runway's "lit" node.
-   * Local UI state for now — Task 9 wires this to real per-step persistence
-   * as part of Leg 1's "Get registered" content.
-   */
-  protected readonly checkedStepKeys = signal<string[]>([]);
-
   private readonly _activatedRoute = inject(ActivatedRoute);
   private readonly _fundpathService = inject(FundpathService);
   private readonly _applicationService = inject(ApplicationService);
@@ -148,6 +136,19 @@ export class ApplicationComponent {
 
   protected readonly routeId = this._activatedRoute.snapshot.paramMap.get('routeId') ?? '';
   protected readonly stopId = this._activatedRoute.snapshot.paramMap.get('stopId') ?? '';
+  private readonly _initialLeg = Number(this._activatedRoute.snapshot.queryParamMap.get('leg') ?? '0') as Leg;
+
+  protected readonly hasSavedSf424 = computed(() => {
+    const kits = this._fundpathService.myStarterKits();
+    return kits.some(k => k.routeId === this.routeId && k.stopId === this.stopId && k.hasSf424);
+  });
+
+  protected readonly legTitles = LEG_TITLES;
+  protected readonly legs: Leg[] = [0, 1, 2, 3, 4];
+  protected readonly numberedLegs: Leg[] = [1, 2, 3, 4];
+  protected readonly currentLeg = signal<Leg>(this._initialLeg >= 0 && this._initialLeg <= 4 ? this._initialLeg : 0);
+
+  protected readonly checkedStepKeys = signal<string[]>([]);
 
   protected readonly formatDate = formatDate;
 
@@ -368,8 +369,8 @@ export class ApplicationComponent {
 
           return this._applicationService
             .generateSf424(this.routeId, this.stopId, this._buildApplicantDetails())
-            .then((result) => ({ ok: true as const, result }))
-            .catch(() => ({ ok: false as const, result: null }));
+            .then((result) => ({ ok: true as const, result, err: null }))
+            .catch((err: unknown) => ({ ok: false as const, result: null, err }));
         }),
         takeUntilDestroyed()
       )
@@ -379,7 +380,12 @@ export class ApplicationComponent {
         if (outcome.ok) {
           this.sf424Result.set(outcome.result);
         } else {
-          this.sf424Error.set('Something went wrong generating your SF-424. Please try again.');
+          const code = (outcome.err as { code?: string })?.code;
+          this.sf424Error.set(
+            code === 'functions/resource-exhausted'
+              ? 'Too many requests. Please wait a few minutes and try again.'
+              : 'Something went wrong generating your SF-424. Please try again.'
+          );
         }
       });
   }
@@ -461,11 +467,30 @@ export class ApplicationComponent {
     }
   }
 
-  protected openSf424InNewTab(): void {
-    const result = this.sf424Result();
-    if (!result) { return; }
+  protected async openSf424InNewTab(): Promise<void> {
+    const existing = this.sf424Result();
+    const url = existing?.url ?? this._sf424BlobUrl;
 
-    window.open(result.url ?? this._sf424BlobUrl ?? undefined, '_blank');
+    if (url) {
+      window.open(url, '_blank');
+      return;
+    }
+
+    if (!this.isFormComplete()) { return; }
+
+    try {
+      const result = await this._applicationService.generateSf424(this.routeId, this.stopId, this._buildApplicantDetails());
+      this.sf424Result.set(result);
+
+      if (result.url) {
+        window.open(result.url, '_blank');
+      } else if (result.base64) {
+        this._sf424BlobUrl = this._base64ToBlobUrl(result.base64);
+        window.open(this._sf424BlobUrl, '_blank');
+      }
+    } catch {
+      this.sf424Error.set('Could not load your SF-424. Please try again.');
+    }
   }
 
   protected isTaskChecked(task: FundPath.Firestore.Routes.ITask): boolean {
@@ -474,6 +499,26 @@ export class ApplicationComponent {
 
   protected toggleTask(task: FundPath.Firestore.Routes.ITask): void {
     this._applicationService.toggleTask(this.routeId, task.id, this.isTaskChecked(task));
+  }
+
+  protected downloadNarratives(): void {
+    const title = this.stop()?.title ?? 'Application';
+    const sections = this.narratives().map(n => {
+      const text = this.narrativeDraftsState()[n.section] ?? n.draft;
+      return `${n.heading}\n${'='.repeat(n.heading.length)}\n\n${text}`;
+    });
+
+    const content = `${title} — Proposal Drafts\n${'='.repeat(title.length + 18)}\n\n${sections.join('\n\n\n')}`;
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+
+    anchor.href = url;
+    anchor.download = `${title.replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '-')}-proposal-drafts.txt`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
   }
 
   protected async copyNarrative(narrative: FundPath.Firestore.Applications.INarrativeStarter): Promise<void> {
@@ -504,8 +549,13 @@ export class ApplicationComponent {
       } else if (result.base64) {
         this._downloadBase64Pdf(result.base64);
       }
-    } catch {
-      this.downloadError.set('Something went wrong generating your SF-424. Please try again.');
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code;
+      this.downloadError.set(
+        code === 'functions/resource-exhausted'
+          ? 'Too many requests. Please wait a few minutes and try again.'
+          : 'Something went wrong generating your SF-424. Please try again.'
+      );
     } finally {
       this.isDownloading.set(false);
     }
@@ -535,8 +585,13 @@ export class ApplicationComponent {
     try {
       const kit = await this._applicationService.generateStarterKit(this.routeId, this.stopId);
       this.kit.set(kit);
-    } catch {
-      this.kitError.set('Something went wrong loading your application starter kit. Please try again.');
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code;
+      if (code === 'functions/resource-exhausted') {
+        this.kitError.set('Too many requests. Please wait a few minutes and try again.');
+      } else {
+        this.kitError.set('Something went wrong loading your application starter kit. Please try again.');
+      }
     } finally {
       this.isLoadingKit.set(false);
     }

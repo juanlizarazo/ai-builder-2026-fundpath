@@ -43,7 +43,7 @@ function parseIsoDateToTimestamp(value?: string): Timestamp | undefined {
  * so this can afford to be looser than `generateStarterKit`'s cap — 20/hour
  * comfortably covers a founder iterating on applicant details across a few
  * stops while still bounding Storage writes if a client retries in a loop. */
-const RATE_LIMIT_PER_HOUR = 20;
+const RATE_LIMIT_PER_HOUR = 100;
 
 const SIGNED_URL_TTL_MS = 60 * 60 * 1000;
 
