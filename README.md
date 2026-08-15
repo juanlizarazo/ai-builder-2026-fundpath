@@ -37,11 +37,11 @@ All five standard founder profiles run through the live pipeline end-to-end — 
 
 | # | Profile | Result |
 |---|---|---|
-| 1 | AI healthcare SaaS, Utah, 15 employees | 🟢 NIH/NSF SBIR fit, historical proof, SBIR Phase III procurement path |
-| 2 | Aerospace manufacturer, 35 employees, $2–5M ask | 🟢 Multi-stop stacked route (SBIR Phase I→II + STRATFI/TACFI), DIU CSO |
-| 3 | Water/climate sensor startup, 10 employees | 🟢 EPA/NSF/DOE fits, adjacent WaterSMART/SRF flagged (needs municipal partner) |
-| 4 | Cybersecurity startup, 22 employees | 🟡 DoD/NSF fits with a "needs a named government customer" flag, GSA Schedule |
-| 5 | Consumer marketplace, 8 employees | 🔴 **The abstention test** — no federal grant match, honest non-grant route instead |
+| 1 | AI healthcare SaaS, Utah, 15 employees | [PASS] 🟢 NIH/NSF SBIR fit, historical proof, SBIR Phase III procurement path |
+| 2 | Aerospace manufacturer, 35 employees, $2–5M ask | [PASS] 🟢 Multi-stop stacked route (SBIR Phase I→II + STRATFI/TACFI), DIU CSO |
+| 3 | Water/climate sensor startup, 10 employees | [PASS] 🟢 EPA/NSF/DOE fits, adjacent WaterSMART/SRF flagged (needs municipal partner) |
+| 4 | Cybersecurity startup, 22 employees | [PASS] 🟡 DoD/NSF fits with a "needs a named government customer" flag, GSA Schedule |
+| 5 | Consumer marketplace, 8 employees | [PASS] 🔴 **The abstention test** — no federal grant match, honest non-grant route instead |
 
 ## Architecture
 

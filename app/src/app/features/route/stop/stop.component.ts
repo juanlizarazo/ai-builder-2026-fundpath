@@ -47,6 +47,7 @@ export class StopComponent {
 
   public readonly stop = input.required<FundPath.Firestore.Routes.IStop>();
   public readonly routeId = input<string>('');
+  public readonly isOwner = input<boolean>(true);
 
   /**
    * Emitted whenever the collapsed station card is activated.
@@ -132,7 +133,7 @@ export class StopComponent {
     ) ?? null;
   });
 
-  protected readonly hasApplication = computed(() => !!this.starterKit());
+  protected readonly hasApplication = computed(() => this.isOwner() && !!this.starterKit());
   protected readonly hasSf424 = computed(() => this.starterKit()?.hasSf424 ?? false);
 
   protected open(): void {

@@ -11,10 +11,60 @@
 } @else {
   <div class="route-page">
     <div class="route-content animate-slide-up">
+      <div class="print-masthead">
+        <span class="print-wordmark">FundPath</span>
+        <span class="print-generated">Generated {{ printGeneratedOn }}</span>
+      </div>
+
       <header class="route-header">
         <div class="route-header-top">
           <a routerLink="/" class="back-link">← New search</a>
+
+          <div class="route-header-actions">
+            @if (isOwner()) {
+              <button
+                mat-stroked-button
+                class="share-button"
+                [class.share-button--sharing]="shareState() === 'sharing'"
+                [class.share-button--copied]="shareState() === 'copied'"
+                [disabled]="shareState() === 'sharing'"
+                (click)="shareRoute()"
+              >
+                @switch (shareState()) {
+                  @case ('sharing') {
+                    <ng-container>
+                      <mat-icon class="share-button-spinner">progress_activity</mat-icon>
+                      <span>Sharing…</span>
+                    </ng-container>
+                  }
+                  @case ('copied') {
+                    <ng-container>
+                      <mat-icon class="share-button-check">check_circle</mat-icon>
+                      <span>Copied!</span>
+                    </ng-container>
+                  }
+                  @default {
+                    <ng-container>
+                      <mat-icon>share</mat-icon>
+                      <span>Share</span>
+                    </ng-container>
+                  }
+                }
+              </button>
+            }
+            <button mat-stroked-button class="pdf-button" (click)="downloadPdf()">
+              <mat-icon>picture_as_pdf</mat-icon>
+              Download PDF
+            </button>
+          </div>
         </div>
+
+        @if (!isOwner()) {
+          <div class="shared-view-banner">
+            <span class="shared-view-tag">Shared path</span>
+            <span class="shared-view-copy fp-meta">You're seeing someone else's matches — read-only.</span>
+          </div>
+        }
         <div class="verdict-rule" aria-hidden="true"></div>
         <h1 class="verdict-line">{{ route()!.verdictLine }}</h1>
 
@@ -50,13 +100,15 @@
             }
           </div>
 
-          <button mat-stroked-button class="check-for-new-button" (click)="checkForNewPrograms()">
-            <mat-icon>refresh</mat-icon>
-            Check for new
-          </button>
+          @if (isOwner()) {
+            <button mat-stroked-button class="check-for-new-button" (click)="checkForNewPrograms()">
+              <mat-icon>refresh</mat-icon>
+              Check for new
+            </button>
+          }
         </div>
 
-        @if (checkForNewError()) {
+        @if (isOwner() && checkForNewError()) {
           <ss-alert-banner
             [message]="checkForNewError()"
             type="error"
@@ -64,7 +116,7 @@
           />
         }
 
-        @if (checkForNewMessage()) {
+        @if (isOwner() && checkForNewMessage()) {
           <p class="check-for-new-message">{{ checkForNewMessage() }}</p>
         }
       </header>
@@ -82,7 +134,7 @@
           <div class="stops-list">
             @for (stop of nonGrantStops(); track stop.id) {
               <div [id]="'stop-' + stop.id">
-                <app-stop [stop]="stop" [routeId]="routeId!" (opened)="openStopDetail($event)" />
+                <app-stop [stop]="stop" [routeId]="routeId!" [isOwner]="isOwner()" (opened)="openStopDetail($event)" />
               </div>
             }
           </div>
@@ -139,7 +191,7 @@
             <div class="stops-list">
               @for (stop of nonGrantStops(); track stop.id) {
                 <div [id]="'stop-' + stop.id">
-                  <app-stop [stop]="stop" [routeId]="routeId!" (opened)="openStopDetail($event)" />
+                  <app-stop [stop]="stop" [routeId]="routeId!" [isOwner]="isOwner()" (opened)="openStopDetail($event)" />
                 </div>
               }
             </div>
@@ -166,6 +218,8 @@
           </section>
         }
       }
+
+      <p class="print-footer">FundPath — a snapshot of matches, not a guarantee of funding.</p>
     </div>
   </div>
 
@@ -182,6 +236,7 @@
         [taskState]="route()?.taskState ?? {}"
         [askMin]="askMin()"
         [askMax]="askMax()"
+        [isOwner]="isOwner()"
       />
     }
   </ss-side-panel>

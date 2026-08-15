@@ -41,6 +41,7 @@ export class StopDetailPanelComponent {
   public readonly taskState = input<Record<string, boolean>>({});
   public readonly askMin = input<number | null>(null);
   public readonly askMax = input<number | null>(null);
+  public readonly isOwner = input<boolean>(true);
 
   protected readonly isChecklistExpanded = signal(false);
 
@@ -52,14 +53,14 @@ export class StopDetailPanelComponent {
     ) ?? null;
   });
 
-  protected readonly hasApplication = computed<boolean>(() => !!this.starterKitForStop());
+  protected readonly hasApplication = computed<boolean>(() => this.isOwner() && !!this.starterKitForStop());
   protected readonly hasSf424 = computed<boolean>(() => this.starterKitForStop()?.hasSf424 ?? false);
 
   protected readonly formatDollars = formatDollars;
   protected readonly formatDate = formatDate;
 
   protected readonly canStartApplication = computed<boolean>(() =>
-    this.stop().placement === 'primary' || this.stop().placement === 'alongside'
+    this.isOwner() && (this.stop().placement === 'primary' || this.stop().placement === 'alongside')
   );
 
   protected readonly tierIcon = computed<string>(() => FIT_TIER_ICONS[this.stop().fitTier]);
