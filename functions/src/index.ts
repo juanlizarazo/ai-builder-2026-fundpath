@@ -2,7 +2,7 @@ import { onRequest } from 'firebase-functions/v2/https';
 import { setGlobalOptions } from 'firebase-functions/v2';
 import * as logger from 'firebase-functions/logger';
 
-setGlobalOptions({ region: 'us-central1', maxInstances: 10, minInstances: 1 });
+setGlobalOptions({ region: 'us-central1', maxInstances: 10, minInstances: 0 });
 
 export { triggerSync } from './ingest/sync.function';
 export { buildRoute } from './route/buildRoute.function';
