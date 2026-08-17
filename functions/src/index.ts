@@ -4,7 +4,7 @@ import * as logger from 'firebase-functions/logger';
 
 setGlobalOptions({ region: 'us-central1', maxInstances: 10, minInstances: 0 });
 
-export { triggerSync } from './ingest/sync.function';
+export { syncCorpus, triggerSync } from './ingest/sync.function';
 export { buildRoute } from './route/buildRoute.function';
 export { deepPass } from './route/deepPass.function';
 export { generateStarterKit } from './application/generateStarterKit.function';
